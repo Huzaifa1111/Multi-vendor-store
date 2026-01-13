@@ -1,31 +1,30 @@
+// apps/backend/src/app.module.ts - UPDATED
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
-import { AppController } from './app.controller';
+import { ProductsModule } from './modules/products/products.module';
+import { UploadsModule } from './modules/uploads/uploads.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { EmailModule } from './modules/email/email.module';
+import { typeOrmConfig } from './database/typeorm.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
     }),
-    TypeOrmModule.forRootAsync({
-      useFactory: () => ({
-        type: 'postgres',
-        host: process.env.DB_HOST || 'localhost',
-        port: parseInt(process.env.DB_PORT || '5432'),
-        username: process.env.DB_USERNAME || 'postgres',
-        password: process.env.DB_PASSWORD || 'postgres',
-        database: process.env.DB_DATABASE || 'store_db',
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: process.env.NODE_ENV !== 'production',
-      }),
-    }),
+    TypeOrmModule.forRoot(typeOrmConfig),
     AuthModule,
     UsersModule,
+    ProductsModule,
+    // CategoriesModule, // Comment out or remove since it doesn't exist yet
+    // OrdersModule,    // Comment out or remove since it doesn't exist yet
+    UploadsModule,
+    AdminModule,
+    EmailModule,
   ],
-  controllers: [AppController],
-  providers: [],
 })
 export class AppModule {}

@@ -1,3 +1,4 @@
+// apps/frontend/src/lib/auth.tsx - UPDATED
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -8,6 +9,7 @@ interface User {
   email: string;
   name: string;
   role: string;
+  isEmailVerified?: boolean;
 }
 
 interface AuthContextType {
@@ -16,7 +18,9 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (name: string, email: string, password: string, phone?: string) => Promise<void>;
+  register: (name: string, email: string, password: string, phone?: string) => Promise<any>;
+  verifyOtp: (email: string, otp: string) => Promise<void>;
+  resendOtp: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -64,11 +68,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     try {
       const response = await authService.register({ name, email, password, phone });
-      console.log('✅ Registration successful:', response);
-      setUser(response.user);
+      console.log('✅ Registration response:', response);
+      
+      // Return the response for handling in the component
+      return response;
     } catch (error: any) {
       console.error('❌ Registration failed:', error);
       throw new Error(error.message || 'Registration failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const verifyOtp = async (email: string, otp: string) => {
+    console.log('🔢 Verifying OTP for:', email);
+    setIsLoading(true);
+    try {
+      const response = await authService.verifyOtp({ email, otp });
+      console.log('✅ OTP verification successful:', response);
+      setUser(response.user);
+    } catch (error: any) {
+      console.error('❌ OTP verification failed:', error);
+      throw new Error(error.message || 'OTP verification failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resendOtp = async (email: string) => {
+    console.log('🔄 Resending OTP for:', email);
+    setIsLoading(true);
+    try {
+      const response = await authService.resendOtp(email);
+      console.log('✅ OTP resent successfully:', response);
+      return response;
+    } catch (error: any) {
+      console.error('❌ Failed to resend OTP:', error);
+      throw new Error(error.message || 'Failed to resend OTP');
     } finally {
       setIsLoading(false);
     }
@@ -87,6 +123,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     logout,
     register,
+    verifyOtp,
+    resendOtp,
   };
 
   return (
@@ -102,4 +140,4 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}
+} 

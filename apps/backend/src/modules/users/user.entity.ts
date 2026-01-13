@@ -1,3 +1,4 @@
+// apps/backend/src/modules/users/user.entity.ts - UPDATED
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export enum UserRole {
@@ -28,6 +29,15 @@ export class User {
 
   @Column({ nullable: true })
   phone: string;
+
+  @Column({ default: false })
+  isEmailVerified: boolean; // Add this line
+
+  @Column({ nullable: true, type: 'varchar' })
+  verificationOtp: string | null; // Add this line - changed to string | null
+
+  @Column({ nullable: true, type: 'timestamp' })
+  otpExpiresAt: Date | null; // Add this line - changed to Date | null
 
   @CreateDateColumn()
   createdAt: Date;

@@ -1,3 +1,4 @@
+// apps/frontend/src/services/auth.service.ts - UPDATED
 import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -74,6 +75,16 @@ export const authService = {
     try {
       const response = await api.post('/auth/register', userData);
       
+      // NEW: Check if OTP verification is required
+      if (response.data.requiresVerification) {
+        return {
+          requiresVerification: true,
+          email: response.data.email,
+          message: response.data.message
+        };
+      }
+      
+      // Old flow - direct login
       if (response.data.access_token) {
         localStorage.setItem('token', response.data.access_token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -89,6 +100,40 @@ export const authService = {
         error.response?.data?.message || 
         error.response?.data?.error || 
         'Registration failed'
+      );
+    }
+  },
+
+  // NEW: Verify OTP
+  async verifyOtp(otpData: { email: string; otp: string }) {
+    try {
+      const response = await api.post('/auth/verify-otp', otpData);
+      
+      if (response.data.access_token) {
+        localStorage.setItem('token', response.data.access_token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+      
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 
+        error.response?.data?.error || 
+        'OTP verification failed'
+      );
+    }
+  },
+
+  // NEW: Resend OTP
+  async resendOtp(email: string) {
+    try {
+      const response = await api.post('/auth/resend-otp', { email });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 
+        error.response?.data?.error || 
+        'Failed to resend OTP'
       );
     }
   },
@@ -119,5 +164,7 @@ export const authService = {
 // Also export individual functions
 export const login = authService.login;
 export const register = authService.register;
+export const verifyOtp = authService.verifyOtp;
+export const resendOtp = authService.resendOtp;
 export const getCurrentUser = authService.getCurrentUser;
 export const logout = authService.logout;

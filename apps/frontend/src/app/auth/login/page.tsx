@@ -1,7 +1,8 @@
+// apps/frontend/src/app/auth/login/page.tsx - UPDATED
 'use client';
 
-import { useState, useEffect } from 'react'; // Add useEffect
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import Link from 'next/link';
 
@@ -9,17 +10,32 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { login, user } = useAuth(); // Get user from auth context
+  const { login, user } = useAuth();
+  const searchParams = useSearchParams();
+
+  // Check for verification success message
+  useEffect(() => {
+    const verified = searchParams.get('verified');
+    if (verified === 'true') {
+      setSuccess('Email verified successfully! You can now log in.');
+    }
+    
+    const emailParam = searchParams.get('email');
+    if (emailParam) {
+      setEmail(emailParam);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setIsLoading(true);
 
     try {
-      // Validate inputs
       if (!email || !password) {
         throw new Error('Please enter both email and password');
       }
@@ -28,7 +44,6 @@ export default function LoginPage() {
         throw new Error('Please enter a valid email address');
       }
 
-      // Call login function
       await login(email, password);
       
       // Success - redirect based on role
@@ -36,7 +51,12 @@ export default function LoginPage() {
       // We'll use useEffect to handle the redirect
       
     } catch (err: any) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+      // Check if error is about email verification
+      if (err.message.includes('verify your email')) {
+        setError(err.message + ' Please check your email for verification OTP.');
+      } else {
+        setError(err.message || 'Login failed. Please check your credentials.');
+      }
       console.error('Login error:', err);
     } finally {
       setIsLoading(false);
@@ -73,6 +93,22 @@ export default function LoginPage() {
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
               {error}
+              {error.includes('verify your email') && (
+                <div className="mt-2">
+                  <Link 
+                    href={`/auth/verify-email?email=${encodeURIComponent(email)}`}
+                    className="text-blue-600 hover:text-blue-500 font-medium"
+                  >
+                    Click here to verify your email
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {success && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
+              {success}
             </div>
           )}
           
@@ -106,10 +142,21 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-500 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
                 disabled={isLoading}
               />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="text-sm">
+              <Link 
+                href={`/auth/verify-email`}
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
+                Need to verify email?
+              </Link>
             </div>
           </div>
 
@@ -133,4 +180,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-} 
+}

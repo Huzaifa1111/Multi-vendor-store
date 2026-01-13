@@ -1,7 +1,9 @@
+// apps/backend/src/modules/auth/auth.controller.ts
 import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { VerifyOtpDto, ResendOtpDto } from './dto/verify-otp.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 @Controller('auth')
@@ -15,6 +17,8 @@ export class AuthController {
       endpoints: {
         login: 'POST /auth/login',
         register: 'POST /auth/register',
+        verifyOtp: 'POST /auth/verify-otp',
+        resendOtp: 'POST /auth/resend-otp',
         profile: 'GET /auth/profile (requires auth)',
         health: 'GET /auth/health'
       }
@@ -40,6 +44,18 @@ export class AuthController {
   async register(@Body() registerDto: RegisterDto) {
     console.log('📝 Registration attempt for:', registerDto.email);
     return this.authService.register(registerDto);
+  }
+
+  @Post('verify-otp')
+  async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
+    console.log('📝 OTP verification for:', verifyOtpDto.email);
+    return this.authService.verifyOtp(verifyOtpDto);
+  }
+
+  @Post('resend-otp')
+  async resendOtp(@Body() resendOtpDto: ResendOtpDto) {
+    console.log('📝 Resend OTP for:', resendOtpDto.email);
+    return this.authService.resendOtp(resendOtpDto);
   }
 
   @UseGuards(JwtAuthGuard)

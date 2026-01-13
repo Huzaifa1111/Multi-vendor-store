@@ -10,17 +10,19 @@ import {
   Settings,
   BarChart3,
   Folder,
-  Shield
+  Shield,
+  PlusCircle
 } from 'lucide-react';
 
 const navItems = [
-  { href: '/admin', label: 'Dashboard', icon: Home },
+  { href: '/admin/dashboard', label: 'Dashboard', icon: Home },
   { href: '/admin/products', label: 'Products', icon: Package },
+  { href: '/admin/products/create', label: 'Add Product', icon: PlusCircle },
   { href: '/admin/categories', label: 'Categories', icon: Folder },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { href: '/admin/users', label: 'Users', icon: Users },
-  { href: '/admin/settings', label: 'Settings', icon: Settings },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
 export default function AdminSidebar() {
@@ -43,7 +45,7 @@ export default function AdminSidebar() {
       <nav className="space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+          const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
           
           return (
             <Link

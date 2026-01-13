@@ -1,6 +1,7 @@
+// apps/frontend/src/app/auth/register/page.tsx - UPDATED
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import Link from 'next/link';
@@ -14,10 +15,11 @@ export default function RegisterPage() {
     phone: ''
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [debugInfo, setDebugInfo] = useState('');
   const router = useRouter();
-  const { register, user } = useAuth();
+  const { register } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -29,6 +31,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setDebugInfo('');
     setIsLoading(true);
 
@@ -61,10 +64,29 @@ export default function RegisterPage() {
       });
 
       // Call register function
-      await register(formData.name, formData.email, formData.password, formData.phone);
+      const result = await register(formData.name, formData.email, formData.password, formData.phone);
       
-      setDebugInfo('Registration successful!');
-      console.log('Registration successful');
+      // NEW: Check if OTP verification is required
+      if (result.requiresVerification) {
+        setSuccess('Registration successful! Please check your email for verification OTP.');
+        setDebugInfo('OTP verification required');
+        
+        // Store email for verification page
+        localStorage.setItem('pendingVerificationEmail', formData.email);
+        
+        // Redirect to verification page
+        setTimeout(() => {
+          router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`);
+        }, 2000);
+      } else {
+        // Old flow - direct login (for backward compatibility)
+        setSuccess('Registration successful! Redirecting to dashboard...');
+        setDebugInfo('Registration successful');
+        
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 2000);
+      }
       
     } catch (err: any) {
       console.error('Registration error details:', err);
@@ -74,14 +96,6 @@ export default function RegisterPage() {
       setIsLoading(false);
     }
   };
-
-  // Handle redirect after successful registration
-  useEffect(() => {
-    if (user) {
-      console.log('User logged in, redirecting to dashboard...', user);
-      router.push('/dashboard');
-    }
-  }, [user, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -102,6 +116,12 @@ export default function RegisterPage() {
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
               <strong>Error:</strong> {error}
+            </div>
+          )}
+          
+          {success && (
+            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
+              <strong>Success:</strong> {success}
             </div>
           )}
           

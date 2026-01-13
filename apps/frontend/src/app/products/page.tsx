@@ -1,130 +1,111 @@
 'use client';
 
-import { useState } from 'react';
-import ProductCard from '@/components/products/ProductCard';
+import { useState, useEffect } from 'react';
+import { Package } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/Card';
 
-// Mock data - replace with real API data
-const mockProducts = [
-  {
-    id: 1,
-    name: 'Premium Wireless Headphones',
-    description: 'Noise-cancelling wireless headphones with premium sound quality',
-    price: 199.99,
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
-    category: 'Electronics',
-    rating: 4.5,
-  },
-  {
-    id: 2,
-    name: 'Smart Watch Pro',
-    description: 'Advanced smartwatch with health tracking and notifications',
-    price: 299.99,
-    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w-400&h=400&fit=crop',
-    category: 'Electronics',
-    rating: 4.7,
-  },
-  {
-    id: 3,
-    name: 'Organic Cotton T-Shirt',
-    description: 'Comfortable organic cotton t-shirt in multiple colors',
-    price: 29.99,
-    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop',
-    category: 'Fashion',
-    rating: 4.3,
-  },
-  {
-    id: 4,
-    name: 'Bluetooth Speaker',
-    description: 'Portable Bluetooth speaker with 360° sound',
-    price: 89.99,
-    image: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&h=400&fit=crop',
-    category: 'Electronics',
-    rating: 4.4,
-  },
-  {
-    id: 5,
-    name: 'Yoga Mat Premium',
-    description: 'Non-slip eco-friendly yoga mat with carrying strap',
-    price: 49.99,
-    image: 'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=400&h=400&fit=crop',
-    category: 'Fitness',
-    rating: 4.6,
-  },
-  {
-    id: 6,
-    name: 'Coffee Maker',
-    description: 'Automatic coffee maker with programmable settings',
-    price: 129.99,
-    image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=400&fit=crop',
-    category: 'Home',
-    rating: 4.5,
-  },
-];
-
-const categories = ['All', 'Electronics', 'Fashion', 'Fitness', 'Home'];
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number; // This might be coming as string from backend
+  stock: number;
+  image: string | null;
+}
 
 export default function ProductsPage() {
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredProducts = mockProducts.filter(product => {
-    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/products');
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Parse price to number if it comes as string
+          const parsedProducts = data.map((product: any) => ({
+            ...product,
+            price: typeof product.price === 'string' ? parseFloat(product.price) : product.price,
+            stock: typeof product.stock === 'string' ? parseInt(product.stock) : product.stock,
+          }));
+          
+          setProducts(parsedProducts);
+        } else {
+          console.error('Failed to fetch products:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">Loading products...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Our Products</h1>
-          <p className="text-lg text-gray-600">Discover amazing products at great prices</p>
-        </div>
-
-        {/* Search and Filter */}
         <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            
-            <div className="flex space-x-2 overflow-x-auto pb-2">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
-                    selectedCategory === category
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900">Our Products</h1>
+          <p className="text-gray-600 mt-2">Browse our amazing collection of products</p>
         </div>
 
-        {/* Products Grid */}
-        {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+        {products.length === 0 ? (
+          <div className="text-center py-16">
+            <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No products available</h3>
+            <p className="text-gray-600">Check back later for new products</p>
           </div>
         ) : (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">😔</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {products.map((product) => (
+              <Card key={product.id} className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-4">
+                  <div className="aspect-square bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    ) : (
+                      <Package className="w-12 h-12 text-gray-400" />
+                    )}
+                  </div>
+                  <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                  <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                    {product.description}
+                  </p>
+                  <div className="flex items-center justify-between mt-4">
+                    <span className="text-lg font-bold text-gray-900">
+                      {/* FIXED: Ensure price is a number before calling toFixed */}
+                      ${typeof product.price === 'number' ? product.price.toFixed(2) : '0.00'}
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      product.stock > 0 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                    </span>
+                  </div>
+                  <button className="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    Add to Cart
+                  </button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         )}
       </div>

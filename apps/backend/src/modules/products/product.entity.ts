@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
-import { Category } from '../categories/category.entity';
+// apps/backend/src/modules/products/product.entity.ts - CREATE IF MISSING
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('products')
 export class Product {
@@ -15,14 +15,14 @@ export class Product {
   @Column('decimal', { precision: 10, scale: 2 })
   price: number;
 
-  @Column({ default: 0 })
-  stock: number;
-
   @Column({ nullable: true })
   image: string;
 
-  @ManyToOne(() => Category, category => category.products, { nullable: true })
-  category: Category;
+  @Column()
+  category: string;
+
+  @Column({ default: 0 })
+  stock: number;
 
   @CreateDateColumn()
   createdAt: Date;
