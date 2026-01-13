@@ -1,104 +1,123 @@
-import api from '@/lib/api';
+import axios from 'axios';
 
-interface LoginData {
-  email: string;
-  password: string;
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-  phone?: string;
-}
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 10000, // 10 second timeout
+});
 
-interface AuthResponse {
-  access_token: string;
-  user: {
-    id: number;
-    email: string;
-    name: string;
-    role: string;
-  };
-}
-
-export const login = async (data: LoginData): Promise<AuthResponse> => {
-  // For now, simulate successful login
-  const mockResponse: AuthResponse = {
-    access_token: 'mock-jwt-token',
-    user: {
-      id: 1,
-      email: data.email,
-      name: 'Test User',
-      role: 'user',
-    },
-  };
-  
-  if (mockResponse.access_token) {
-    localStorage.setItem('token', mockResponse.access_token);
-    api.defaults.headers.common['Authorization'] = `Bearer ${mockResponse.access_token}`;
+// Add token to requests if it exists
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  
-  return mockResponse;
-  
-  // Uncomment when backend is ready:
-  // const response = await api.post<AuthResponse>('/auth/login', data);
-  // if (response.data.access_token) {
-  //   localStorage.setItem('token', response.data.access_token);
-  //   api.defaults.headers.common['Authorization'] = `Bearer ${response.data.access_token}`;
-  // }
-  // return response.data;
-};
+);
 
-export const register = async (data: RegisterData): Promise<AuthResponse> => {
-  // For now, simulate successful registration
-  const mockResponse: AuthResponse = {
-    access_token: 'mock-jwt-token',
-    user: {
-      id: 1,
-      email: data.email,
-      name: data.name,
-      role: 'user',
-    },
-  };
-  
-  if (mockResponse.access_token) {
-    localStorage.setItem('token', mockResponse.access_token);
-    api.defaults.headers.common['Authorization'] = `Bearer ${mockResponse.access_token}`;
+// Response interceptor for better error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.code === 'ECONNABORTED') {
+      throw new Error('Request timeout. Please check your connection.');
+    }
+    
+    if (!error.response) {
+      // Network error or server not running
+      throw new Error('Cannot connect to server. Please make sure the backend is running on port 3000.');
+    }
+    
+    return Promise.reject(error);
   }
-  
-  return mockResponse;
-  
-  // Uncomment when backend is ready:
-  // const response = await api.post<AuthResponse>('/auth/register', data);
-  // if (response.data.access_token) {
-  //   localStorage.setItem('token', response.data.access_token);
-  //   api.defaults.headers.common['Authorization'] = `Bearer ${response.data.access_token}`;
-  // }
-  // return response.data;
+);
+
+export const authService = {
+  async login(credentials: { email: string; password: string }) {
+    try {
+      const response = await api.post('/auth/login', credentials);
+      
+      if (response.data.access_token) {
+        localStorage.setItem('token', response.data.access_token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+      
+      return response.data;
+    } catch (error: any) {
+      if (error.message.includes('Cannot connect to server')) {
+        throw new Error('Backend server is not running. Please start the backend on port 3000.');
+      }
+      
+      throw new Error(
+        error.response?.data?.message || 
+        error.response?.data?.error || 
+        'Login failed'
+      );
+    }
+  },
+
+  async register(userData: { 
+    name: string; 
+    email: string; 
+    password: string; 
+    phone?: string 
+  }) {
+    try {
+      const response = await api.post('/auth/register', userData);
+      
+      if (response.data.access_token) {
+        localStorage.setItem('token', response.data.access_token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
+      
+      return response.data;
+    } catch (error: any) {
+      if (error.message.includes('Cannot connect to server')) {
+        throw new Error('Backend server is not running. Please start the backend on port 3000.');
+      }
+      
+      throw new Error(
+        error.response?.data?.message || 
+        error.response?.data?.error || 
+        'Registration failed'
+      );
+    }
+  },
+
+  async getCurrentUser() {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No token found');
+      }
+
+      const response = await api.get('/auth/profile');
+      return response.data;
+    } catch (error: any) {
+      // Clear invalid token
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      throw new Error('Session expired. Please login again.');
+    }
+  },
+
+  logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  },
 };
 
-export const getCurrentUser = async () => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    throw new Error('No token found');
-  }
-
-  // For now, return mock user
-  return {
-    id: 1,
-    email: 'test@example.com',
-    name: 'Test User',
-    role: 'user',
-  };
-  
-  // Uncomment when backend is ready:
-  // api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  // const response = await api.get('/auth/me');
-  // return response.data;
-};
-
-export const logout = () => {
-  localStorage.removeItem('token');
-  delete api.defaults.headers.common['Authorization'];
-};
+// Also export individual functions
+export const login = authService.login;
+export const register = authService.register;
+export const getCurrentUser = authService.getCurrentUser;
+export const logout = authService.logout;

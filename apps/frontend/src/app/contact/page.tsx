@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import ContactForm from '@/components/forms/ContactForm';
-import Card from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 
 export default function ContactPage() {
   const [formSubmitted, setFormSubmitted] = useState(false);

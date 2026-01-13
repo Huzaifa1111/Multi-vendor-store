@@ -4,6 +4,21 @@ import { Controller, Get } from '@nestjs/common';
 export class AppController {
   @Get()
   getHello() {
-    return 'Hello World!';
+    return { 
+      message: 'Store API is running',
+      timestamp: new Date().toISOString(),
+      endpoints: {
+        auth: '/auth',
+        health: '/auth/health'
+      }
+    };
+  }
+
+  @Get('test')
+  test() {
+    return { 
+      status: 'OK',
+      message: 'Test endpoint working'
+    };
   }
 }

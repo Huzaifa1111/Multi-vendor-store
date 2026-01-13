@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
-import Header from '@/components/layout/Header'; // Add this import
+import Header from '@/components/layout/Header'; // Add Header back
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,8 +20,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
-          <Header /> {/* Add Header here */}
-          <main className="min-h-screen pt-16"> {/* Add padding to prevent content overlap */}
+          <Header /> {/* Add Header back */}
+          <main className="min-h-screen pt-16"> {/* Add padding top for fixed header */}
             {children}
           </main>
         </AuthProvider>

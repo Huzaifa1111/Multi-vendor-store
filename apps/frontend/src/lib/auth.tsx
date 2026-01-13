@@ -1,8 +1,7 @@
-// /apps/frontend/src/lib/auth.tsx
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { login as apiLogin, register as apiRegister, getCurrentUser, logout as apiLogout } from '@/services/auth.service';
+import { authService } from '@/services/auth.service';
 
 interface User {
   id: number;
@@ -33,14 +32,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const checkAuth = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const userData = await getCurrentUser();
-        setUser(userData);
-      }
+      console.log('🔍 Checking auth...');
+      const userData = await authService.getCurrentUser();
+      console.log('✅ Auth check successful:', userData);
+      setUser(userData);
     } catch (error) {
-      console.error('Auth check failed:', error);
-      localStorage.removeItem('token');
+      console.error('❌ Auth check failed:', error);
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -48,31 +45,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
+    console.log('🔐 Attempting login for:', email);
     setIsLoading(true);
     try {
-      const response = await apiLogin({ email, password });
+      const response = await authService.login({ email, password });
+      console.log('✅ Login successful:', response);
       setUser(response.user);
-    } catch (error) {
-      throw error;
+    } catch (error: any) {
+      console.error('❌ Login failed:', error);
+      throw new Error(error.message || 'Login failed');
     } finally {
       setIsLoading(false);
     }
   };
 
   const register = async (name: string, email: string, password: string, phone?: string) => {
+    console.log('📝 Attempting registration for:', email);
     setIsLoading(true);
     try {
-      const response = await apiRegister({ name, email, password, phone });
+      const response = await authService.register({ name, email, password, phone });
+      console.log('✅ Registration successful:', response);
       setUser(response.user);
-    } catch (error) {
-      throw error;
+    } catch (error: any) {
+      console.error('❌ Registration failed:', error);
+      throw new Error(error.message || 'Registration failed');
     } finally {
       setIsLoading(false);
     }
   };
 
   const logout = () => {
-    apiLogout();
+    console.log('🚪 Logging out...');
+    authService.logout();
     setUser(null);
   };
 

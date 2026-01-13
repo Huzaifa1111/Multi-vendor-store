@@ -5,13 +5,15 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import { logout } from '@/services/auth.service';
 import { useState } from 'react';
+import { authService } from '@/services/auth.service'; // Change this import
+
 
 export default function Header() {
   const { user, isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
-    logout();
+     authService.logout(); // Call the logout method from the service
     window.location.href = '/login';
   };
 
@@ -21,10 +23,16 @@ export default function Header() {
     { href: '/products', label: 'Products' },
     { href: '/contact', label: 'Contact Us' },
     ...(isAuthenticated ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
+    // Add admin link if user is admin
+    ...(user?.role === 'admin' ? [{ 
+      href: '/admin', 
+      label: 'Admin',
+      className: 'bg-purple-100 text-purple-700 hover:bg-purple-200' 
+    }] : []),
   ];
 
   return (
-    <header className="bg-white shadow">
+    <header className="bg-white shadow"> {/* Remove fixed class */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
@@ -38,7 +46,9 @@ export default function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    link.className || 'text-gray-700 hover:text-blue-600'
+                  }`}
                 >
                   {link.label}
                 </Link>
@@ -52,8 +62,12 @@ export default function Header() {
               <>
                 <div className="flex items-center space-x-3">
                   <div className="text-gray-700">
-                    <span className="font-medium">Welcome,</span>
-                    <span className="ml-1">{user?.name}</span>
+                    <span className="font-medium">{user?.name}</span>
+                    {user?.role === 'admin' && (
+                      <span className="ml-2 px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded">
+                        Admin
+                      </span>
+                    )}
                   </div>
                   <Button variant="secondary" onClick={handleLogout} size="sm">
                     Logout
@@ -62,12 +76,12 @@ export default function Header() {
               </>
             ) : (
               <>
-                <Link href="/login">
+                <Link href="/auth/login">
                   <Button variant="outline" size="sm">
                     Login
                   </Button>
                 </Link>
-                <Link href="/register">
+                <Link href="/auth/register">
                   <Button size="sm">
                     Register
                   </Button>
@@ -104,7 +118,9 @@ export default function Header() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-gray-700 hover:bg-gray-50 hover:text-blue-600 block px-3 py-2 rounded-md text-base font-medium"
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                    link.className || 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+                  }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {link.label}
@@ -115,7 +131,14 @@ export default function Header() {
                 {isAuthenticated ? (
                   <div className="space-y-3">
                     <div className="px-3 py-2">
-                      <div className="text-sm font-medium text-gray-900">Welcome, {user?.name}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {user?.name}
+                        {user?.role === 'admin' && (
+                          <span className="ml-2 px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded">
+                            Admin
+                          </span>
+                        )}
+                      </div>
                       <div className="text-sm text-gray-500">{user?.email}</div>
                     </div>
                     <Button
