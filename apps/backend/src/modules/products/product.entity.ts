@@ -1,4 +1,3 @@
-// apps/backend/src/modules/products/product.entity.ts - CREATE IF MISSING
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('products')
@@ -12,7 +11,11 @@ export class Product {
   @Column('text')
   description: string;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', { precision: 10, scale: 2, transformer: {
+    // Add transformer to handle decimal to number conversion
+    from: (value: string) => parseFloat(value),
+    to: (value: number) => value,
+  }})
   price: number;
 
   @Column({ nullable: true })

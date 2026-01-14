@@ -13,6 +13,7 @@ import {
   PlusCircle,
   Eye
 } from 'lucide-react';
+import productService from '@/services/product.service';
 
 interface Product {
   id: number;
@@ -30,42 +31,22 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [deletingId, setDeletingId] = useState<number | null>(null); // Add this line
+
+  const fetchProducts = async () => {
+    try {
+      const data = await productService.getAllProducts();
+      console.log('Fetched products:', data);
+      setProducts(data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // TODO: Replace with actual API call
-    const fetchProducts = async () => {
-      try {
-        // Mock data for now
-        const mockProducts: Product[] = [
-          {
-            id: 1,
-            name: 'Product 1',
-            description: 'Description for product 1',
-            price: 99.99,
-            stock: 10,
-            image: null,
-            category: 'electronics',
-            createdAt: new Date().toISOString(),
-          },
-          {
-            id: 2,
-            name: 'Product 2',
-            description: 'Description for product 2',
-            price: 49.99,
-            stock: 5,
-            image: null,
-            category: 'clothing',
-            createdAt: new Date().toISOString(),
-          },
-        ];
-        setProducts(mockProducts);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProducts();
   }, []);
 
@@ -74,17 +55,34 @@ export default function AdminProductsPage() {
     product.description.toLowerCase().includes(search.toLowerCase())
   );
 
+  const handleView = (id: number) => {
+    router.push(`/products/${id}`);
+  };
+
+  const handleEdit = (id: number) => {
+    router.push(`/admin/products/edit/${id}`);
+  };
+
   const handleDelete = async (id: number) => {
-    if (confirm('Are you sure you want to delete this product?')) {
-      try {
-        // TODO: Replace with actual API call
-        console.log('Deleting product:', id);
-        setProducts(products.filter(product => product.id !== id));
-      } catch (error) {
-        console.error('Error deleting product:', error);
-        alert('Failed to delete product');
-      }
+    if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+      return;
     }
+
+    setDeletingId(id);
+    try {
+      await productService.deleteProduct(id);
+      setProducts(products.filter(product => product.id !== id));
+      alert('Product deleted successfully!');
+    } catch (error: any) {
+      console.error('Error deleting product:', error);
+      alert(`Failed to delete product: ${error.message || 'Unknown error'}`);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const formatPrice = (price: number): string => {
+    return `$${price.toFixed(2)}`;
   };
 
   return (
@@ -199,7 +197,7 @@ export default function AdminProductsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="font-medium">${product.price.toFixed(2)}</span>
+                        <span className="font-medium">{formatPrice(product.price)}</span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${
@@ -220,25 +218,32 @@ export default function AdminProductsPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex items-center space-x-2">
                           <button
-                            onClick={() => router.push(`/products/${product.id}`)}
-                            className="text-blue-600 hover:text-blue-900 p-1"
-                            title="View"
+                            onClick={() => handleView(product.id)}
+                            className="text-blue-600 hover:text-blue-900 p-1 transition-colors hover:bg-blue-50 rounded"
+                            title="View Product"
+                            disabled={deletingId === product.id}
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => router.push(`/admin/products/edit/${product.id}`)}
-                            className="text-green-600 hover:text-green-900 p-1"
-                            title="Edit"
+                            onClick={() => handleEdit(product.id)}
+                            className="text-green-600 hover:text-green-900 p-1 transition-colors hover:bg-green-50 rounded"
+                            title="Edit Product"
+                            disabled={deletingId === product.id}
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(product.id)}
-                            className="text-red-600 hover:text-red-900 p-1"
-                            title="Delete"
+                            className="text-red-600 hover:text-red-900 p-1 transition-colors hover:bg-red-50 rounded disabled:opacity-50"
+                            title="Delete Product"
+                            disabled={deletingId === product.id}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            {deletingId === product.id ? (
+                              <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
                           </button>
                         </div>
                       </td>

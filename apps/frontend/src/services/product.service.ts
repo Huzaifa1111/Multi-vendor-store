@@ -7,10 +7,7 @@ export interface Product {
   price: number;
   stock: number;
   image: string | null;
-  category?: {
-    id: number;
-    name: string;
-  };
+  category?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -20,7 +17,7 @@ export interface CreateProductData {
   description: string;
   price: number;
   stock: number;
-  categoryId?: number;
+  category?: string;
   image?: File;
 }
 
@@ -51,8 +48,8 @@ class ProductService {
     formData.append('price', productData.price.toString());
     formData.append('stock', productData.stock.toString());
     
-    if (productData.categoryId) {
-      formData.append('categoryId', productData.categoryId.toString());
+    if (productData.category) {
+      formData.append('category', productData.category);
     }
     
     // Append image if exists
@@ -66,7 +63,7 @@ class ProductService {
       },
     });
     
-    return response.data;
+    return response.data.data; // Note: Your backend returns { data: product }
   }
 
   async updateProduct(id: number, productData: UpdateProductData): Promise<Product> {
@@ -77,7 +74,7 @@ class ProductService {
     if (productData.description) formData.append('description', productData.description);
     if (productData.price) formData.append('price', productData.price.toString());
     if (productData.stock) formData.append('stock', productData.stock.toString());
-    if (productData.categoryId) formData.append('categoryId', productData.categoryId.toString());
+    if (productData.category) formData.append('category', productData.category);
     
     // Append image if exists
     if (productData.image) {
