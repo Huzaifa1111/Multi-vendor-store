@@ -6,14 +6,13 @@ import {
     CircleDollarSign,
     Headphones,
     CreditCard,
-    Mail,
     ArrowRight,
     Facebook,
     Instagram,
     Twitter
 } from 'lucide-react';
 
-// Custom Pinterest icon as it's missing from standard lucide-react in some versions
+// Custom Pinterest icon
 const Pinterest = ({ size = 20 }: { size?: number }) => (
     <svg
         width={size}
@@ -33,37 +32,45 @@ export default function Footer() {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="w-full bg-white dark:bg-gray-950 font-sans">
+        <footer className="w-full bg-white font-jost border-t border-gray-100">
             {/* 1. Features Bar */}
-            <div className="border-t border-b border-gray-100 dark:border-gray-900 py-16">
+            <div className="py-16 border-b border-gray-100">
                 <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-                        <div className="flex items-center space-x-6">
-                            <Package size={44} strokeWidth={1} className="text-black dark:text-white" />
+                        <div className="flex items-center space-x-6 group">
+                            <div className="p-4 bg-gray-50 rounded-2xl group-hover:bg-black text-black group-hover:text-white transition-all duration-300">
+                                <Package size={32} strokeWidth={1.5} />
+                            </div>
                             <div>
-                                <h3 className="font-bold text-lg text-black dark:text-white">Free Shipping</h3>
-                                <p className="text-gray-400 text-sm">Free Shipping for orders over £130</p>
+                                <h3 className="font-bold text-lg text-black">Free Shipping</h3>
+                                <p className="text-gray-400 text-sm">On all orders over £130</p>
                             </div>
                         </div>
-                        <div className="flex items-center space-x-6">
-                            <CircleDollarSign size={44} strokeWidth={1} className="text-black dark:text-white" />
+                        <div className="flex items-center space-x-6 group">
+                            <div className="p-4 bg-gray-50 rounded-2xl group-hover:bg-black text-black group-hover:text-white transition-all duration-300">
+                                <CircleDollarSign size={32} strokeWidth={1.5} />
+                            </div>
                             <div>
-                                <h3 className="font-bold text-lg text-black dark:text-white">Money Guarantee</h3>
-                                <p className="text-gray-400 text-sm">Within 30 days for an exchange.</p>
+                                <h3 className="font-bold text-lg text-black">Money Guarantee</h3>
+                                <p className="text-gray-400 text-sm">30 days for free returns</p>
                             </div>
                         </div>
-                        <div className="flex items-center space-x-6">
-                            <Headphones size={44} strokeWidth={1} className="text-black dark:text-white" />
+                        <div className="flex items-center space-x-6 group">
+                            <div className="p-4 bg-gray-50 rounded-2xl group-hover:bg-black text-black group-hover:text-white transition-all duration-300">
+                                <Headphones size={32} strokeWidth={1.5} />
+                            </div>
                             <div>
-                                <h3 className="font-bold text-lg text-black dark:text-white">Online Support</h3>
-                                <p className="text-gray-400 text-sm">24 hours a day, 7 days a week</p>
+                                <h3 className="font-bold text-lg text-black">Online Support</h3>
+                                <p className="text-gray-400 text-sm">Dedicated 24/7 service</p>
                             </div>
                         </div>
-                        <div className="flex items-center space-x-6">
-                            <CreditCard size={44} strokeWidth={1} className="text-black dark:text-white" />
+                        <div className="flex items-center space-x-6 group">
+                            <div className="p-4 bg-gray-50 rounded-2xl group-hover:bg-black text-black group-hover:text-white transition-all duration-300">
+                                <CreditCard size={32} strokeWidth={1.5} />
+                            </div>
                             <div>
-                                <h3 className="font-bold text-lg text-black dark:text-white">Flexible Payment</h3>
-                                <p className="text-gray-400 text-sm">Pay with Multiple Credit Cards</p>
+                                <h3 className="font-bold text-lg text-black">Secure Payment</h3>
+                                <p className="text-gray-400 text-sm">Safe & flexible checkouts</p>
                             </div>
                         </div>
                     </div>
@@ -71,91 +78,88 @@ export default function Footer() {
             </div>
 
             {/* 2. Main Footer Links & Newsletter */}
-            <div className="bg-[#f9f9f9] dark:bg-gray-950/20">
-                <div className="max-w-[1400px] mx-auto px-6 lg:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-b border-gray-100 dark:border-gray-900">
+            <div className="bg-white">
+                <div className="max-w-[1400px] mx-auto px-6 lg:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 pt-20 pb-12 gap-x-8">
 
                     {/* Column 1: Company */}
-                    <div className="py-20 lg:pr-12 lg:border-r border-gray-100 dark:border-gray-900">
-                        <h4 className="font-bold text-[14px] uppercase tracking-[0.2em] mb-8 text-black dark:text-white">Company</h4>
-                        <div className="space-y-4 text-[14px] text-gray-500 leading-relaxed">
+                    <div className="mb-12">
+                        <h4 className="font-black text-[12px] uppercase tracking-[0.25em] mb-8 text-black">Contact Us</h4>
+                        <div className="space-y-4 text-[15px] text-gray-500 leading-relaxed">
                             <p>Find a location nearest you.</p>
-                            <Link href="#" className="inline-block text-black dark:text-white border-b border-black dark:border-white pb-0.5 hover:opacity-70 transition-opacity">
-                                See Our Stores
+                            <Link href="#" className="inline-block text-black font-bold border-b-2 border-black pb-1 hover:bg-black hover:text-white px-1 transition-all">
+                                Our Stores
                             </Link>
-                            <div className="pt-4 space-y-1">
-                                <p className="font-medium text-black dark:text-white">+391 (0)35 2568 4593</p>
-                                <p>hello@domain.com</p>
+                            <div className="pt-6 space-y-2">
+                                <p className="font-bold text-black text-lg">+391 (0)35 2568 4593</p>
+                                <p className="font-medium">concierge@estore.com</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Column 2: Information */}
-                    <div className="py-20 lg:px-12 lg:border-r border-gray-100 dark:border-gray-900">
-                        <h4 className="font-bold text-[14px] uppercase tracking-[0.2em] mb-8 text-black dark:text-white">Information</h4>
-                        <ul className="space-y-4 text-[14px] text-gray-500">
-                            <li><Link href="#" className="hover:text-black dark:hover:text-white transition-colors">My Account</Link></li>
-                            <li><Link href="#" className="hover:text-black dark:hover:text-white transition-colors">Login</Link></li>
-                            <li><Link href="#" className="hover:text-black dark:hover:text-white transition-colors">My Cart</Link></li>
-                            <li><Link href="#" className="hover:text-black dark:hover:text-white transition-colors">Wishlist</Link></li>
-                            <li><Link href="#" className="hover:text-black dark:hover:text-white transition-colors">Checkout</Link></li>
+                    {/* Column 2: Experience */}
+                    <div className="mb-12">
+                        <h4 className="font-black text-[12px] uppercase tracking-[0.25em] mb-8 text-black">Experience</h4>
+                        <ul className="space-y-4 text-[15px] text-gray-500 font-medium">
+                            <li><Link href="#" className="hover:text-black transition-colors">My Profile</Link></li>
+                            <li><Link href="#" className="hover:text-black transition-colors">Order Tracking</Link></li>
+                            <li><Link href="#" className="hover:text-black transition-colors">Wishlist</Link></li>
+                            <li><Link href="#" className="hover:text-black transition-colors">Gift Cards</Link></li>
+                            <li><Link href="#" className="hover:text-black transition-colors">Sustainability</Link></li>
                         </ul>
                     </div>
 
-                    {/* Column 3: Services */}
-                    <div className="py-20 lg:px-12 lg:border-r border-gray-100 dark:border-gray-900">
-                        <h4 className="font-bold text-[14px] uppercase tracking-[0.2em] mb-8 text-black dark:text-white">Services</h4>
-                        <ul className="space-y-4 text-[14px] text-gray-500">
-                            <li><Link href="#" className="hover:text-black dark:hover:text-white transition-colors">About Us</Link></li>
-                            <li><Link href="#" className="hover:text-black dark:hover:text-white transition-colors">Careers</Link></li>
-                            <li><Link href="#" className="hover:text-black dark:hover:text-white transition-colors">Delivery Information</Link></li>
-                            <li><Link href="#" className="hover:text-black dark:hover:text-white transition-colors">Privacy Policy</Link></li>
-                            <li><Link href="#" className="hover:text-black dark:hover:text-white transition-colors">Terms & Condition</Link></li>
+                    {/* Column 3: Corporate */}
+                    <div className="mb-12">
+                        <h4 className="font-black text-[12px] uppercase tracking-[0.25em] mb-8 text-black">Corporate</h4>
+                        <ul className="space-y-4 text-[15px] text-gray-500 font-medium">
+                            <li><Link href="#" className="hover:text-black transition-colors">Our Story</Link></li>
+                            <li><Link href="#" className="hover:text-black transition-colors">Careers</Link></li>
+                            <li><Link href="#" className="hover:text-black transition-colors">Privacy Policy</Link></li>
+                            <li><Link href="#" className="hover:text-black transition-colors">Terms of Service</Link></li>
+                            <li><Link href="#" className="hover:text-black transition-colors">Cookie Settings</Link></li>
                         </ul>
                     </div>
 
-                    {/* Column 4: Subscribe */}
-                    <div className="py-20 lg:pl-12">
-                        <h4 className="font-bold text-[14px] uppercase tracking-[0.2em] mb-8 text-black dark:text-white">Subscribe</h4>
-                        <p className="text-[14px] text-gray-500 mb-8 leading-relaxed">
-                            Enter your email below to be the first to know about new collections and product launches.
+                    {/* Column 4: Newsletter */}
+                    <div className="mb-12">
+                        <h4 className="font-black text-[12px] uppercase tracking-[0.25em] mb-8 text-black">Connect</h4>
+                        <p className="text-[15px] text-gray-500 mb-8 leading-relaxed">
+                            Stay updated with the latest trends and exclusive offers directly in your inbox.
                         </p>
-                        <div className="relative flex items-center bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-sm p-1 shadow-sm">
-                            <Mail size={18} className="text-black dark:text-white ml-3" />
+                        <div className="relative group">
                             <input
                                 type="email"
-                                placeholder="Your Email"
-                                className="w-full bg-transparent px-3 py-2.5 text-[14px] outline-none text-black dark:text-white"
+                                placeholder="Email Address"
+                                className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-4 pr-12 text-[14px] outline-none focus:bg-white focus:border-black transition-all font-medium"
                             />
-                            <button className="pr-3 hover:translate-x-1 transition-transform">
-                                <ArrowRight size={20} className="text-black dark:text-white" />
+                            <button className="absolute right-3 top-1/2 -translate-y-1/2 bg-black text-white p-2 rounded-lg hover:bg-gray-800 transition-colors">
+                                <ArrowRight size={18} />
                             </button>
                         </div>
                     </div>
                 </div>
 
                 {/* 3. Bottom Bar */}
-                <div className="max-w-[1400px] mx-auto px-6 lg:px-12 py-8 flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0 text-[13px] text-gray-500">
+                <div className="border-t border-gray-50 py-10">
+                    <div className="max-w-[1400px] mx-auto px-6 lg:px-12 flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0 text-gray-400">
 
-                    {/* Payment Logos */}
-                    <div className="flex items-center space-x-3">
-                        <div className="w-10 h-6 bg-[#0070ba]/10 rounded flex items-center justify-center text-[8px] font-bold text-[#0070ba]">AMEX</div>
-                        <div className="w-10 h-6 bg-[#4285f4]/10 rounded flex items-center justify-center text-[8px] font-bold text-[#4285f4]">G Pay</div>
-                        <div className="w-10 h-6 bg-[#eb001b]/10 rounded flex items-center justify-center text-[8px] font-bold text-[#eb001b]">MC</div>
-                        <div className="w-10 h-6 bg-[#003087]/10 rounded flex items-center justify-center text-[8px] font-bold text-[#003087]">PayPal</div>
-                        <div className="w-10 h-6 bg-[#0070e0]/10 rounded flex items-center justify-center text-[8px] font-bold text-[#0070e0]">OPay</div>
-                        <div className="w-10 h-6 bg-[#1a1f71]/10 rounded flex items-center justify-center text-[8px] font-bold text-[#1a1f71]">VISA</div>
-                    </div>
+                        <div className="flex items-center space-x-4 grayscale hover:grayscale-0 transition-all duration-500">
+                            <div className="w-8 h-5 bg-black rounded flex items-center justify-center text-[6px] font-black text-white">AMEX</div>
+                            <div className="w-8 h-5 bg-black rounded flex items-center justify-center text-[6px] font-black text-white">VISA</div>
+                            <div className="w-8 h-5 bg-black rounded flex items-center justify-center text-[6px] font-black text-white">MC</div>
+                            <div className="w-8 h-5 bg-black rounded flex items-center justify-center text-[6px] font-black text-white">APPLE</div>
+                        </div>
 
-                    <div className="uppercase tracking-[0.3em] font-medium text-[11px] text-black dark:text-white">
-                        © E-STORE {currentYear}
-                    </div>
+                        <div className="text-[11px] font-black uppercase tracking-[0.5em] text-black">
+                            © E-STORE {currentYear} — ALL RIGHTS RESERVED
+                        </div>
 
-                    {/* Social Icons */}
-                    <div className="flex items-center space-x-6 text-black dark:text-white">
-                        <Link href="#" className="hover:opacity-60 transition-opacity"><Pinterest size={18} /></Link>
-                        <Link href="#" className="hover:opacity-60 transition-opacity"><Facebook size={18} /></Link>
-                        <Link href="#" className="hover:opacity-60 transition-opacity"><Instagram size={18} /></Link>
-                        <Link href="#" className="hover:opacity-60 transition-opacity"><Twitter size={18} /></Link>
+                        <div className="flex items-center space-x-6 text-black">
+                            <Link href="#" className="hover:scale-125 transition-transform"><Pinterest size={18} /></Link>
+                            <Link href="#" className="hover:scale-125 transition-transform"><Facebook size={18} /></Link>
+                            <Link href="#" className="hover:scale-125 transition-transform"><Instagram size={18} /></Link>
+                            <Link href="#" className="hover:scale-125 transition-transform"><Twitter size={18} /></Link>
+                        </div>
                     </div>
                 </div>
             </div>

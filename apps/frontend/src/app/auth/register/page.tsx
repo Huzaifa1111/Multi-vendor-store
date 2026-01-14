@@ -1,4 +1,3 @@
-// apps/frontend/src/app/auth/register/page.tsx - UPDATED
 'use client';
 
 import { useState } from 'react';
@@ -17,7 +16,6 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [debugInfo, setDebugInfo] = useState('');
   const router = useRouter();
   const { register } = useAuth();
 
@@ -32,13 +30,9 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
     setSuccess('');
-    setDebugInfo('');
     setIsLoading(true);
 
     try {
-      console.log('Form Data:', formData);
-      
-      // Validate inputs
       if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
         throw new Error('Please fill in all required fields');
       }
@@ -55,188 +49,186 @@ export default function RegisterPage() {
         throw new Error('Passwords do not match');
       }
 
-      setDebugInfo('Calling register API...');
-      console.log('Calling register with:', { 
-        name: formData.name, 
-        email: formData.email, 
-        password: '[HIDDEN]', 
-        phone: formData.phone 
-      });
-
-      // Call register function
       const result = await register(formData.name, formData.email, formData.password, formData.phone);
-      
-      // NEW: Check if OTP verification is required
+
       if (result.requiresVerification) {
         setSuccess('Registration successful! Please check your email for verification OTP.');
-        setDebugInfo('OTP verification required');
-        
-        // Store email for verification page
         localStorage.setItem('pendingVerificationEmail', formData.email);
-        
-        // Redirect to verification page
         setTimeout(() => {
           router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`);
         }, 2000);
       } else {
-        // Old flow - direct login (for backward compatibility)
         setSuccess('Registration successful! Redirecting to dashboard...');
-        setDebugInfo('Registration successful');
-        
         setTimeout(() => {
           router.push('/dashboard');
         }, 2000);
       }
-      
     } catch (err: any) {
-      console.error('Registration error details:', err);
       setError(err.message || 'Registration failed. Please try again.');
-      setDebugInfo(`Error: ${err.message}`);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link href="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
-              sign in to existing account
+    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0b] font-jost relative overflow-hidden">
+      {/* Premium Animated Background */}
+      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-glow pointer-events-none"></div>
+      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse-glow pointer-events-none" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-indigo-600/10 rounded-full blur-[100px] animate-float pointer-events-none"></div>
+
+      {/* Grid Pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:32px_32px] pointer-events-none"></div>
+
+      <div className="w-full flex items-center justify-center p-6 md:p-12 relative z-10">
+        <div className="max-w-md w-full opacity-0-initial animate-slide-up">
+          {/* Logo Section */}
+          <div className="text-center mb-8 opacity-0-initial animate-zoom-in delay-300">
+            <Link href="/" className="text-5xl font-black tracking-tighter text-white inline-block mb-4 hover:scale-105 transition-transform duration-300">
+              <span className="bg-white text-black px-3 py-1 rounded-2xl mr-2">E</span>
+              <span>Store</span>
+              <span className="text-blue-500 animate-pulse">.</span>
             </Link>
-          </p>
-        </div>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-              <strong>Error:</strong> {error}
-            </div>
-          )}
-          
-          {success && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
-              <strong>Success:</strong> {success}
-            </div>
-          )}
-          
-          {debugInfo && (
-            <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-md">
-              <strong>Debug:</strong> {debugInfo}
-            </div>
-          )}
-          
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name *
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="John Doe"
-                disabled={isLoading}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address *
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="john@example.com"
-                disabled={isLoading}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number (Optional)
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                autoComplete="tel"
-                value={formData.phone}
-                onChange={handleChange}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="+1 (555) 123-4567"
-                disabled={isLoading}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password *
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Minimum 6 characters"
-                disabled={isLoading}
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm Password *
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Re-enter your password"
-                disabled={isLoading}
-              />
-            </div>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Creating account...' : 'Create Account'}
-            </button>
+          {/* Form Card */}
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 md:p-10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] opacity-0-initial animate-slide-up delay-500">
+            <div className="text-center mb-8">
+              <h2 className="text-4xl font-bold text-white mb-2 tracking-tight">Create Account</h2>
+              <p className="text-gray-400 font-medium tracking-wide">Please fill in the details below to get started.</p>
+            </div>
+
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              {/* Error/Success Messages */}
+              <div>
+                {error && (
+                  <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-2xl text-sm font-medium animate-fade-in">
+                    <div className="flex items-center space-x-2">
+                      <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                      <span>{error}</span>
+                    </div>
+                  </div>
+                )}
+
+                {success && (
+                  <div className="bg-green-500/10 border border-green-500/20 text-green-500 px-4 py-3 rounded-2xl text-sm font-medium animate-fade-in">
+                    <div className="flex items-center space-x-2">
+                      <span className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></span>
+                      <span>{success}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <div className="group opacity-0-initial animate-slide-left delay-700">
+                  <label htmlFor="name" className="block text-sm font-bold text-gray-400 mb-1.5 transition-colors group-focus-within:text-white">
+                    Full Name
+                  </label>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="w-full px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl outline-none focus:bg-white/10 focus:border-white/30 focus:ring-4 focus:ring-white/5 transition-all duration-300 text-white font-medium placeholder-gray-500"
+                    placeholder="John Doe"
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className="group opacity-0-initial animate-slide-left delay-800">
+                  <label htmlFor="email" className="block text-sm font-bold text-gray-400 mb-1.5 transition-colors group-focus-within:text-white">
+                    Email Address
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl outline-none focus:bg-white/10 focus:border-white/30 focus:ring-4 focus:ring-white/5 transition-all duration-300 text-white font-medium placeholder-gray-500"
+                    placeholder="john@example.com"
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="group opacity-0-initial animate-slide-left delay-900">
+                    <label htmlFor="password" className="block text-sm font-bold text-gray-400 mb-1.5 transition-colors group-focus-within:text-white">
+                      Password
+                    </label>
+                    <input
+                      id="password"
+                      name="password"
+                      type="password"
+                      required
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="w-full px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl outline-none focus:bg-white/10 focus:border-white/30 focus:ring-4 focus:ring-white/5 transition-all duration-300 text-white font-medium placeholder-gray-500"
+                      placeholder="••••••••"
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div className="group opacity-0-initial animate-slide-left delay-1000">
+                    <label htmlFor="confirmPassword" className="block text-sm font-bold text-gray-400 mb-1.5 transition-colors group-focus-within:text-white">
+                      Confirm
+                    </label>
+                    <input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      required
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="w-full px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl outline-none focus:bg-white/10 focus:border-white/30 focus:ring-4 focus:ring-white/5 transition-all duration-300 text-white font-medium placeholder-gray-500"
+                      placeholder="••••••••"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="opacity-0-initial animate-slide-up delay-1000 pt-4">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-white text-black py-5 rounded-2xl font-bold text-lg hover:bg-gray-100 active:scale-[0.98] transition-all duration-300 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_20px_40px_rgba(255,255,255,0.05)] group"
+                >
+                  {isLoading ? (
+                    <>
+                      <svg className="animate-spin h-6 w-6 text-black" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Creating Account...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Register Now</span>
+                      <span className="group-hover:translate-x-1 transition-transform">→</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="text-center text-sm font-medium opacity-0-initial animate-fade-in delay-1000 pt-4">
+                <span className="text-gray-500">Already have an account? </span>
+                <Link href="/auth/login" className="text-white font-bold border-b-2 border-white hover:bg-white hover:text-black px-1 transition-all duration-300">
+                  Login here
+                </Link>
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-white/10 text-[10px] text-gray-400 text-center uppercase tracking-widest leading-loose opacity-0-initial animate-fade-in delay-1000">
+                By joining, you agree to our <br />
+                <Link href="/terms" className="underline hover:text-white transition-colors">Terms of Service</Link> and <Link href="/privacy" className="underline hover:text-white transition-colors">Privacy Policy</Link>
+              </div>
+            </form>
           </div>
-          
-          <div className="text-center text-sm text-gray-500">
-            <p>Test credentials:</p>
-            <p className="font-mono mt-1">Email: test@example.com / Password: test123</p>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   );

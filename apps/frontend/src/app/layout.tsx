@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Jost } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
-import Header from '@/components/layout/Header'; // Add Header back
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const jost = Jost({ subsets: ['latin'], variable: '--font-jost' });
 
 export const metadata: Metadata = {
   title: 'Store App - Your Modern E-commerce Platform',
@@ -18,12 +20,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${jost.className} ${jost.variable} ${inter.variable}`}>
         <AuthProvider>
-          <Header /> {/* Add Header back */}
-          <main className="min-h-screen pt-16"> {/* Add padding top for fixed header */}
+          <Header />
+          <main className="min-h-screen pt-20">
             {children}
           </main>
+          <Footer />
         </AuthProvider>
       </body>
     </html>
