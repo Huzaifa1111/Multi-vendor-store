@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Package } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/Card';
+import { resolveProductImage } from '@/lib/image';
 
 interface Product {
   id: number;
@@ -23,14 +24,14 @@ export default function ProductsPage() {
         const response = await fetch('http://localhost:3001/products');
         if (response.ok) {
           const data = await response.json();
-          
+
           // Parse price to number if it comes as string
           const parsedProducts = data.map((product: any) => ({
             ...product,
             price: typeof product.price === 'string' ? parseFloat(product.price) : product.price,
             stock: typeof product.stock === 'string' ? parseInt(product.stock) : product.stock,
           }));
-          
+
           setProducts(parsedProducts);
         } else {
           console.error('Failed to fetch products:', response.status);
@@ -72,16 +73,12 @@ export default function ProductsPage() {
             {products.map((product) => (
               <Card key={product.id} className="hover:shadow-lg transition-shadow">
                 <CardContent className="p-4">
-                  <div className="aspect-square bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
-                    {product.image ? (
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    ) : (
-                      <Package className="w-12 h-12 text-gray-400" />
-                    )}
+                  <div className="aspect-square bg-gray-200 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+                    <img
+                      src={resolveProductImage(product.image)}
+                      alt={product.name}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
                   </div>
                   <h3 className="font-semibold text-gray-900">{product.name}</h3>
                   <p className="text-sm text-gray-600 mt-1 line-clamp-2">
@@ -92,11 +89,10 @@ export default function ProductsPage() {
                       {/* FIXED: Ensure price is a number before calling toFixed */}
                       ${typeof product.price === 'number' ? product.price.toFixed(2) : '0.00'}
                     </span>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      product.stock > 0 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`text-xs px-2 py-1 rounded-full ${product.stock > 0
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                      }`}>
                       {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
                     </span>
                   </div>

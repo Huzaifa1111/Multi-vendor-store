@@ -1,132 +1,197 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Palette, LifeBuoy, BookOpen, ShoppingBag } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 const slides = [
     {
         id: 1,
-        subtitle: 'New Arrivals',
-        title: 'Autumn\nCollection',
-        image: '/images/hero/autumn-collection.png',
-        link: '/products?category=autumn',
-        bgColor: 'bg-[#f5f5f5]',
-    },
-    {
-        id: 2,
-        subtitle: 'Winter Essentials',
-        title: 'Modern\nMinimalist',
-        image: '/images/hero/winter-essentials.png',
-        link: '/products?category=winter',
-        bgColor: 'bg-[#eeeeee]',
-    },
+        subtitle: 'Welcome to Estore',
+        title: 'Next-Gen\nElectronics.',
+        description: 'Discover the latest in technology and innovation. Your one-stop shop for premium electronics and gadgets.',
+        image: '/images/hero/Estore Electronics.webp',
+        link: '/products',
+        textColor: 'text-white',
+        accentColor: 'bg-white',
+    }
 ];
 
 export default function Hero() {
     const [currentSlide, setCurrentSlide] = useState(0);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const { scrollY } = useScroll();
+
+    // Parallax effect for the image container
+    const y1 = useTransform(scrollY, [0, 500], [0, 100]);
+    const scale = useTransform(scrollY, [0, 500], [1, 1.1]);
 
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentSlide((prev) => (prev + 1) % slides.length);
-        }, 6000);
+        }, 10000); // Slower interval for better appreciation
         return () => clearInterval(timer);
     }, []);
 
+    // Split title into characters for animation
+    const splitTitle = (title: string) => {
+        return title.split('').map((char, index) => (
+            <motion.span
+                key={index}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                    duration: 0.8,
+                    delay: 0.5 + index * 0.03,
+                    ease: [0.22, 1, 0.36, 1]
+                }}
+                className="inline-block"
+            >
+                {char === '\n' ? <br /> : char}
+            </motion.span>
+        ));
+    };
+
     return (
-        <section className="relative h-[600px] md:h-[700px] lg:h-[800px] overflow-hidden bg-[#f9f9f9]">
+        <section ref={containerRef} className="relative h-[500px] md:h-[650px] bg-black overflow-hidden font-jost border-b border-gray-100">
             <AnimatePresence mode="wait">
                 <motion.div
                     key={currentSlide}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.8, ease: "easeInOut" }}
-                    className={`absolute inset-0 flex items-center ${slides[currentSlide].bgColor}`}
+                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute inset-0"
                 >
-                    <div className="max-w-[1400px] mx-auto px-6 lg:px-12 w-full grid grid-cols-1 lg:grid-cols-2 items-center h-full relative">
-
-                        {/* Text Content */}
-                        <div className="z-10 pt-10 lg:pt-0">
-                            <motion.span
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2, duration: 0.5 }}
-                                className="text-sm md:text-base font-medium tracking-[0.2em] uppercase text-gray-700 mb-4 block"
-                            >
-                                {slides[currentSlide].subtitle}
-                            </motion.span>
-
-                            <motion.h1
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.4, duration: 0.6 }}
-                                className="text-5xl md:text-7xl lg:text-[100px] leading-[1.1] font-black text-black tracking-tighter whitespace-pre-line mb-8"
-                            >
-                                {slides[currentSlide].title}
-                            </motion.h1>
-
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.6, duration: 0.5 }}
-                            >
-                                <Link
-                                    href={slides[currentSlide].link}
-                                    className="inline-block px-10 py-3.5 border border-black text-black dark:text-white text-sm font-bold uppercase tracking-widest hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300 transform"
-                                >
-                                    Shop Now
-                                </Link>
-                            </motion.div>
-                        </div>
-
-                        {/* Image Content */}
-                        <div className="absolute right-0 top-0 bottom-0 w-full lg:w-1/2 h-full z-0">
-                            <motion.div
-                                initial={{ opacity: 0, scale: 1.05 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 1.2, ease: "easeOut" }}
-                                className="relative w-full h-full"
-                            >
+                    <div className="relative h-full w-full flex items-center justify-center">
+                        {/* Centered Background Image */}
+                        <motion.div
+                            style={{ y: y1 }}
+                            className="absolute inset-0 z-0 flex items-center justify-center"
+                        >
+                            <div className="relative w-full h-full">
                                 <Image
                                     src={slides[currentSlide].image}
                                     alt={slides[currentSlide].title}
                                     fill
-                                    className="object-cover object-center lg:object-right-top"
+                                    className="object-cover"
                                     priority
-                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                    quality={100}
                                 />
-                            </motion.div>
+                                {/* Dark Gradient Overlay for White Text */}
+                                <div className="absolute inset-0 bg-black/40"></div>
+                            </div>
+                        </motion.div>
+
+                        {/* Centered Content Container */}
+                        <div className="container mx-auto px-6 md:px-12 relative z-10 text-center flex flex-col items-center">
+                            <div className="max-w-4xl">
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2, duration: 0.8 }}
+                                    className="mb-6 flex items-center justify-center space-x-4"
+                                >
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: 40 }}
+                                        transition={{ delay: 0.4, duration: 1 }}
+                                        className={`h-[1px] ${slides[currentSlide].accentColor}`}
+                                    ></motion.div>
+                                    <span className={`text-[11px] font-black uppercase tracking-[0.4em] ${slides[currentSlide].textColor}`}>
+                                        {slides[currentSlide].subtitle}
+                                    </span>
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: 40 }}
+                                        transition={{ delay: 0.4, duration: 1 }}
+                                        className={`h-[1px] ${slides[currentSlide].accentColor}`}
+                                    ></motion.div>
+                                </motion.div>
+
+                                <h1 className={`text-4xl md:text-5xl lg:text-7xl font-bold leading-[1] tracking-tighter mb-6 ${slides[currentSlide].textColor}`}>
+                                    {splitTitle(slides[currentSlide].title)}
+                                </h1>
+
+                                <motion.p
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.8, duration: 0.8 }}
+                                    className={`text-sm md:text-base font-medium max-w-lg mx-auto mb-8 opacity-90 leading-relaxed ${slides[currentSlide].textColor}`}
+                                >
+                                    {slides[currentSlide].description}
+                                </motion.p>
+
+                                <motion.div
+                                    initial={{ opacity: 0, y: 30 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 1, duration: 0.8 }}
+                                    className="flex flex-wrap justify-center gap-6"
+                                >
+                                    <Link
+                                        href={slides[currentSlide].link}
+                                        className="group relative px-10 py-5 bg-white border-2 border-white text-black font-black uppercase tracking-[0.2em] text-[11px] overflow-hidden transition-all duration-500 hover:scale-105 active:scale-95 shadow-lg"
+                                    >
+                                        <span className="relative z-10 flex items-center group-hover:tracking-[0.3em] transition-all duration-500">
+                                            Shop Now <ArrowRight className="ml-3 group-hover:translate-x-2 transition-transform duration-500 text-black" size={18} />
+                                        </span>
+                                    </Link>
+
+                                    <Link
+                                        href="/products"
+                                        className="group relative px-10 py-5 border-2 border-white text-white font-black uppercase tracking-[0.2em] text-[11px] hover:bg-white hover:text-black transition-all duration-500 overflow-hidden"
+                                    >
+                                        <span className="relative z-10 transition-all duration-500 group-hover:tracking-[0.3em]">Explore All</span>
+                                    </Link>
+                                </motion.div>
+                            </div>
                         </div>
                     </div>
                 </motion.div>
             </AnimatePresence>
 
-            {/* Pagination Dots */}
-            <div className="absolute right-8 top-1/2 -translate-y-1/2 z-20 flex flex-col space-y-4">
-                {slides.map((_, index) => (
-                    <button
-                        key={index}
-                        onClick={() => setCurrentSlide(index)}
-                        className="group relative flex items-center justify-center p-2"
-                    >
-                        <div
-                            className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${currentSlide === index ? 'bg-black w-2 h-2 scale-125' : 'bg-gray-300 hover:bg-gray-500'
-                                }`}
-                        />
-                        {currentSlide === index && (
-                            <motion.div
-                                layoutId="activeDot"
-                                className="absolute -inset-1 border border-black rounded-full"
-                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            />
-                        )}
-                    </button>
-                ))}
-            </div>
+            {/* Subtle Navigation Arrows */}
+            {slides.length > 1 && (
+                <>
+                    <div className="absolute inset-y-0 left-4 md:left-8 z-30 flex items-center">
+                        <button
+                            onClick={() => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)}
+                            className="p-3 rounded-full hover:bg-black/5 transition-colors border border-black/10 group active:scale-90"
+                        >
+                            <ArrowRight className="rotate-180 text-black group-hover:-translate-x-1 transition-transform" size={24} />
+                        </button>
+                    </div>
+                    <div className="absolute inset-y-0 right-4 md:right-8 z-30 flex items-center">
+                        <button
+                            onClick={() => setCurrentSlide((prev) => (prev + 1) % slides.length)}
+                            className="p-3 rounded-full hover:bg-black/5 transition-colors border border-black/10 group active:scale-90"
+                        >
+                            <ArrowRight className="text-black group-hover:translate-x-1 transition-transform" size={24} />
+                        </button>
+                    </div>
+                </>
+            )}
 
+            {/* Decorative vertical reveal */}
+            <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: "15%" }}
+                transition={{ delay: 2, duration: 1.5 }}
+                className="absolute right-12 top-0 w-[1px] bg-black/10 hidden lg:block"
+            ></motion.div>
+
+            <div className="absolute right-12 bottom-12 hidden lg:flex flex-col items-center space-y-12 z-20">
+                <motion.span
+                    animate={{ y: [0, 10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="text-[10px] font-black uppercase tracking-[0.6em] rotate-90 mb-12 whitespace-nowrap opacity-40"
+                >
+                    SCROLL
+                </motion.span>
+                <div className="w-[1px] h-40 bg-gradient-to-b from-black/0 via-black/40 to-black"></div>
+            </div>
         </section>
     );
 }

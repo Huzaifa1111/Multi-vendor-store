@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Package, ShoppingCart, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/Card';
+import { resolveProductImage } from '@/lib/image';
 
 interface ProductDetailProps {
   product: {
@@ -45,17 +46,11 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Product Image */}
           <div>
-            {product.image ? (
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-auto rounded-lg shadow-lg"
-              />
-            ) : (
-              <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
-                <Package className="w-24 h-24 text-gray-400" />
-              </div>
-            )}
+            <img
+              src={resolveProductImage(product.image)}
+              alt={product.name}
+              className="w-full h-auto rounded-lg shadow-lg"
+            />
           </div>
 
           {/* Product Details */}
@@ -67,7 +62,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             </div>
 
             <h1 className="text-3xl font-bold text-gray-900 mb-3">{product.name}</h1>
-            
+
             <div className="flex items-center mb-4">
               <div className="flex text-yellow-400 mr-2">
                 {[...Array(5)].map((_, i) => (
@@ -101,7 +96,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 {addingToCart ? 'Adding...' : 'Add to Cart'}
               </button>
-              
+
               <button
                 onClick={() => router.push(`/admin/products/edit/${product.id}`)}
                 className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"

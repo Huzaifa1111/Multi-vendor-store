@@ -1,16 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import Button from '@/components/ui/Button';
+import Link from 'next/link';
+import Image from 'next/image';
+import { resolveProductImage } from '@/lib/image';
+import { ShoppingBag, Eye, Heart } from 'lucide-react';
 
 interface Product {
   id: number;
   name: string;
   description: string;
   price: number;
-  image: string;
-  category: string;
-  rating: number;
+  image: string | null;
+  category?: string;
 }
 
 interface ProductCardProps {
@@ -20,68 +22,73 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
+  const productImage = resolveProductImage(product.image);
+
   return (
     <div
-      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+      className={`group relative bg-white transition-all duration-700 font-jost rounded-3xl ${isHovered ? '-translate-y-2 shadow-2xl' : 'shadow-sm'
+        }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Product Image */}
-      <div className="relative h-48 overflow-hidden">
-        <img
-          src={product.image}
+      {/* Image Container */}
+      <div className="relative aspect-[3/4] overflow-hidden bg-gray-50 rounded-2xl">
+        <Image
+          src={productImage}
           alt={product.name}
-          className={`w-full h-full object-cover transition-transform duration-300 ${
-            isHovered ? 'scale-110' : 'scale-100'
-          }`}
+          fill
+          className={`object-cover transition-transform duration-700 ease-out ${isHovered ? 'scale-110' : 'scale-100'
+            }`}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-        <div className="absolute top-2 right-2">
-          <span className="bg-blue-600 text-white text-xs font-semibold px-2 py-1 rounded">
-            {product.category}
-          </span>
+
+        {/* Quick Actions - Professional Side Position */}
+        <div
+          className={`absolute top-4 right-4 flex flex-col space-y-3 transition-all duration-500 ${isHovered ? 'translate-x-0 opacity-100' : 'translate-x-12 opacity-0'
+            }`}
+        >
+          <button className="w-11 h-11 bg-white hover:bg-black hover:text-white rounded-full flex items-center justify-center text-black transition-all duration-300 shadow-xl border border-gray-100 group/btn">
+            <ShoppingBag size={18} className="group-hover/btn:scale-110 transition-transform" />
+          </button>
+          <button className="w-11 h-11 bg-white hover:bg-black hover:text-white rounded-full flex items-center justify-center text-black transition-all duration-300 shadow-xl border border-gray-100 group/btn">
+            <Eye size={18} className="group-hover/btn:scale-110 transition-transform" />
+          </button>
+          <button className="w-11 h-11 bg-white hover:bg-black hover:text-white rounded-full flex items-center justify-center text-black transition-all duration-300 shadow-xl border border-gray-100 group/btn">
+            <Heart size={18} className="group-hover/btn:scale-110 transition-transform" />
+          </button>
         </div>
+
+        {/* Category Badge */}
+        {product.category && (
+          <div className="absolute top-4 left-4">
+            <span className="bg-white/90 backdrop-blur-sm text-black text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-sm">
+              {product.category}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Product Info */}
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
-          <span className="text-xl font-bold text-blue-600">${product.price.toFixed(2)}</span>
+      <div className="mt-6 text-center">
+        <h3 className="text-[17px] font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300 truncate px-2">
+          <Link href={`/products/${product.id}`}>
+            {product.name}
+          </Link>
+        </h3>
+
+        <div className="mt-2 flex items-center justify-center space-x-2">
+          <span className="text-[18px] font-black text-black">
+            ${Number(product.price).toFixed(2)}
+          </span>
+          {/* Optional: Add a crossed-out old price for premium look */}
+          <span className="text-sm text-gray-400 line-through font-medium">
+            ${(Number(product.price) * 1.2).toFixed(2)}
+          </span>
         </div>
 
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-          {product.description}
-        </p>
-
-        {/* Rating */}
-        <div className="flex items-center mb-4">
-          <div className="flex">
-            {[...Array(5)].map((_, i) => (
-              <svg
-                key={i}
-                className={`w-4 h-4 ${
-                  i < Math.floor(product.rating)
-                    ? 'text-yellow-400'
-                    : 'text-gray-300'
-                }`}
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-            ))}
-          </div>
-          <span className="ml-2 text-sm text-gray-600">{product.rating.toFixed(1)}</span>
-        </div>
-
-        {/* Actions */}
-        <div className="flex space-x-2">
-          <Button className="flex-1">Add to Cart</Button>
-          <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-50">
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          </button>
+        {/* Dynamic Underline on Hover */}
+        <div className="mt-4 flex justify-center">
+          <div className={`h-0.5 bg-black transition-all duration-500 rounded-full ${isHovered ? 'w-12' : 'w-0'}`}></div>
         </div>
       </div>
     </div>

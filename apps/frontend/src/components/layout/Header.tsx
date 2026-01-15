@@ -15,7 +15,8 @@ import {
   ChevronDown,
   Menu,
   X,
-  Crown
+  Crown,
+  ArrowRight
 } from 'lucide-react';
 
 export default function Header() {
@@ -69,10 +70,26 @@ export default function Header() {
     window.location.href = '/login';
   };
 
+  const categories = [
+    "Electronic Devices",
+    "Electronic Accessories",
+    "TV & Home Appliances",
+    "Health & Beauty",
+    "Babies & Toys",
+    "Groceries & Pets",
+    "Home & Lifestyle",
+    "Women's Fashion",
+    "Men's Fashion",
+    "Watches, Bags & Jewellery",
+    "Sports & Outdoor",
+    "Automotive & Motorbike",
+    "Stationery & Craft",
+    "Books & Magazines"
+  ];
+
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/about', label: 'About Us' },
-    { href: '/products', label: 'Products' },
     { href: '/contact', label: 'Contact Us' },
     ...(isAuthenticated ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
   ];
@@ -93,9 +110,9 @@ export default function Header() {
             </div>
           </div>
 
-          <div className="flex-1 text-center">
-            <span>Open Doors To A World Of Fashion | </span>
-            <Link href="/products" className="underline underline-offset-4 hover:text-black transition-colors">Discover More</Link>
+          <div className="flex-1 text-center font-black uppercase tracking-[0.2em] text-[11px]">
+            <span>Next-Gen Tech Marketplace | </span>
+            <Link href="/products" className="underline underline-offset-4 hover:text-black transition-colors">Shop Now</Link>
           </div>
         </div>
       </div>
@@ -111,17 +128,37 @@ export default function Header() {
           }`}
       >
         <div className="max-w-[1440px] mx-auto px-6 h-20 flex justify-between items-center">
-          {/* Left: Nav Links */}
+          {/* Left: Nav Links & Categories Dropdown */}
           <nav className="hidden lg:flex items-center space-x-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-[15px] font-semibold text-black hover:text-gray-600 transition-colors uppercase tracking-tight"
-              >
-                {link.label}
-              </Link>
-            ))}
+            <Link href="/" className="text-[15px] font-semibold text-black hover:text-gray-600 transition-colors uppercase tracking-tight">Home</Link>
+
+            {/* Professional Category Dropdown */}
+            <div className="relative group/mega">
+              <button className="flex items-center space-x-1.5 text-[15px] font-bold text-black uppercase tracking-tight group-hover:text-blue-600 transition-colors py-8">
+                <span>Shop by Category</span>
+                <ChevronDown size={14} className="group-hover/mega:rotate-180 transition-transform duration-300" />
+              </button>
+
+              <div className="absolute top-[100%] left-0 w-[800px] bg-white border border-gray-100 shadow-2xl rounded-2xl p-8 opacity-0 invisible group-hover/mega:opacity-100 group-hover/mega:visible transition-all duration-300 transform origin-top-left -translate-y-2 group-hover/mega:translate-y-0 grid grid-cols-3 gap-x-8 gap-y-2 z-[100]">
+                {categories.map((cat) => (
+                  <Link
+                    key={cat}
+                    href={`/products?category=${cat.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`}
+                    className="flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full bg-gray-200 group-hover:bg-blue-600 transition-colors" />
+                    <span className="text-[14px] font-medium text-gray-600 group-hover:text-black transition-colors">{cat}</span>
+                  </Link>
+                ))}
+                <div className="col-span-3 mt-4 pt-4 border-t border-gray-100">
+                  <Link href="/products" className="flex items-center text-blue-600 font-black uppercase tracking-[0.2em] text-[11px] hover:translate-x-2 transition-transform">
+                    View All Products <ArrowRight size={14} className="ml-2" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <Link href="/about" className="text-[15px] font-semibold text-black hover:text-gray-600 transition-colors uppercase tracking-tight">About</Link>
           </nav>
 
           {/* Mobile menu button */}
@@ -135,7 +172,7 @@ export default function Header() {
           {/* Center: Logo */}
           <div className="absolute left-1/2 -translate-x-1/2">
             <Link href="/" className="text-3xl font-bold tracking-tighter text-black hover:scale-105 transition-transform duration-300 flex items-center group">
-              <span className="bg-black text-white px-2 py-0.5 rounded mr-1 group-hover:bg-blue-600 transition-colors">E</span>
+              <span className="bg-white border-2 border-black text-black px-2 py-0.5 rounded mr-1 group-hover:bg-blue-50 transition-colors">E</span>
               <span>Store</span>
               <span className="text-blue-600 animate-pulse">.</span>
             </Link>
@@ -144,75 +181,81 @@ export default function Header() {
           {/* Right: Icons & Auth */}
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-2 md:space-x-5 text-black">
-              {/* Account Dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setIsAccountOpen(!isAccountOpen)}
-                  onBlur={() => setTimeout(() => setIsAccountOpen(false), 200)}
-                  className={`p-1.5 ${isAuthenticated ? 'px-3' : 'px-1.5'} hover:bg-gray-100 rounded-full transition-all flex items-center relative group space-x-2`}
-                >
-                  {user?.role === 'admin' ? (
-                    <div className="relative">
-                      <User size={20} className="text-purple-600" />
-                      <Crown size={12} className="absolute -top-1.5 -right-1.5 text-yellow-500 fill-yellow-500 animate-bounce" />
-                    </div>
-                  ) : (
-                    <User size={20} className={isAuthenticated ? "text-blue-600" : "text-gray-800"} />
-                  )}
+              {/* Account / Auth - Optimized for 1-click access */}
+              {isAuthenticated ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setIsAccountOpen(!isAccountOpen)}
+                    onBlur={() => setTimeout(() => setIsAccountOpen(false), 200)}
+                    className="p-1.5 px-3 hover:bg-gray-100 rounded-full transition-all flex items-center relative group space-x-2"
+                  >
+                    {user?.role === 'admin' ? (
+                      <div className="relative">
+                        <User size={20} className="text-purple-600" />
+                        <Crown size={12} className="absolute -top-1.5 -right-1.5 text-yellow-500 fill-yellow-500 animate-bounce" />
+                      </div>
+                    ) : (
+                      <User size={20} className="text-blue-600" />
+                    )}
 
-                  {isAuthenticated && (
                     <span className="hidden sm:inline-block text-[13px] font-bold text-black uppercase tracking-wider">
                       {user?.name?.split(' ')[0]}
                     </span>
-                  )}
 
-                  <ChevronDown size={12} className={`transition-transform duration-200 text-gray-400 ${isAccountOpen ? "rotate-180" : ""}`} />
-                </button>
+                    <ChevronDown size={12} className={`transition-transform duration-200 text-gray-400 ${isAccountOpen ? "rotate-180" : ""}`} />
+                  </button>
 
-                {isAccountOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-xl py-2 z-[100] animate-in fade-in zoom-in duration-200 origin-top-right">
-                    {isAuthenticated ? (
-                      <>
-                        <div className="px-4 py-3 border-b border-gray-50 flex flex-col">
-                          <span className="text-sm font-bold truncate">{user?.name}</span>
-                          <span className="text-xs text-gray-400 truncate">{user?.email}</span>
-                          {user?.role === 'admin' && (
-                            <span className="mt-1 text-[10px] uppercase font-black bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded w-fit">Admin</span>
-                          )}
-                        </div>
-                        <Link href="/dashboard" className="block px-4 py-2.5 text-sm font-medium hover:bg-gray-50 hover:text-blue-600 transition-colors">Dashboard</Link>
+                  {isAccountOpen && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-xl py-2 z-[100] animate-in fade-in zoom-in duration-200 origin-top-right">
+                      <div className="px-4 py-3 border-b border-gray-50 flex flex-col">
+                        <span className="text-sm font-bold truncate">{user?.name}</span>
+                        <span className="text-xs text-gray-400 truncate">{user?.email}</span>
                         {user?.role === 'admin' && (
-                          <Link href="/admin" className="block px-4 py-2.5 text-sm font-medium text-purple-700 hover:bg-purple-50 transition-colors">Admin Panel</Link>
+                          <span className="mt-1 text-[10px] uppercase font-black bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded w-fit">Admin</span>
                         )}
-                        <Link href="/profile" className="block px-4 py-2.5 text-sm font-medium hover:bg-gray-50 hover:text-blue-600 transition-colors border-b border-gray-50">Profile Settings</Link>
-                        <button
-                          onClick={handleLogout}
-                          className="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors"
-                        >
-                          Logout
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-widest">Account</div>
-                        <Link href="/auth/login" className="block px-4 py-2.5 text-sm font-bold hover:bg-gray-50 hover:text-blue-600 transition-colors">Login</Link>
-                        <Link href="/auth/register" className="block px-4 py-2.5 text-sm font-bold hover:bg-gray-50 hover:text-blue-600 transition-colors border-t border-gray-50">Register</Link>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
+                      </div>
+                      <Link href="/dashboard" className="block px-4 py-2.5 text-sm font-medium hover:bg-gray-50 hover:text-blue-600 transition-colors">Dashboard</Link>
+                      {user?.role === 'admin' && (
+                        <Link href="/admin" className="block px-4 py-2.5 text-sm font-medium text-purple-700 hover:bg-purple-50 transition-colors">Admin Panel</Link>
+                      )}
+                      <Link href="/profile" className="block px-4 py-2.5 text-sm font-medium hover:bg-gray-50 hover:text-blue-600 transition-colors border-b border-gray-50">Profile Settings</Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center space-x-1 sm:space-x-4">
+                  <Link
+                    href="/auth/login"
+                    className="text-[13px] font-bold uppercase tracking-widest text-black hover:text-blue-600 transition-colors px-2 py-1"
+                  >
+                    Login
+                  </Link>
+                  <span className="text-gray-200 hidden sm:inline">|</span>
+                  <Link
+                    href="/auth/register"
+                    className="hidden sm:block text-[13px] font-bold uppercase tracking-widest text-black hover:text-blue-600 transition-colors px-2 py-1"
+                  >
+                    Register
+                  </Link>
+                </div>
+              )}
 
               <button className="hidden sm:p-2 hover:bg-gray-100 rounded-full transition-colors">
                 <Search size={22} />
               </button>
               <button className="p-2 hover:bg-gray-100 rounded-full transition-colors relative">
                 <Heart size={22} />
-                <span className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full leading-none">0</span>
+                <span className="absolute top-0 right-0 bg-white border border-black text-black text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full leading-none">0</span>
               </button>
               <button className="p-2 hover:bg-gray-100 rounded-full transition-colors relative">
                 <ShoppingBag size={22} />
-                <span className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full leading-none">0</span>
+                <span className="absolute top-0 right-0 bg-white border border-black text-black text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full leading-none">0</span>
               </button>
             </div>
           </div>

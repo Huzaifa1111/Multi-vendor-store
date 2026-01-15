@@ -38,7 +38,7 @@ export default function Footer() {
                 <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
                         <div className="flex items-center space-x-6 group">
-                            <div className="p-4 bg-gray-50 rounded-2xl group-hover:bg-black text-black group-hover:text-white transition-all duration-300">
+                            <div className="p-4 bg-gray-50 rounded-2xl group-hover:bg-blue-50 text-black transition-all duration-300">
                                 <Package size={32} strokeWidth={1.5} />
                             </div>
                             <div>
@@ -47,7 +47,7 @@ export default function Footer() {
                             </div>
                         </div>
                         <div className="flex items-center space-x-6 group">
-                            <div className="p-4 bg-gray-50 rounded-2xl group-hover:bg-black text-black group-hover:text-white transition-all duration-300">
+                            <div className="p-4 bg-gray-50 rounded-2xl group-hover:bg-blue-50 text-black transition-all duration-300">
                                 <CircleDollarSign size={32} strokeWidth={1.5} />
                             </div>
                             <div>
@@ -56,7 +56,7 @@ export default function Footer() {
                             </div>
                         </div>
                         <div className="flex items-center space-x-6 group">
-                            <div className="p-4 bg-gray-50 rounded-2xl group-hover:bg-black text-black group-hover:text-white transition-all duration-300">
+                            <div className="p-4 bg-gray-50 rounded-2xl group-hover:bg-blue-50 text-black transition-all duration-300">
                                 <Headphones size={32} strokeWidth={1.5} />
                             </div>
                             <div>
@@ -65,7 +65,7 @@ export default function Footer() {
                             </div>
                         </div>
                         <div className="flex items-center space-x-6 group">
-                            <div className="p-4 bg-gray-50 rounded-2xl group-hover:bg-black text-black group-hover:text-white transition-all duration-300">
+                            <div className="p-4 bg-gray-50 rounded-2xl group-hover:bg-blue-50 text-black transition-all duration-300">
                                 <CreditCard size={32} strokeWidth={1.5} />
                             </div>
                             <div>
@@ -86,7 +86,7 @@ export default function Footer() {
                         <h4 className="font-black text-[12px] uppercase tracking-[0.25em] mb-8 text-black">Contact Us</h4>
                         <div className="space-y-4 text-[15px] text-gray-500 leading-relaxed">
                             <p>Find a location nearest you.</p>
-                            <Link href="#" className="inline-block text-black font-bold border-b-2 border-black pb-1 hover:bg-black hover:text-white px-1 transition-all">
+                            <Link href="#" className="inline-block text-black font-bold border-b-2 border-black pb-1 hover:bg-blue-50 px-1 transition-all">
                                 Our Stores
                             </Link>
                             <div className="pt-6 space-y-2">
@@ -132,7 +132,7 @@ export default function Footer() {
                                 placeholder="Email Address"
                                 className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-4 pr-12 text-[14px] outline-none focus:bg-white focus:border-black transition-all font-medium"
                             />
-                            <button className="absolute right-3 top-1/2 -translate-y-1/2 bg-black text-white p-2 rounded-lg hover:bg-gray-800 transition-colors">
+                            <button className="absolute right-3 top-1/2 -translate-y-1/2 bg-white border-2 border-black text-black p-2 rounded-lg hover:bg-blue-50 transition-colors">
                                 <ArrowRight size={18} />
                             </button>
                         </div>
@@ -144,10 +144,10 @@ export default function Footer() {
                     <div className="max-w-[1400px] mx-auto px-6 lg:px-12 flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0 text-gray-400">
 
                         <div className="flex items-center space-x-4 grayscale hover:grayscale-0 transition-all duration-500">
-                            <div className="w-8 h-5 bg-black rounded flex items-center justify-center text-[6px] font-black text-white">AMEX</div>
-                            <div className="w-8 h-5 bg-black rounded flex items-center justify-center text-[6px] font-black text-white">VISA</div>
-                            <div className="w-8 h-5 bg-black rounded flex items-center justify-center text-[6px] font-black text-white">MC</div>
-                            <div className="w-8 h-5 bg-black rounded flex items-center justify-center text-[6px] font-black text-white">APPLE</div>
+                            <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center text-[6px] font-black text-black">AMEX</div>
+                            <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center text-[6px] font-black text-black">VISA</div>
+                            <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center text-[6px] font-black text-black">MC</div>
+                            <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center text-[6px] font-black text-black">APPLE</div>
                         </div>
 
                         <div className="text-[11px] font-black uppercase tracking-[0.5em] text-black">
