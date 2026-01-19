@@ -102,9 +102,9 @@ export default function Footer() {
                         <ul className="space-y-4 text-[15px] text-gray-500 font-medium">
                             <li><Link href="#" className="hover:text-black transition-colors">My Profile</Link></li>
                             <li><Link href="#" className="hover:text-black transition-colors">Order Tracking</Link></li>
-                            <li><Link href="#" className="hover:text-black transition-colors">Wishlist</Link></li>
-                            <li><Link href="#" className="hover:text-black transition-colors">Gift Cards</Link></li>
-                            <li><Link href="#" className="hover:text-black transition-colors">Sustainability</Link></li>
+                            <li><Link href="/wishlist" className="hover:text-black transition-colors">Wishlist</Link></li>
+                            <li><Link href="/gift-cards" className="hover:text-black transition-colors">Gift Cards</Link></li>
+                            <li><Link href="/sustainability" className="hover:text-black transition-colors">Sustainability</Link></li>
                         </ul>
                     </div>
 
@@ -112,10 +112,10 @@ export default function Footer() {
                     <div className="mb-12">
                         <h4 className="font-black text-[12px] uppercase tracking-[0.25em] mb-8 text-black">Corporate</h4>
                         <ul className="space-y-4 text-[15px] text-gray-500 font-medium">
-                            <li><Link href="#" className="hover:text-black transition-colors">Our Story</Link></li>
-                            <li><Link href="#" className="hover:text-black transition-colors">Careers</Link></li>
-                            <li><Link href="#" className="hover:text-black transition-colors">Privacy Policy</Link></li>
-                            <li><Link href="#" className="hover:text-black transition-colors">Terms of Service</Link></li>
+                            <li><Link href="/our-story" className="hover:text-black transition-colors">Our Story</Link></li>
+                            <li><Link href="/careers" className="hover:text-black transition-colors">Careers</Link></li>
+                            <li><Link href="/privacy-policy" className="hover:text-black transition-colors">Privacy Policy</Link></li>
+                            <li><Link href="/terms" className="hover:text-black transition-colors">Terms of Service</Link></li>
                             <li><Link href="#" className="hover:text-black transition-colors">Cookie Settings</Link></li>
                         </ul>
                     </div>
@@ -130,7 +130,7 @@ export default function Footer() {
                             <input
                                 type="email"
                                 placeholder="Email Address"
-                                className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-4 pr-12 text-[14px] outline-none focus:bg-white focus:border-black transition-all font-medium"
+                                className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-4 pr-12 text-[14px] outline-none focus:bg-white focus:border-black transition-all font-medium text-black"
                             />
                             <button className="absolute right-3 top-1/2 -translate-y-1/2 bg-white border-2 border-black text-black p-2 rounded-lg hover:bg-blue-50 transition-colors">
                                 <ArrowRight size={18} />

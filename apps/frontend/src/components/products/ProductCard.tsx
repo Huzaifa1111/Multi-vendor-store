@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { resolveProductImage } from '@/lib/image';
 import { ShoppingBag, Eye, Heart } from 'lucide-react';
+import { useWishlist } from '@/lib/WishlistContext';
 
 interface Product {
   id: number;
@@ -21,8 +22,10 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const { isInWishlist, toggleWishlist } = useWishlist();
 
   const productImage = resolveProductImage(product.image);
+  const isWishlisted = isInWishlist(product.id);
 
   return (
     <div
@@ -53,8 +56,15 @@ export default function ProductCard({ product }: ProductCardProps) {
           <button className="w-11 h-11 bg-white hover:bg-black hover:text-white rounded-full flex items-center justify-center text-black transition-all duration-300 shadow-xl border border-gray-100 group/btn">
             <Eye size={18} className="group-hover/btn:scale-110 transition-transform" />
           </button>
-          <button className="w-11 h-11 bg-white hover:bg-black hover:text-white rounded-full flex items-center justify-center text-black transition-all duration-300 shadow-xl border border-gray-100 group/btn">
-            <Heart size={18} className="group-hover/btn:scale-110 transition-transform" />
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              toggleWishlist(product);
+            }}
+            className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl border border-gray-100 group/btn ${isWishlisted ? 'bg-red-50 text-red-500 border-red-100' : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
+          >
+            <Heart size={18} className={`group-hover/btn:scale-110 transition-transform ${isWishlisted ? 'fill-current' : ''}`} />
           </button>
         </div>
 
