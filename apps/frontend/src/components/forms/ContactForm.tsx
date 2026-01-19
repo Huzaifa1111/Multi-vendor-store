@@ -31,7 +31,7 @@ export default function ContactForm({ onSubmit }: ContactFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       await onSubmit(formData);
     } catch (error) {
@@ -54,7 +54,7 @@ export default function ContactForm({ onSubmit }: ContactFormProps) {
           required
           value={formData.name}
           onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
           placeholder="Your name"
         />
       </div>
@@ -70,7 +70,7 @@ export default function ContactForm({ onSubmit }: ContactFormProps) {
           required
           value={formData.email}
           onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
           placeholder="you@example.com"
         />
       </div>
@@ -85,7 +85,7 @@ export default function ContactForm({ onSubmit }: ContactFormProps) {
           required
           value={formData.subject}
           onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
         >
           <option value="">Select a subject</option>
           <option value="General Inquiry">General Inquiry</option>
@@ -107,7 +107,7 @@ export default function ContactForm({ onSubmit }: ContactFormProps) {
           rows={4}
           value={formData.message}
           onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
           placeholder="How can we help you?"
         />
       </div>

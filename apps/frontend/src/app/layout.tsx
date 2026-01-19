@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Jost } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
+import { WishlistProvider } from '@/lib/WishlistContext';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
@@ -22,11 +23,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${jost.className} ${jost.variable} ${inter.variable}`}>
         <AuthProvider>
-          <Header />
-          <main className="min-h-screen pt-20">
-            {children}
-          </main>
-          <Footer />
+          <WishlistProvider>
+            <Header />
+            <main className="min-h-screen pt-20">
+              {children}
+            </main>
+            <Footer />
+          </WishlistProvider>
         </AuthProvider>
       </body>
     </html>

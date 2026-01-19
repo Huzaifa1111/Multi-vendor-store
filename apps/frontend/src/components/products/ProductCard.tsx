@@ -5,9 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { resolveProductImage } from '@/lib/image';
 import { ShoppingBag, Eye, Heart } from 'lucide-react';
-import { useCart } from '@/hooks/useCart';
-import { useAuth } from '@/lib/auth';
-import { useRouter } from 'next/navigation';
 
 interface Product {
   id: number;
@@ -24,33 +21,9 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const { isInWishlist, toggleWishlist } = useWishlist();
 
   const productImage = resolveProductImage(product.image);
-
-  const router = useRouter();
-const { isAuthenticated } = useAuth();
-const { addToCart, isLoading } = useCart();
-const [addingToCart, setAddingToCart] = useState(false);
-
-const handleAddToCart = async (e: React.MouseEvent) => {
-  e.preventDefault();
-  e.stopPropagation();
-  
-  if (!isAuthenticated) {
-    router.push('/auth/login?redirect=' + window.location.pathname);
-    return;
-  }
-  
-  setAddingToCart(true);
-  try {
-    await addToCart(product.id, 1);
-    // You can show a toast notification here
-  } catch (error: any) {
-    alert(error.message || 'Failed to add to cart');
-  } finally {
-    setAddingToCart(false);
-  }
-};
 
   return (
     <div
@@ -86,8 +59,15 @@ const handleAddToCart = async (e: React.MouseEvent) => {
           <button className="w-11 h-11 bg-white hover:bg-black hover:text-white rounded-full flex items-center justify-center text-black transition-all duration-300 shadow-xl border border-gray-100 group/btn">
             <Eye size={18} className="group-hover/btn:scale-110 transition-transform" />
           </button>
-          <button className="w-11 h-11 bg-white hover:bg-black hover:text-white rounded-full flex items-center justify-center text-black transition-all duration-300 shadow-xl border border-gray-100 group/btn">
-            <Heart size={18} className="group-hover/btn:scale-110 transition-transform" />
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              toggleWishlist(product);
+            }}
+            className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl border border-gray-100 group/btn ${isWishlisted ? 'bg-red-50 text-red-500 border-red-100' : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
+          >
+            <Heart size={18} className={`group-hover/btn:scale-110 transition-transform ${isWishlisted ? 'fill-current' : ''}`} />
           </button>
         </div>
 
