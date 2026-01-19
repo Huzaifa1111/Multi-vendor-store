@@ -1,3 +1,4 @@
+// apps/frontend/src/services/product.service.ts
 import api from '@/lib/api';
 
 export interface Product {
@@ -8,6 +9,7 @@ export interface Product {
   stock: number;
   image: string | null;
   category?: string;
+  featured?: boolean; // ADD THIS LINE
   createdAt: string;
   updatedAt: string;
 }
@@ -18,6 +20,7 @@ export interface CreateProductData {
   price: number;
   stock: number;
   category?: string;
+  featured?: boolean; // ADD THIS LINE
   image?: File;
 }
 
@@ -26,12 +29,34 @@ export interface UpdateProductData extends Partial<CreateProductData> {}
 class ProductService {
   async getAllProducts(filters?: {
     category?: string;
+    featured?: boolean;
     minPrice?: number;
     maxPrice?: number;
     search?: string;
+    limit?: number;
   }): Promise<Product[]> {
     const response = await api.get('/products', { params: filters });
     return response.data;
+  }
+
+  // apps/frontend/src/services/product.service.ts - Add this method
+async getFeaturedProducts(limit?: number): Promise<Product[]> {
+  try {
+    const response = await api.get('/products/featured', {
+      params: limit ? { limit } : {}
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Featured endpoint failed, falling back:', error);
+    // Fallback: fetch all and filter
+    const allProducts = await this.getAllProducts();
+    return allProducts.filter(p => p.featured).slice(0, limit);
+  }
+}
+
+  async getCategories(): Promise<string[]> { // ADD THIS METHOD
+    const response = await api.get('/products/categories');
+    return response.data.categories;
   }
 
   async getProductById(id: number): Promise<Product> {
@@ -42,7 +67,6 @@ class ProductService {
   async createProduct(productData: CreateProductData): Promise<Product> {
     const formData = new FormData();
     
-    // Append text fields
     formData.append('name', productData.name);
     formData.append('description', productData.description);
     formData.append('price', productData.price.toString());
@@ -52,7 +76,10 @@ class ProductService {
       formData.append('category', productData.category);
     }
     
-    // Append image if exists
+    if (productData.featured !== undefined) { // ADD THIS BLOCK
+      formData.append('featured', productData.featured.toString());
+    }
+    
     if (productData.image) {
       formData.append('image', productData.image);
     }
@@ -63,20 +90,22 @@ class ProductService {
       },
     });
     
-    return response.data.data; // Note: Your backend returns { data: product }
+    return response.data.data;
   }
 
   async updateProduct(id: number, productData: UpdateProductData): Promise<Product> {
     const formData = new FormData();
     
-    // Append text fields
     if (productData.name) formData.append('name', productData.name);
     if (productData.description) formData.append('description', productData.description);
     if (productData.price) formData.append('price', productData.price.toString());
     if (productData.stock) formData.append('stock', productData.stock.toString());
     if (productData.category) formData.append('category', productData.category);
     
-    // Append image if exists
+    if (productData.featured !== undefined) { // ADD THIS BLOCK
+      formData.append('featured', productData.featured.toString());
+    }
+    
     if (productData.image) {
       formData.append('image', productData.image);
     }
@@ -87,7 +116,7 @@ class ProductService {
       },
     });
     
-    return response.data;
+    return response.data.data;
   }
 
   async deleteProduct(id: number): Promise<void> {

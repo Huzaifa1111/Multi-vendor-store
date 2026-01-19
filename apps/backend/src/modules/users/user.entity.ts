@@ -1,10 +1,10 @@
-// apps/backend/src/modules/users/user.entity.ts - UPDATED
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-
-export enum UserRole {
-  USER = 'user',
-  ADMIN = 'admin',
-}
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  CreateDateColumn, 
+  UpdateDateColumn 
+} from 'typeorm';
 
 @Entity('users')
 export class User {
@@ -20,24 +20,20 @@ export class User {
   @Column()
   password: string;
 
-  @Column({
-    type: 'varchar',
-    length: 20,
-    default: UserRole.USER,
-  })
-  role: UserRole;
+  @Column({ default: 'user' })
+  role: string;
 
   @Column({ nullable: true })
   phone: string;
 
   @Column({ default: false })
-  isEmailVerified: boolean; // Add this line
+  isEmailVerified: boolean;
 
-  @Column({ nullable: true, type: 'varchar' })
-  verificationOtp: string | null; // Add this line - changed to string | null
+  @Column({ type: 'varchar', nullable: true })
+  verificationOtp: string | null;
 
-  @Column({ nullable: true, type: 'timestamp' })
-  otpExpiresAt: Date | null; // Add this line - changed to Date | null
+  @Column({ type: 'timestamp', nullable: true })
+  otpExpiresAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;

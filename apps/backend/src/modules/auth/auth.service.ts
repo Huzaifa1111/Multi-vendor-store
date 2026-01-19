@@ -1,12 +1,4 @@
-// apps/backend/src/modules/auth/auth.service.ts - UPDATED
-import { 
-  Injectable, 
-  UnauthorizedException, 
-  ConflictException, 
-  Logger,
-  BadRequestException,
-  NotFoundException 
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,15 +6,11 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../users/user.entity';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { VerifyOtpDto, ResendOtpDto } from './dto/verify-otp.dto';
-import { AuthResponseDto } from './dto/auth-response.dto';
-import { UserRole } from '../users/user.entity';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
-
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
@@ -31,57 +19,34 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.usersRepository.findOne({ 
-      where: { email },
-      select: ['id', 'email', 'name', 'password', 'role', 'phone', 'createdAt', 'isEmailVerified'] 
-    });
-    
+    const user = await this.usersRepository.findOne({ where: { email } });
     if (user && (await bcrypt.compare(password, user.password))) {
-      this.logger.debug(`User validated: ${user.email}, Role: ${user.role}`);
-      
-      // Check if email is verified
-      if (!user.isEmailVerified) {
-        throw new UnauthorizedException('Please verify your email first');
-      }
-      
-      const { password: _, ...userWithoutPassword } = user;
-      return userWithoutPassword;
+      const { password, ...result } = user;
+      return result;
     }
     return null;
   }
 
-  async login(loginDto: LoginDto): Promise<AuthResponseDto> {
-    this.logger.debug(`Login attempt for: ${loginDto.email}`);
-    
+  async login(loginDto: LoginDto) {
     const user = await this.validateUser(loginDto.email, loginDto.password);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { 
-      email: user.email, 
-      sub: user.id, 
-      role: user.role,
-      isEmailVerified: user.isEmailVerified
-    };
-
-    this.logger.debug(`JWT Payload: ${JSON.stringify(payload)}`);
-
-    const accessToken = this.jwtService.sign(payload);
-
+    const payload = { email: user.email, sub: user.id, role: user.role };
     return {
-      access_token: accessToken,
+      access_token: this.jwtService.sign(payload),
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
         role: user.role,
-        isEmailVerified: user.isEmailVerified, // Added
+        isEmailVerified: user.isEmailVerified,
       },
     };
   }
 
-  async register(registerDto: RegisterDto): Promise<any> {
+  async register(registerDto: RegisterDto) {
     const existingUser = await this.usersRepository.findOne({
       where: { email: registerDto.email },
     });
@@ -91,44 +56,46 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
-    const otp = this.emailService.generateOtp();
-    const otpExpiresAt = this.emailService.calculateOtpExpiry();
+    
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     const user = this.usersRepository.create({
-      email: registerDto.email,
       name: registerDto.name,
+      email: registerDto.email,
       password: hashedPassword,
-      role: UserRole.USER,
       phone: registerDto.phone,
-      isEmailVerified: false,
       verificationOtp: otp,
-      otpExpiresAt: otpExpiresAt,
+      otpExpiresAt,
     });
 
-    const savedUser = await this.usersRepository.save(user);
-    
-    // Send OTP email
-    const emailSent = await this.emailService.sendVerificationEmail(
-      savedUser.email,
-      otp,
-      savedUser.name
-    );
+    try {
+      const savedUser = await this.usersRepository.save(user);
 
-    if (!emailSent) {
-      this.logger.error(`Failed to send OTP email to ${savedUser.email}`);
-      // Don't fail registration if email fails, but log it
+      // Send OTP email
+      try {
+        await this.emailService.sendOtpEmail(
+          savedUser.email,
+          savedUser.name,
+          otp,
+        );
+      } catch (emailError) {
+        console.error('Failed to send OTP email:', emailError);
+        // Continue even if email fails
+      }
+
+      return {
+        requiresVerification: true,
+        email: savedUser.email,
+        message: 'Registration successful. Please verify your email with the OTP sent to your email.',
+      };
+    } catch (error) {
+      throw new Error('Failed to register user');
     }
-
-    // Return without token - user needs to verify email first
-    return {
-      message: 'Registration successful. Please check your email for verification OTP.',
-      userId: savedUser.id,
-      email: savedUser.email,
-      requiresVerification: true,
-    };
   }
 
-  async verifyOtp(verifyOtpDto: VerifyOtpDto): Promise<AuthResponseDto> {
+  async verifyOtp(verifyOtpDto: VerifyOtpDto) {
     const user = await this.usersRepository.findOne({
       where: { email: verifyOtpDto.email },
     });
@@ -137,104 +104,73 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    // Check if OTP is valid and not expired
     if (!user.verificationOtp || !user.otpExpiresAt) {
-      throw new BadRequestException('No OTP requested or OTP expired');
+      throw new UnauthorizedException('No OTP found or expired');
     }
 
     if (user.verificationOtp !== verifyOtpDto.otp) {
-      throw new BadRequestException('Invalid OTP');
+      throw new UnauthorizedException('Invalid OTP');
     }
 
     if (new Date() > user.otpExpiresAt) {
-      throw new BadRequestException('OTP has expired');
+      throw new UnauthorizedException('OTP expired');
     }
 
-    // Update user as verified and clear OTP
-    user.isEmailVerified = true;
+    // Mark email as verified and clear OTP
+   user.isEmailVerified = true;
     user.verificationOtp = null;
     user.otpExpiresAt = null;
-    
     await this.usersRepository.save(user);
 
-    // Send welcome email
-    await this.emailService.sendWelcomeEmail(user.email, user.name);
-
-    // Generate JWT token
-    const payload = { 
-      email: user.email, 
-      sub: user.id, 
-      role: user.role,
-      isEmailVerified: true
-    };
-
-    const accessToken = this.jwtService.sign(payload);
-
+    const payload = { email: user.email, sub: user.id, role: user.role };
     return {
-      access_token: accessToken,
+      access_token: this.jwtService.sign(payload),
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
         role: user.role,
-        isEmailVerified: true, // Added
+        isEmailVerified: true,
       },
     };
   }
 
-  async resendOtp(resendOtpDto: ResendOtpDto): Promise<any> {
-    const user = await this.usersRepository.findOne({
-      where: { email: resendOtpDto.email },
-    });
-
+  async resendOtp(email: string) {
+    const user = await this.usersRepository.findOne({ where: { email } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
     if (user.isEmailVerified) {
-      throw new BadRequestException('Email is already verified');
+      throw new ConflictException('Email already verified');
     }
 
     // Generate new OTP
-    const otp = this.emailService.generateOtp();
-    const otpExpiresAt = this.emailService.calculateOtpExpiry();
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    // Update user with new OTP
     user.verificationOtp = otp;
     user.otpExpiresAt = otpExpiresAt;
-    
     await this.usersRepository.save(user);
 
-    // Send new OTP email
-    const emailSent = await this.emailService.sendVerificationEmail(
-      user.email,
-      otp,
-      user.name
-    );
-
-    if (!emailSent) {
-      throw new BadRequestException('Failed to send OTP email');
+    // Send OTP email
+    try {
+      await this.emailService.sendOtpEmail(user.email, user.name, otp);
+    } catch (error) {
+      console.error('Failed to send OTP email:', error);
+      throw new Error('Failed to send OTP email');
     }
 
-    return {
-      message: 'New OTP has been sent to your email',
-      email: user.email,
-    };
+    return { message: 'OTP resent successfully' };
   }
 
-  async getProfile(userId: number): Promise<any> {
-    console.log('Getting profile for user ID:', userId);
-    
-    const user = await this.usersRepository.findOne({ 
-      where: { id: userId },
-      select: ['id', 'email', 'name', 'role', 'phone', 'createdAt', 'isEmailVerified']
-    });
-    
+  async getProfile(userId: number) {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new NotFoundException('User not found');
     }
-    
-    console.log('Found user:', user.email);
-    return user;
+
+    const { password, verificationOtp, otpExpiresAt, ...userProfile } = user;
+    return userProfile;
   }
 }

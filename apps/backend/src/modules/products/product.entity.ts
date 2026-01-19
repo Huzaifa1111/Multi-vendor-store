@@ -8,24 +8,23 @@ export class Product {
   @Column()
   name: string;
 
-  @Column('text')
+  @Column('text', { nullable: true })
   description: string;
 
-  @Column('decimal', { precision: 10, scale: 2, transformer: {
-    // Add transformer to handle decimal to number conversion
-    from: (value: string) => parseFloat(value),
-    to: (value: number) => value,
-  }})
+  @Column('decimal', { precision: 10, scale: 2 })
   price: number;
+
+  @Column({ default: 0 }) // Add default value
+  stock: number;
 
   @Column({ nullable: true })
   image: string;
 
-  @Column()
+  @Column({ nullable: true })
   category: string;
 
-  @Column({ default: 0 })
-  stock: number;
+  @Column({ default: false })
+  featured: boolean;
 
   @CreateDateColumn()
   createdAt: Date;

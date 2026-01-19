@@ -1,3 +1,4 @@
+// apps/frontend/src/components/forms/ProductForm.tsx
 'use client';
 
 import { useState } from 'react';
@@ -6,7 +7,7 @@ import productService, { CreateProductData } from '@/services/product.service';
 import { Upload, X } from 'lucide-react';
 
 interface ProductFormProps {
-  initialData?: CreateProductData & { id?: number };
+  initialData?: CreateProductData & { id?: number; featured?: boolean };
   isEditing?: boolean;
 }
 
@@ -24,14 +25,18 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     { id: 2, name: 'Clothing' },
     { id: 3, name: 'Books' },
     { id: 4, name: 'Home & Kitchen' },
+    { id: 5, name: 'Beauty' },
+    { id: 6, name: 'Sports' },
+    { id: 7, name: 'Toys' },
   ]);
   
-  const [formData, setFormData] = useState<CreateProductData>({
+  const [formData, setFormData] = useState<CreateProductData & { featured?: boolean }>({
     name: initialData?.name || '',
     description: initialData?.description || '',
     price: initialData?.price || 0,
     stock: initialData?.stock || 0,
-    categoryId: initialData?.categoryId,
+    category: initialData?.category,
+    featured: initialData?.featured || false, // ADD THIS LINE
   });
   
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -41,7 +46,11 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'number' ? parseFloat(value) || 0 : value,
+      [name]: type === 'checkbox' 
+        ? (e.target as HTMLInputElement).checked 
+        : type === 'number' 
+        ? parseFloat(value) || 0 
+        : value,
     }));
   };
 
@@ -49,13 +58,11 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       alert('Please select an image file');
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert('Image size should be less than 5MB');
       return;
@@ -63,7 +70,6 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
 
     setImageFile(file);
     
-    // Create preview
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result as string);
@@ -81,7 +87,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     setLoading(true);
 
     try {
-      const productData: CreateProductData = {
+      const productData: CreateProductData & { featured?: boolean } = {
         ...formData,
         image: imageFile || undefined,
       };
@@ -221,23 +227,44 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
 
       {/* Category */}
       <div>
-        <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="category" className="block text-sm font-medium text-gray-700">
           Category
         </label>
         <select
-          id="categoryId"
-          name="categoryId"
-          value={formData.categoryId || ''}
+          id="category"
+          name="category"
+          value={formData.category || ''}
           onChange={handleInputChange}
           className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
           <option value="">Select a category</option>
           {categories.map((category) => (
-            <option key={category.id} value={category.id}>
+            <option key={category.id} value={category.name.toLowerCase()}>
               {category.name}
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Featured Checkbox - ADD THIS SECTION */}
+      <div className="flex items-start space-x-2 p-4 border border-gray-200 rounded-lg">
+        <input
+          type="checkbox"
+          id="featured"
+          name="featured"
+          checked={formData.featured || false}
+          onChange={handleInputChange}
+          className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+        />
+        <div>
+          <label htmlFor="featured" className="block text-sm font-medium text-gray-700">
+            Featured Product
+          </label>
+          <p className="text-sm text-gray-500 mt-1">
+            Featured products will be prominently displayed on the homepage.
+            Check this box to make this product appear in the featured section.
+          </p>
+        </div>
       </div>
 
       {/* Submit Button */}

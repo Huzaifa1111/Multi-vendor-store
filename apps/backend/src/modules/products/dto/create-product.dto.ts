@@ -1,4 +1,5 @@
-import { IsString, IsNumber, IsOptional, Min, MaxLength } from 'class-validator';
+// apps/backend/src/modules/products/dto/create-product.dto.ts
+import { IsString, IsNumber, IsOptional, Min, MaxLength, IsBoolean } from 'class-validator';
 
 export class CreateProductDto {
   @IsString()
@@ -20,4 +21,8 @@ export class CreateProductDto {
   @IsOptional()
   @IsString()
   category?: string;
+
+  @IsOptional()             
+  @IsBoolean()              
+  featured?: boolean;      
 }

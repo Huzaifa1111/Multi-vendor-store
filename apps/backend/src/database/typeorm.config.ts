@@ -1,21 +1,16 @@
-// apps/backend/src/database/typeorm.config.ts - UPDATED
+import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
+
 dotenv.config();
 
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { User } from '../modules/users/user.entity';
-import { Product } from '../modules/products/product.entity';
-
-export const typeOrmConfig: TypeOrmModuleOptions = {
+export const dataSource = new DataSource({
   type: 'postgres',
   host: process.env.DB_HOST || 'localhost',
-  port: Number(process.env.DB_PORT) || 5432,
-  username: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'admin', // Changed from DB_PASS to DB_PASSWORD
-  database: process.env.DB_NAME || 'store_db',
-  entities: [
-    User,
-    Product,
-  ],
-  synchronize: true,
-};
+  port: parseInt(process.env.DB_PORT || '5432'),
+  username: process.env.DB_USERNAME || 'postgres',
+  password: process.env.DB_PASSWORD || 'postgres',
+  database: process.env.DB_DATABASE || 'store',
+  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+  migrations: [__dirname + '/migrations/*{.ts,.js}'],
+  synchronize: false,
+});

@@ -1,56 +1,57 @@
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from '../../modules/users/user.entity';
-import { UserRole } from '../../modules/users/user.entity';
 
-async function seedAdmin() {
-  const dataSource = new DataSource({
-    type: 'postgres',
-    host: 'localhost',
-    port: 5432,
-    username: 'postgres',
-    password: 'admin',
-    database: 'store_db',
-    entities: [User],
-    synchronize: false, // Important: false for seeds
-  });
-
-  await dataSource.initialize();
-  console.log('✅ Database connected');
-
+export async function seedAdmin(dataSource: DataSource) {
   const userRepository = dataSource.getRepository(User);
 
-  // Check if admin exists
-  const existingAdmin = await userRepository.findOne({
+  const adminExists = await userRepository.findOne({
     where: { email: 'admin@store.com' },
   });
 
-  if (existingAdmin) {
-    console.log('⚠️ Admin already exists, updating...');
-    existingAdmin.name = 'Admin User';
-    existingAdmin.password = await bcrypt.hash('Admin@123', 10);
-    existingAdmin.role = UserRole.ADMIN;
-    await userRepository.save(existingAdmin);
-    console.log('✅ Admin updated');
-  } else {
-    // Create new admin
-    const adminUser = userRepository.create({
+  if (!adminExists) {
+    const hashedPassword = await bcrypt.hash('Admin@123', 10);
+    
+    const admin = userRepository.create({
       name: 'Admin User',
       email: 'admin@store.com',
-      password: await bcrypt.hash('Admin@123', 10),
-      role: UserRole.ADMIN,
+      password: hashedPassword,
+      role: 'admin',
+      isEmailVerified: true,
     });
 
-    await userRepository.save(adminUser);
-    console.log('✅ Admin created');
+    await userRepository.save(admin);
+    console.log('✅ Admin user created successfully');
+    
+    console.log('\n👑 Admin credentials:');
+    console.log('📧 Email: admin@store.com');
+    console.log('🔑 Password: Admin@123');
+    console.log('👥 Role: admin');
+  } else {
+    console.log('⚠️ Admin user already exists');
   }
-
-  console.log('👑 Admin credentials:');
-  console.log('📧 Email: admin@store.com');
-  console.log('🔑 Password: Admin@123');
-  console.log('👥 Role: admin');
-
-  await dataSource.destroy();
 }
 
-seedAdmin().catch(console.error);
+// If you need a standalone script, add this:
+if (require.main === module) {
+  const dataSource = new DataSource({
+    type: 'postgres',
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '5432'),
+    username: process.env.DB_USERNAME || 'postgres',
+    password: process.env.DB_PASSWORD || 'admin',
+    database: process.env.DB_DATABASE || 'store_db',
+    entities: [User],
+    synchronize: false,
+  });
+
+  seedAdmin(dataSource)
+    .then(() => {
+      console.log('✅ Seed completed');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('❌ Seed failed:', error);
+      process.exit(1);
+    });
+}

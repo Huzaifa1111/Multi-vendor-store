@@ -5,6 +5,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { resolveProductImage } from '@/lib/image';
 import { ShoppingBag, Eye, Heart } from 'lucide-react';
+import { useCart } from '@/hooks/useCart';
+import { useAuth } from '@/lib/auth';
+import { useRouter } from 'next/navigation';
 
 interface Product {
   id: number;
@@ -23,6 +26,31 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const productImage = resolveProductImage(product.image);
+
+  const router = useRouter();
+const { isAuthenticated } = useAuth();
+const { addToCart, isLoading } = useCart();
+const [addingToCart, setAddingToCart] = useState(false);
+
+const handleAddToCart = async (e: React.MouseEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
+  
+  if (!isAuthenticated) {
+    router.push('/auth/login?redirect=' + window.location.pathname);
+    return;
+  }
+  
+  setAddingToCart(true);
+  try {
+    await addToCart(product.id, 1);
+    // You can show a toast notification here
+  } catch (error: any) {
+    alert(error.message || 'Failed to add to cart');
+  } finally {
+    setAddingToCart(false);
+  }
+};
 
   return (
     <div
@@ -47,9 +75,14 @@ export default function ProductCard({ product }: ProductCardProps) {
           className={`absolute top-4 right-4 flex flex-col space-y-3 transition-all duration-500 ${isHovered ? 'translate-x-0 opacity-100' : 'translate-x-12 opacity-0'
             }`}
         >
-          <button className="w-11 h-11 bg-white hover:bg-black hover:text-white rounded-full flex items-center justify-center text-black transition-all duration-300 shadow-xl border border-gray-100 group/btn">
-            <ShoppingBag size={18} className="group-hover/btn:scale-110 transition-transform" />
-          </button>
+          <button 
+  onClick={handleAddToCart}
+  disabled={addingToCart || isLoading}
+  className="w-11 h-11 bg-white hover:bg-black hover:text-white rounded-full flex items-center justify-center text-black transition-all duration-300 shadow-xl border border-gray-100 group/btn disabled:opacity-50"
+  title="Add to cart"
+>
+  <ShoppingBag size={18} className="group-hover/btn:scale-110 transition-transform" />
+</button>
           <button className="w-11 h-11 bg-white hover:bg-black hover:text-white rounded-full flex items-center justify-center text-black transition-all duration-300 shadow-xl border border-gray-100 group/btn">
             <Eye size={18} className="group-hover/btn:scale-110 transition-transform" />
           </button>

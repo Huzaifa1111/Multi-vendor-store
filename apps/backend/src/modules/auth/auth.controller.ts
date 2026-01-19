@@ -1,67 +1,43 @@
-// apps/backend/src/modules/auth/auth.controller.ts
-import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { VerifyOtpDto, ResendOtpDto } from './dto/verify-otp.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResendOtpDto } from './dto/resend-otp.dto';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { Public } from '@/common/decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Get()
-  getAuth() {
-    return { 
-      message: 'Auth endpoints',
-      endpoints: {
-        login: 'POST /auth/login',
-        register: 'POST /auth/register',
-        verifyOtp: 'POST /auth/verify-otp',
-        resendOtp: 'POST /auth/resend-otp',
-        profile: 'GET /auth/profile (requires auth)',
-        health: 'GET /auth/health'
-      }
-    };
-  }
-
-  @Get('health')
-  healthCheck() {
-    return { 
-      status: 'OK', 
-      message: 'Auth service is running',
-      timestamp: new Date().toISOString()
-    };
-  }
-
+  @Public()
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
-    console.log('📝 Login attempt for:', loginDto.email);
     return this.authService.login(loginDto);
   }
 
+  @Public()
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
-    console.log('📝 Registration attempt for:', registerDto.email);
     return this.authService.register(registerDto);
   }
 
+  @Public()
   @Post('verify-otp')
   async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
-    console.log('📝 OTP verification for:', verifyOtpDto.email);
     return this.authService.verifyOtp(verifyOtpDto);
   }
 
+  @Public()
   @Post('resend-otp')
   async resendOtp(@Body() resendOtpDto: ResendOtpDto) {
-    console.log('📝 Resend OTP for:', resendOtpDto.email);
-    return this.authService.resendOtp(resendOtpDto);
+    return this.authService.resendOtp(resendOtpDto.email);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() req) {
-    console.log('👤 Getting profile for user:', req.user?.email);
-    return this.authService.getProfile(req.user?.userId || req.user?.sub);
+  async getProfile(@Req() req) {
+    return this.authService.getProfile(req.user.id);
   }
 }

@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import { useState, useEffect, useCallback } from 'react';
 import { authService } from '@/services/auth.service';
+import { useCart } from '@/hooks/useCart';
+
 import {
   Search,
   User,
@@ -69,6 +71,9 @@ export default function Header() {
     authService.logout();
     window.location.href = '/login';
   };
+
+  const { count } = useCart();
+
 
   const categories = [
     "Electronic Devices",
@@ -253,10 +258,12 @@ export default function Header() {
                 <Heart size={22} />
                 <span className="absolute top-0 right-0 bg-white border border-black text-black text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full leading-none">0</span>
               </button>
-              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors relative">
-                <ShoppingBag size={22} />
-                <span className="absolute top-0 right-0 bg-white border border-black text-black text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full leading-none">0</span>
-              </button>
+             <Link href="/cart" className="p-2 hover:bg-gray-100 rounded-full transition-colors relative">
+  <ShoppingBag size={22} />
+  <span className="absolute top-0 right-0 bg-white border border-black text-black text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full leading-none">
+    {count > 99 ? '99+' : count}
+  </span>
+</Link>
             </div>
           </div>
         </div>

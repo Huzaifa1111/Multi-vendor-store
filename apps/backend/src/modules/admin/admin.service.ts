@@ -1,61 +1,58 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User, UserRole } from '../users/user.entity';
+import { User } from '../users/user.entity';
+import { Product } from '../products/product.entity';
+import { Order } from '../orders/order.entity';
 
 @Injectable()
 export class AdminService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    
+    @InjectRepository(Product)  // Make sure this exists
+    private productsRepository: Repository<Product>,
+    
+    @InjectRepository(Order)    // Make sure this exists  
+    private ordersRepository: Repository<Order>,
   ) {}
 
   async getDashboardStats() {
-    const totalUsers = await this.usersRepository.count();
-    
-    // For now, return placeholder values
-    return {
-      totals: {
-        users: totalUsers,
-        products: 0,
-        orders: 0,
-      },
-      recentOrders: [],
-      recentUsers: await this.getRecentUsers(),
-    };
-  }
+    const [userCount, productCount, orderCount] = await Promise.all([
+      this.usersRepository.count(),
+      this.productsRepository.count(),
+      this.ordersRepository.count(),
+    ]);
 
-  async getRecentUsers() {
-    return this.usersRepository.find({
+    const recentOrders = await this.ordersRepository.find({
+      take: 5,
       order: { createdAt: 'DESC' },
-      take: 10,
-      select: ['id', 'name', 'email', 'role', 'createdAt'],
     });
+
+    return {
+      userCount,
+      productCount,
+      orderCount,
+      recentOrders,
+    };
   }
 
   async getAllUsers() {
     return this.usersRepository.find({
       order: { createdAt: 'DESC' },
-      select: ['id', 'name', 'email', 'role', 'createdAt', 'phone'],
     });
   }
 
-  async updateUserRole(userId: number, role: UserRole) {
-    // Use query builder to avoid TypeORM type issues
-    await this.usersRepository
-      .createQueryBuilder()
-      .update(User)
-      .set({ role })
-      .where('id = :id', { id: userId })
-      .execute();
-
-    return this.usersRepository.findOne({ 
-      where: { id: userId },
-      select: ['id', 'name', 'email', 'role', 'createdAt']
+  async getAllOrders() {
+    return this.ordersRepository.find({
+      order: { createdAt: 'DESC' },
     });
   }
 
-  async deleteUser(userId: number) {
-    return this.usersRepository.delete(userId);
+  async getAllProducts() {
+    return this.productsRepository.find({
+      order: { createdAt: 'DESC' },
+    });
   }
 }
