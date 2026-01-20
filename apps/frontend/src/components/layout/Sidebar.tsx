@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useAuthStore } from '@/store/useAuthStore';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth';
 
 const menuItems = [
   { href: '/admin', label: 'Dashboard', icon: '📊' },
@@ -13,7 +13,13 @@ const menuItems = [
 
 const Sidebar: React.FC = () => {
   const pathname = usePathname();
-  const { logout } = useAuthStore();
+  const router = useRouter();
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    router.push('/auth/login');
+  };
 
   return (
     <div className="fixed left-0 top-0 h-full w-64 bg-gray-900 text-white">
@@ -25,9 +31,8 @@ const Sidebar: React.FC = () => {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className={`flex items-center p-3 rounded-lg hover:bg-gray-800 transition ${
-                    pathname === item.href ? 'bg-blue-600' : ''
-                  }`}
+                  className={`flex items-center p-3 rounded-lg hover:bg-gray-800 transition ${pathname === item.href ? 'bg-blue-600' : ''
+                    }`}
                 >
                   <span className="mr-3">{item.icon}</span>
                   {item.label}
@@ -37,7 +42,7 @@ const Sidebar: React.FC = () => {
           </ul>
         </nav>
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className="mt-8 w-full flex items-center p-3 rounded-lg hover:bg-red-700 transition bg-red-600"
         >
           <span className="mr-3">🚪</span>

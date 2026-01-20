@@ -34,7 +34,7 @@ export const useCartStore = create<CartStore>()(
         try {
           const items = await cartService.getCart();
           const count = items.reduce((sum, item) => sum + item.quantity, 0);
-          const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+          const total = items.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
           set({ items, count, total });
         } catch (error) {
           console.error('Failed to fetch cart:', error);
@@ -128,7 +128,7 @@ export const useCartStore = create<CartStore>()(
         set((state) => {
           const existingIndex = state.items.findIndex(i => i.productId === item.productId);
           let newItems = [...state.items];
-          
+
           if (existingIndex > -1) {
             // Update quantity if item exists
             newItems[existingIndex].quantity += item.quantity;
@@ -136,10 +136,10 @@ export const useCartStore = create<CartStore>()(
             // Add new item
             newItems.unshift(item);
           }
-          
+
           const count = newItems.reduce((sum, item) => sum + item.quantity, 0);
-          const total = newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-          
+          const total = newItems.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
+
           return { items: newItems, count, total };
         });
       },
@@ -149,19 +149,19 @@ export const useCartStore = create<CartStore>()(
           const newItems = state.items.filter(item => item.id !== itemId);
           const count = newItems.reduce((sum, item) => sum + item.quantity, 0);
           const total = newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-          
+
           return { items: newItems, count, total };
         });
       },
 
       updateItemOptimistic: (itemId: number, quantity: number) => {
         set((state) => {
-          const newItems = state.items.map(item => 
+          const newItems = state.items.map(item =>
             item.id === itemId ? { ...item, quantity } : item
           );
           const count = newItems.reduce((sum, item) => sum + item.quantity, 0);
-          const total = newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-          
+          const total = newItems.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
+
           return { items: newItems, count, total };
         });
       },
@@ -172,10 +172,10 @@ export const useCartStore = create<CartStore>()(
     }),
     {
       name: 'cart-storage',
-      partialize: (state) => ({ 
+      partialize: (state) => ({
         items: state.items,
         count: state.count,
-        total: state.total 
+        total: state.total
       }),
     }
   )

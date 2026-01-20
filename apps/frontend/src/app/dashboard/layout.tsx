@@ -16,7 +16,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push('/login');
+      router.push('/auth/login');
     }
   }, [user, isLoading, router]);
 
@@ -34,13 +34,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const handleLogout = () => {
     authLogout();
-    router.push('/');
+    router.push('/auth/login');
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Dashboard Header - REMOVED, using main Header instead */}
-      
+
       {/* Dashboard Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex">
@@ -75,7 +75,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <span className="mr-3">⚙️</span>
                 Settings
               </Link>
-              
+
               {/* Admin Link - Only show if user is admin */}
               {user.role === 'admin' && (
                 <Link

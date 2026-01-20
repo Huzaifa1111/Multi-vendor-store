@@ -39,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('🔍 Checking auth...');
       const userData = await authService.getCurrentUser();
       console.log('✅ Auth check successful:', userData);
+      console.log('👤 Current Role:', userData.role);
       setUser(userData);
     } catch (error) {
       console.error('❌ Auth check failed:', error);
@@ -69,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await authService.register({ name, email, password, phone });
       console.log('✅ Registration response:', response);
-      
+
       // Return the response for handling in the component
       return response;
     } catch (error: any) {

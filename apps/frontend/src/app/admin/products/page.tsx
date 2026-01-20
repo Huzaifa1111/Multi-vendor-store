@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Plus, Search, Edit, Trash2, Eye, Star, Package } from 'lucide-react';
 import Link from 'next/link';
@@ -60,10 +60,10 @@ export default function AdminProductsPage() {
 
   const filteredProducts = search
     ? products.filter(product =>
-        product.name.toLowerCase().includes(search.toLowerCase()) ||
-        product.description.toLowerCase().includes(search.toLowerCase()) ||
-        (product.category && product.category.toLowerCase().includes(search.toLowerCase()))
-      )
+      product.name.toLowerCase().includes(search.toLowerCase()) ||
+      product.description.toLowerCase().includes(search.toLowerCase()) ||
+      (product.category && product.category.toLowerCase().includes(search.toLowerCase()))
+    )
     : products;
 
   const featuredProductsCount = products.filter(p => p.featured).length;

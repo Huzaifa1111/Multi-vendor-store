@@ -1,16 +1,17 @@
 import { useState } from 'react';
-import { useAuthStore } from '@/store/useAuthStore';
+
 
 export const useAdmin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { token } = useAuthStore();
+
 
   const adminRequest = async (endpoint: string, options: RequestInit = {}) => {
     setLoading(true);
     setError(null);
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`/api/admin/${endpoint}`, {
         ...options,
         headers: {
@@ -35,9 +36,9 @@ export const useAdmin = () => {
   };
 
   const getDashboardStats = () => adminRequest('dashboard');
-  
+
   const getUsers = () => adminRequest('users');
-  
+
   const updateUserRole = (userId: number, role: string) =>
     adminRequest(`users/${userId}/role`, {
       method: 'PUT',

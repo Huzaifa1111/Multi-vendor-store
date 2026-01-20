@@ -1,13 +1,17 @@
 import React from 'react';
 import Sidebar from './Sidebar';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuth } from '@/lib/auth';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const { user } = useAuthStore();
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
   if (user?.role !== 'admin') {
     return (

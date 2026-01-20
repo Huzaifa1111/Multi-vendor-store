@@ -1,13 +1,13 @@
 // apps/backend/src/modules/products/products.controller.ts
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Body, 
-  Param, 
-  Delete, 
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
   Patch,
-  UseInterceptors, 
+  UseInterceptors,
   UploadedFile,
   NotFoundException,
   Query // ADD THIS IMPORT
@@ -19,37 +19,51 @@ import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService) { }
 
   @Get('test')
   test() {
-    return { 
-      message: 'Products API is working!', 
+    return {
+      message: 'Products API is working!',
       timestamp: new Date().toISOString(),
       status: 'OK'
     };
   }
 
- @Post()
-@UseInterceptors(FileInterceptor('image'))
-async create(
-  @Body() createProductDto: CreateProductDto,
-  @UploadedFile() image?: Express.Multer.File,
-) {
-  console.log('=== PRODUCT CREATE REQUEST ===');
-  console.log('Body:', createProductDto);
-  console.log('Featured field:', createProductDto.featured); // ADD THIS LINE
-  console.log('Featured type:', typeof createProductDto.featured); // ADD THIS LINE
-  console.log('Image:', image ? `Filename: ${image.originalname}, Size: ${image.size} bytes` : 'No image');
-  
-  try {
-    const result = await this.productsService.create(createProductDto, image);
-    return result;
-  } catch (error) {
-    console.error('Error creating product:', error);
-    return { error: 'Internal server error' };
+  @Post()
+  @UseInterceptors(FileInterceptor('image'))
+  async create(
+    @Body() body: any, // Change to any to handle FormData parsing manually or CreateProductDto if using ParseBoolPipe but manual is safer here for mixed types
+    @UploadedFile() image?: Express.Multer.File,
+  ) {
+    // Create correct DTO with proper types
+    const createProductDto = new CreateProductDto();
+    createProductDto.name = body.name;
+    createProductDto.description = body.description;
+
+    // Robust parsing
+    const parsedPrice = parseFloat(body.price);
+    const parsedStock = parseInt(body.stock);
+
+    createProductDto.price = isNaN(parsedPrice) ? 0 : parsedPrice;
+    createProductDto.stock = isNaN(parsedStock) ? 0 : parsedStock;
+    createProductDto.category = body.category;
+    createProductDto.featured = body.featured === 'true' || body.featured === true;
+
+    console.log('=== PRODUCT CREATE DEBUG ===');
+    console.log('Incoming Raw Body:', body);
+    console.log('Parsed Stock:', createProductDto.stock);
+    console.log('Parsed Price:', createProductDto.price);
+    console.log('Image:', image ? `Filename: ${image.originalname}` : 'No image');
+
+    try {
+      const result = await this.productsService.create(createProductDto, image);
+      return result;
+    } catch (error) {
+      console.error('Error creating product:', error);
+      return { error: 'Internal server error' };
+    }
   }
-}
 
   @Get()
   async findAll(@Query() filters?: ProductFilterDto) { // UPDATE THIS METHOD
@@ -83,36 +97,32 @@ async create(
     }
   }
 
-@Patch(':id')
-@UseInterceptors(FileInterceptor('image'))
-async update(
-  @Param('id') id: string,
-  @Body() updateProductDto: any,
-  @UploadedFile() image?: Express.Multer.File,
-) {
+  @Patch(':id')
+  @UseInterceptors(FileInterceptor('image'))
+  async update(
+    @Param('id') id: string,
+    @Body() updateProductDto: any,
+    @UploadedFile() image?: Express.Multer.File,
+  ) {
     console.log('=== PRODUCT UPDATE REQUEST ===');
-  console.log('Product ID:', id);
-  console.log('Body:', updateProductDto);
-  console.log('Featured value:', updateProductDto.featured); // ADD THIS LINE
-  console.log('Featured type:', typeof updateProductDto.featured); // ADD THIS LINE
-    
+    console.log('Product ID:', id);
+    console.log('Body:', updateProductDto);
+    console.log('Featured value:', updateProductDto.featured); // ADD THIS LINE
+    console.log('Featured type:', typeof updateProductDto.featured); // ADD THIS LINE
+
     try {
       await this.productsService.findOne(parseInt(id));
-      
+
       const updateData: any = {};
-      if (updateProductDto.name) updateData.name = updateProductDto.name;
-      if (updateProductDto.description) updateData.description = updateProductDto.description;
-      if (updateProductDto.price) updateData.price = parseFloat(updateProductDto.price);
-      if (updateProductDto.stock) updateData.stock = parseInt(updateProductDto.stock);
+      if (updateProductDto.name !== undefined) updateData.name = updateProductDto.name;
+      if (updateProductDto.description !== undefined) updateData.description = updateProductDto.description;
+      if (updateProductDto.price !== undefined) updateData.price = parseFloat(updateProductDto.price);
+      if (updateProductDto.stock !== undefined) updateData.stock = parseInt(updateProductDto.stock);
       if (updateProductDto.category) updateData.category = updateProductDto.category;
       if (updateProductDto.featured !== undefined) updateData.featured = updateProductDto.featured === 'true' || updateProductDto.featured === true; // ADD THIS LINE
-      
-      if (image) {
-        // TODO: Upload to Cloudinary and get URL
-        updateData.image = `/uploads/${image.originalname}`; // Temporary
-      }
-      
-      const updatedProduct = await this.productsService.update(parseInt(id), updateData);
+
+
+      const updatedProduct = await this.productsService.update(parseInt(id), updateData, image);
       return {
         message: 'Product updated successfully',
         data: updatedProduct,
@@ -130,11 +140,11 @@ async update(
   async remove(@Param('id') id: string) {
     try {
       await this.productsService.findOne(parseInt(id));
-      
+
       await this.productsService.remove(parseInt(id));
-      return { 
+      return {
         success: true,
-        message: 'Product deleted successfully' 
+        message: 'Product deleted successfully'
       };
     } catch (error) {
       if (error instanceof NotFoundException) {

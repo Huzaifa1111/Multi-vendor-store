@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CartItem } from './cart-item.entity';
@@ -12,7 +12,7 @@ export class CartService {
     private cartItemRepository: Repository<CartItem>,
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
-  ) {}
+  ) { }
 
   async getCart(userId: number) {
     const cartItems = await this.cartItemRepository.find({
@@ -50,7 +50,7 @@ export class CartService {
 
     // Check if product is in stock
     if (product.stock < quantity) {
-      throw new Error('Insufficient stock');
+      throw new BadRequestException('Insufficient stock');
     }
 
     // Check if item already in cart
@@ -90,7 +90,7 @@ export class CartService {
     });
 
     if (product && product.stock < updateCartDto.quantity) {
-      throw new Error('Insufficient stock');
+      throw new BadRequestException('Insufficient stock');
     }
 
     cartItem.quantity = updateCartDto.quantity;
@@ -129,7 +129,7 @@ export class CartService {
     const cartItems = await this.cartItemRepository.find({
       where: { userId },
     });
-    
+
     return cartItems.reduce((total, item) => {
       return total + (item.price * item.quantity);
     }, 0);

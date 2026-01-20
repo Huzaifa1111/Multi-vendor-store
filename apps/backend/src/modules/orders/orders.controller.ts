@@ -9,12 +9,18 @@ import { UserRole } from '../users/enums/user-role.enum';
 
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(private readonly ordersService: OrdersService) { }
+
+  @Post('create-payment-intent')
+  @UseGuards(JwtAuthGuard)
+  async createPaymentIntent(@Req() req) {
+    return this.ordersService.createPaymentIntent(req.user.id);
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  async createOrder(@Req() req, @Body() createOrderDto: CreateOrderDto) {
-    return await this.ordersService.createOrder(req.user.id, createOrderDto);
+  async create(@Req() req, @Body() createOrderDto: CreateOrderDto) {
+    return this.ordersService.createOrder(req.user.id, createOrderDto);
   }
 
   @Get()

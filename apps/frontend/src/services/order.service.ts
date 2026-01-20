@@ -4,11 +4,17 @@ import { Order, OrderStatus } from '@/types/order';
 export interface CreateOrderData {
   shippingAddress: string;
   paymentMethod: string;
+  paymentIntentId?: string;
 }
 
 class OrderService {
   async createOrder(orderData: CreateOrderData): Promise<Order> {
     const response = await api.post('/orders', orderData);
+    return response.data;
+  }
+
+  async createPaymentIntent(): Promise<{ clientSecret: string }> {
+    const response = await api.post('/orders/create-payment-intent', {});
     return response.data;
   }
 

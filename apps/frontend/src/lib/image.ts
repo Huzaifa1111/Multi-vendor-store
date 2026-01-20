@@ -1,13 +1,44 @@
-/**
- * Resolves a product image source to a format usable by Next.js <Image /> or standard <img /> tags.
- * Handles nulls, absolute URLs, and missing leading slashes for local assets.
- */
-export const resolveProductImage = (src: string | null | undefined): string => {
-    if (!src) return '/images/placeholder-product.png';
-    if (src.startsWith('http://') || src.startsWith('https://')) return src;
-    if (src.startsWith('/')) return src;
+// apps/frontend/src/lib/image.ts - UPDATED
+export const resolveProductImage = (imageUrl: string | null): string => {
+  if (!imageUrl || imageUrl.trim() === '') {
+    // Use a reliable placeholder from a public service
+    return 'https://placehold.co/600x600/3b82f6/ffffff?text=No+Image';
+  }
 
-    // If it's a raw filename without a leading slash, assume it's a local asset or needs normalization
-    // In Next.js, local public assets MUST start with /
-    return `/${src}`;
+  // Check if it's already a full URL
+  if (imageUrl.startsWith('http') || imageUrl.startsWith('https')) {
+    // If it's a Cloudinary URL, make sure it's correct
+    if (imageUrl.includes('cloudinary.com')) {
+      return imageUrl;
+    }
+    return imageUrl;
+  }
+
+  // If it's a Cloudinary public_id without domain, construct full URL
+  if (!imageUrl.includes('http') && imageUrl.includes('upload')) {
+    return `https://res.cloudinary.com/den4kqcoh/${imageUrl}`;
+  }
+
+  // For relative paths from your API
+  if (imageUrl.startsWith('/')) {
+    return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}${imageUrl}`;
+  }
+
+  // Default placeholder
+  return 'https://placehold.co/600x600/3b82f6/ffffff?text=No+Image';
+};
+
+// Simple version without Cloudinary construction (if Cloudinary isn't working)
+export const simpleImageResolver = (imageUrl: string | null): string => {
+  if (!imageUrl || imageUrl.trim() === '') {
+    return 'https://placehold.co/600x600/3b82f6/ffffff?text=No+Image';
+  }
+
+  // If it's already a full URL, use it
+  if (imageUrl.startsWith('http')) {
+    return imageUrl;
+  }
+
+  // Otherwise, use placeholder
+  return 'https://placehold.co/600x600/3b82f6/ffffff?text=No+Image';
 };

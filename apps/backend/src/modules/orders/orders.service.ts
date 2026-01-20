@@ -2,21 +2,26 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order, OrderStatus } from './order.entity';
+import { Product } from '../products/product.entity';
 import { CartService } from '../cart/cart.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { StripeService } from './stripe.service';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
+    @InjectRepository(Product)
+    private productRepository: Repository<Product>,
     private cartService: CartService,
-  ) {}
+    private stripeService: StripeService,
+  ) { }
 
   async createOrder(userId: number, createOrderDto: CreateOrderDto) {
     // Get cart items
     const cartItems = await this.cartService.getCart(userId);
-    
+
     if (cartItems.length === 0) {
       throw new Error('Cart is empty');
     }
@@ -35,12 +40,75 @@ export class OrdersService {
       status: OrderStatus.PENDING,
     });
 
+    // Handle Stripe Payment
+    if (createOrderDto.paymentMethod === 'stripe') {
+      if (!createOrderDto.paymentIntentId) {
+        throw new Error('Payment Intent ID is required for Stripe payments');
+      }
+
+      try {
+        const paymentIntent = await this.stripeService.retrievePaymentIntent(createOrderDto.paymentIntentId);
+
+        if (paymentIntent.status === 'succeeded') {
+          order.status = OrderStatus.PROCESSING; // Or PAID
+        } else {
+          throw new Error(`Payment not successful: ${paymentIntent.status}`);
+        }
+      } catch (error) {
+        console.error('Stripe verification failed:', error);
+        throw new Error('Failed to verify payment');
+      }
+    }
+
     const savedOrder = await this.orderRepository.save(order);
+
+    // Deduct Stock
+    for (const item of cartItems) {
+      const product = await this.productRepository.findOne({ where: { id: item.productId } });
+      if (product) {
+        if (product.stock < item.quantity) {
+          throw new Error(`Insufficient stock for product: ${product.name}`);
+        }
+        product.stock -= item.quantity;
+        await this.productRepository.save(product);
+        console.log(`Stock deducted for product ${product.id}: ${item.quantity} units. New stock: ${product.stock}`);
+      }
+    }
 
     // Clear cart after order is created
     await this.cartService.clearCart(userId);
 
     return savedOrder;
+  }
+
+  async createPaymentIntent(userId: number) {
+    const cartItems = await this.cartService.getCart(userId);
+
+    if (cartItems.length === 0) {
+      throw new Error('Cart is empty');
+    }
+
+    const total = cartItems.reduce((sum, item) => {
+      return sum + (item.price * item.quantity);
+    }, 0);
+
+    console.log('=== CREATE PAYMENT INTENT ===');
+    console.log('User ID:', userId);
+    console.log('Cart Items Count:', cartItems.length);
+    console.log('Calculated Total:', total);
+
+    try {
+      const paymentIntent = await this.stripeService.createPaymentIntent(total);
+      console.log('Payment Intent Created:', paymentIntent.id);
+
+      return {
+        clientSecret: paymentIntent.client_secret,
+        total,
+      };
+    } catch (error) {
+      console.error('Stripe Payment Intent Creation Failed:', error);
+      throw error;
+    }
   }
 
   async getUserOrders(userId: number) {

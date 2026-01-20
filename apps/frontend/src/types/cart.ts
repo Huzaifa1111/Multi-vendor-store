@@ -1,13 +1,19 @@
-import { Product } from './product';
-
+// apps/frontend/src/types/cart.ts
 export interface CartItem {
   id: number;
+  userId: number;
   productId: number;
   quantity: number;
   price: number;
-  product: Product;
   createdAt: string;
   updatedAt: string;
+  product?: {
+    id: number;
+    name: string;
+    image: string | null;
+    description: string;
+    stock: number;
+  };
 }
 
 export interface CartState {

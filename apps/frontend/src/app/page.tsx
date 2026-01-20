@@ -7,7 +7,11 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import Hero from '@/components/home/Hero';
 import ProductCard from '@/components/products/ProductCard';
-import { ArrowRight, Truck, ShieldCheck, RefreshCcw, Headset, Star } from 'lucide-react';
+import { ArrowRight, Truck, ShieldCheck, RefreshCcw, Headset, Star, ShoppingCart } from 'lucide-react';
+import { useCart } from '@/hooks/useCart';
+import { useAuth } from '@/lib/auth';
+import { useRouter } from 'next/navigation';
+import { resolveProductImage } from '@/lib/image';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -20,68 +24,90 @@ export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [addingToCartId, setAddingToCartId] = useState<number | null>(null);
+
+  const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  const handleAddToCart = async (product: any) => {
+    if (!isAuthenticated) {
+      router.push(`/auth/login?redirect=/`);
+      return;
+    }
+
+    try {
+      setAddingToCartId(product.id);
+      await addToCart(product.id, 1);
+      // Optional: you could add a toast here
+    } catch (error: any) {
+      alert(error.message || 'Failed to add to cart');
+    } finally {
+      setAddingToCartId(null);
+    }
+  };
 
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
-  try {
-    console.log('🔄 Fetching featured products...');
-    
-    // First, get all products to see what's in DB
-    const allResponse = await fetch('http://localhost:3001/products');
-    const allProducts = await allResponse.json();
-    
-    console.log('📊 All products from API:', allProducts.length);
-    console.log('🔍 Featured status of all products:');
-    allProducts.forEach((p: any) => {
-      console.log(`  ID ${p.id}: "${p.name}" - Featured: ${p.featured}`);
-    });
-    
-    const featuredCount = allProducts.filter((p: any) => p.featured === true).length;
-    console.log(`⭐ Products with featured=true: ${featuredCount}`);
-    
-    // Now try the featured endpoint
-    console.log('🔗 Calling /products/featured endpoint...');
-    const response = await fetch('http://localhost:3001/products/featured?limit=8');
-    
-    if (response.ok) {
-      const data = await response.json();
-      console.log('✅ Featured endpoint returned:', data.length, 'products');
-      console.log('Featured data:', data);
-      
-      setFeaturedProducts(data);
-      
-      if (data.length === 0 && featuredCount > 0) {
-        console.error('⚠️ BUG DETECTED: Products have featured=true but endpoint returns empty!');
-        setError('BUG: Products marked as featured but not showing. Check backend logs.');
+      try {
+        console.log('🔄 Fetching featured products...');
+
+        // First, get all products to see what's in DB
+        const allResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/products`);
+        const allProducts = await allResponse.json();
+
+        console.log('📊 All products from API:', allProducts.length);
+        console.log('🔍 Featured status of all products:');
+        allProducts.forEach((p: any) => {
+          console.log(`  ID ${p.id}: "${p.name}" - Featured: ${p.featured}`);
+        });
+
+        const featuredCount = allProducts.filter((p: any) => p.featured === true).length;
+        console.log(`⭐ Products with featured=true: ${featuredCount}`);
+
+        // Now try the featured endpoint
+        console.log('🔗 Calling /products/featured endpoint...');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/products/featured?limit=8`);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ Featured endpoint returned:', data.length, 'products');
+          console.log('Featured data:', data);
+
+          setFeaturedProducts(data);
+
+          if (data.length === 0 && featuredCount > 0) {
+            console.error('⚠️ BUG DETECTED: Products have featured=true but endpoint returns empty!');
+            setError('BUG: Products marked as featured but not showing. Check backend logs.');
+          }
+        } else {
+          console.error('❌ Featured endpoint failed:', response.status);
+          setError('Featured endpoint error: ' + response.status);
+        }
+
+      } catch (err: any) {
+        console.error('❌ Error fetching products:', err);
+        setError('Cannot connect to backend. Make sure it\'s running on port 4000.');
+
+        // Show fallback data for testing
+        setFeaturedProducts([
+          {
+            id: 999,
+            name: "Test Featured Product",
+            description: "This is a test featured product",
+            price: 99.99,
+            stock: 10,
+            image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000",
+            featured: true,
+            category: "Electronics",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        ]);
+      } finally {
+        setIsLoading(false);
       }
-    } else {
-      console.error('❌ Featured endpoint failed:', response.status);
-      setError('Featured endpoint error: ' + response.status);
-    }
-    
-  } catch (err: any) {
-    console.error('❌ Error fetching products:', err);
-    setError('Cannot connect to backend. Make sure it\'s running on port 3001.');
-    
-    // Show fallback data for testing
-    setFeaturedProducts([
-      {
-        id: 999,
-        name: "Test Featured Product",
-        description: "This is a test featured product",
-        price: 99.99,
-        stock: 10,
-        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000",
-        featured: true,
-        category: "Electronics",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    ]);
-  } finally {
-    setIsLoading(false);
-  }
-};
+    };
 
     fetchFeaturedProducts();
   }, []);
@@ -193,7 +219,7 @@ export default function HomePage() {
           >
             <span className="text-blue-600 font-black uppercase tracking-[0.4em] text-[11px] mb-4 block">Bestselling Electronics</span>
             <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-black">Featured Products</h2>
-            
+
             {/* Debug info - visible only in development */}
             <div className="mt-4 text-sm">
               <div className="inline-block bg-gray-100 px-3 py-1 rounded-lg">
@@ -262,11 +288,11 @@ export default function HomePage() {
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="border border-gray-200 rounded-3xl overflow-hidden bg-white hover:shadow-2xl transition-all duration-300">
                       <div className="aspect-[3/4] relative overflow-hidden">
                         <img
-                          src={product.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000'}
+                          src={resolveProductImage(product.image)}
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
@@ -280,8 +306,13 @@ export default function HomePage() {
                             {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
                           </span>
                         </div>
-                        <button className="w-full mt-4 bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition-colors">
-                          Add to Cart
+                        <button
+                          onClick={() => handleAddToCart(product)}
+                          disabled={addingToCartId === product.id || Number(product.stock) === 0}
+                          className="w-full mt-4 bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <ShoppingCart className="w-4 h-4 mr-2" />
+                          {addingToCartId === product.id ? 'Adding...' : Number(product.stock) === 0 ? 'Out of Stock' : 'Add to Cart'}
                         </button>
                       </div>
                     </div>

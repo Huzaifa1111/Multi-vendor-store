@@ -8,7 +8,7 @@ export const useAuthRedirect = () => {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push('/login');
+      router.push('/auth/login');
     }
   }, [user, isLoading, router]);
 
@@ -22,7 +22,7 @@ export const useAdminAuth = () => {
   useEffect(() => {
     if (!isLoading) {
       if (!user) {
-        router.push('/login');
+        router.push('/auth/login');
       } else if (user.role !== 'admin') {
         router.push('/dashboard');
       }

@@ -17,7 +17,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   useEffect(() => {
     if (!isLoading) {
       if (!user) {
-        router.push('/login');
+        router.push('/auth/login');
       } else if (user.role !== 'admin') {
         router.push('/dashboard');
       }

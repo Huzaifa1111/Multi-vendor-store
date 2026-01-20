@@ -13,20 +13,21 @@ export class ProductsService {
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
     private cloudinaryService: CloudinaryService,
-  ) {}
+  ) { }
 
   async create(createProductDto: CreateProductDto, image?: Express.Multer.File): Promise<any> {
     console.log('Creating product:', createProductDto);
     console.log('Image received:', image ? `Type: ${image.mimetype}, Size: ${image.size}` : 'No image');
-    
+
     let imageUrl: string | undefined = undefined;
-    
+
     if (image) {
       try {
         imageUrl = await this.cloudinaryService.uploadImage(image);
         console.log('Image uploaded to Cloudinary:', imageUrl);
       } catch (error) {
         console.error('Failed to upload image:', error);
+        throw new Error('Failed to upload image to Cloudinary');
       }
     }
 
@@ -45,7 +46,7 @@ export class ProductsService {
 
     const product = this.productRepository.create(productData as Product);
     const savedProduct = await this.productRepository.save(product);
-    
+
     return {
       message: 'Product created successfully',
       data: savedProduct,
@@ -54,35 +55,35 @@ export class ProductsService {
 
   async findAll(filters?: ProductFilterDto): Promise<Product[]> { // UPDATE THIS METHOD
     const query = this.productRepository.createQueryBuilder('product');
-    
+
     if (filters?.category) {
       query.andWhere('product.category = :category', { category: filters.category });
     }
-    
+
     if (filters?.featured !== undefined) {
       query.andWhere('product.featured = :featured', { featured: filters.featured });
     }
-    
+
     if (filters?.minPrice !== undefined) {
       query.andWhere('product.price >= :minPrice', { minPrice: filters.minPrice });
     }
-    
+
     if (filters?.maxPrice !== undefined) {
       query.andWhere('product.price <= :maxPrice', { maxPrice: filters.maxPrice });
     }
-    
+
     if (filters?.search) {
       query.andWhere('(product.name LIKE :search OR product.description LIKE :search)', {
         search: `%${filters.search}%`,
       });
     }
-    
+
     query.orderBy('product.createdAt', 'DESC');
-    
+
     if (filters?.limit) {
       query.limit(filters.limit);
     }
-    
+
     return query.getMany();
   }
 
@@ -91,11 +92,11 @@ export class ProductsService {
       .createQueryBuilder('product')
       .where('product.featured = :featured', { featured: true })
       .orderBy('product.createdAt', 'DESC');
-    
+
     if (limit) {
       query.limit(limit);
     }
-    
+
     return query.getMany();
   }
 
@@ -105,27 +106,64 @@ export class ProductsService {
       .select('DISTINCT product.category', 'category')
       .where('product.category IS NOT NULL')
       .getRawMany();
-    
+
     return categories.map(c => c.category);
   }
 
   async findOne(id: number): Promise<Product> {
     const product = await this.productRepository.findOne({ where: { id } });
-    
+
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
-    
+
     return product;
   }
 
-  async update(id: number, updateProductDto: any): Promise<Product> {
+  async update(id: number, updateProductDto: any, image?: Express.Multer.File): Promise<Product> {
+    const product = await this.findOne(id);
+
+    // Upload new image if provided
+    let imageUrl: string | undefined = undefined;
+    if (image) {
+      try {
+        // Optional: Delete old image if it exists and is on Cloudinary
+        // if (product.image && product.image.includes('cloudinary')) {
+        //   // Extract public_id and delete
+        // }
+
+        imageUrl = await this.cloudinaryService.uploadImage(image);
+        console.log('New image uploaded to Cloudinary:', imageUrl);
+      } catch (error) {
+        console.error('Failed to upload new image:', error);
+        throw new Error('Failed to upload new image to Cloudinary');
+      }
+    }
+
     // ADD featured to update data
     const updateData: any = { ...updateProductDto };
+
+    // Handle types
+    if (updateProductDto.price !== undefined) {
+      const p = parseFloat(updateProductDto.price);
+      updateData.price = isNaN(p) ? 0 : p;
+    }
+    if (updateProductDto.stock !== undefined) {
+      const s = parseInt(updateProductDto.stock);
+      updateData.stock = isNaN(s) ? 0 : s;
+    }
+
+    console.log('=== PRODUCT UPDATE DEBUG ===');
+    console.log('Update Data Final:', updateData);
+
     if (updateProductDto.featured !== undefined) {
       updateData.featured = updateProductDto.featured;
     }
-    
+
+    if (imageUrl) {
+      updateData.image = imageUrl;
+    }
+
     await this.productRepository.update(id, updateData);
     return this.findOne(id);
   }

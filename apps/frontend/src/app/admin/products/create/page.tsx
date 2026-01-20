@@ -25,10 +25,10 @@ export default function CreateProductPage() {
     const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' 
-        ? (e.target as HTMLInputElement).checked 
-        : name === 'price' || name === 'stock' 
-          ? parseFloat(value) || 0 
+      [name]: type === 'checkbox'
+        ? (e.target as HTMLInputElement).checked
+        : name === 'price' || name === 'stock'
+          ? parseFloat(value) || 0
           : value
     }));
   };
@@ -48,7 +48,7 @@ export default function CreateProductPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
@@ -63,7 +63,7 @@ export default function CreateProductPage() {
         formDataToSend.append('image', image);
       }
 
-      const response = await fetch('http://localhost:3001/products', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/products`, {
         method: 'POST',
         body: formDataToSend,
         credentials: 'include',
@@ -253,7 +253,7 @@ export default function CreateProductPage() {
                   Mark as Featured Product
                 </label>
                 <p className="text-sm text-gray-500 mt-1">
-                  Featured products will be prominently displayed on the homepage. 
+                  Featured products will be prominently displayed on the homepage.
                   Check this box to make this product appear in the featured section.
                 </p>
               </div>

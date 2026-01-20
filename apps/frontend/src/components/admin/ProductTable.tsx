@@ -4,13 +4,15 @@ import { useState } from 'react';
 import { Edit2, Trash2, Eye, Star } from 'lucide-react';
 import Link from 'next/link';
 import { Product } from '@/types/product';
+import { resolveProductImage } from '@/lib/image';
 
 interface ProductTableProps {
   products: Product[];
+  loading?: boolean;
   onDelete: (id: number) => void;
 }
 
-export default function ProductTable({ products, onDelete }: ProductTableProps) {
+export default function ProductTable({ products, loading = false, onDelete }: ProductTableProps) {
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
   const formatPrice = (price: any) => {
@@ -28,7 +30,7 @@ export default function ProductTable({ products, onDelete }: ProductTableProps) 
 
   const getStockColor = (stock: number) => {
     if (stock === 0) return 'text-red-600 bg-red-50';
-    if (stock < 10) return 'text-yellow-600 bg-yellow-50';
+    if (stock < 5) return 'text-yellow-600 bg-yellow-50';
     return 'text-green-600 bg-green-50';
   };
 
@@ -58,85 +60,99 @@ export default function ProductTable({ products, onDelete }: ProductTableProps) 
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {products.map((product) => (
-            <tr key={product.id} className="hover:bg-gray-50">
-              <td className="px-6 py-4">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 h-10 w-10">
-                    {product.image ? (
-                      <img
-                        className="h-10 w-10 rounded-md object-cover"
-                        src={product.image}
-                        alt={product.name}
-                      />
-                    ) : (
-                      <div className="h-10 w-10 rounded-md bg-gray-200 flex items-center justify-center">
-                        <span className="text-gray-500 text-xs">No image</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="ml-4">
-                    <div className="text-sm font-medium text-gray-900">
-                      {product.name}
-                    </div>
-                    <div className="text-sm text-gray-500 truncate max-w-xs">
-                      {product.description?.substring(0, 50)}...
-                    </div>
-                  </div>
-                </div>
-              </td>
-              <td className="px-6 py-4 text-sm text-gray-900">
-                {product.category || 'Uncategorized'}
-              </td>
-              <td className="px-6 py-4 text-sm text-gray-900">
-                {formatPrice(product.price)}
-              </td>
-              <td className="px-6 py-4">
-                <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStockColor(
-                    formatStock(product.stock)
-                  )}`}
-                >
-                  {formatStock(product.stock)} in stock
-                </span>
-              </td>
-              <td className="px-6 py-4">
-                {product.featured ? (
-                  <div className="flex items-center">
-                    <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                    <span className="ml-1 text-sm text-gray-900">Featured</span>
-                  </div>
-                ) : (
-                  <span className="text-sm text-gray-500">Regular</span>
-                )}
-              </td>
-              <td className="px-6 py-4 text-sm font-medium">
-                <div className="flex space-x-3">
-                  <Link
-                    href={`/products/${product.id}`}
-                    className="text-blue-600 hover:text-blue-900"
-                    title="View"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Link>
-                  <Link
-                    href={`/admin/products/edit/${product.id}`}
-                    className="text-indigo-600 hover:text-indigo-900"
-                    title="Edit"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </Link>
-                  <button
-                    onClick={() => setConfirmDelete(product.id)}
-                    className="text-red-600 hover:text-red-900"
-                    title="Delete"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
+          {loading ? (
+            <tr>
+              <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
+                Loading products...
               </td>
             </tr>
-          ))}
+          ) : products.length === 0 ? (
+            <tr>
+              <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
+                No products found
+              </td>
+            </tr>
+          ) : (
+            products.map((product) => (
+              <tr key={product.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 h-10 w-10">
+                      {product.image ? (
+                        <img
+                          className="h-10 w-10 rounded-md object-cover"
+                          src={resolveProductImage(product.image)}
+                          alt={product.name}
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-md bg-gray-200 flex items-center justify-center">
+                          <span className="text-gray-500 text-xs">No image</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="ml-4">
+                      <div className="text-sm font-medium text-gray-900">
+                        {product.name}
+                      </div>
+                      <div className="text-sm text-gray-500 truncate max-w-xs">
+                        {product.description?.substring(0, 50)}...
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-900">
+                  {product.category || 'Uncategorized'}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-900">
+                  {formatPrice(product.price)}
+                </td>
+                <td className="px-6 py-4">
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStockColor(
+                      formatStock(product.stock)
+                    )}`}
+                  >
+                    {formatStock(product.stock)} in stock
+                  </span>
+                </td>
+                <td className="px-6 py-4">
+                  {product.featured ? (
+                    <div className="flex items-center">
+                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                      <span className="ml-1 text-sm text-gray-900">Featured</span>
+                    </div>
+                  ) : (
+                    <span className="text-sm text-gray-500">Regular</span>
+                  )}
+                </td>
+                <td className="px-6 py-4 text-sm font-medium">
+                  <div className="flex space-x-3">
+                    <Link
+                      href={`/products/${product.id}`}
+                      className="text-blue-600 hover:text-blue-900"
+                      title="View"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Link>
+                    <Link
+                      href={`/admin/products/edit/${product.id}`}
+                      className="text-indigo-600 hover:text-indigo-900"
+                      title="Edit"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Link>
+                    <button
+                      onClick={() => setConfirmDelete(product.id)}
+                      className="text-red-600 hover:text-red-900"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
 

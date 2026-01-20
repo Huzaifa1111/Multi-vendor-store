@@ -1,9 +1,9 @@
+// apps/frontend/src/hooks/useCart.ts
+import { useCallback } from 'react';
 import { useCartStore } from '@/store/useCartStore';
-import { useAuth } from '@/lib/auth';
-import { useEffect } from 'react';
+import { AddToCartPayload } from '@/types/cart';
 
-export function useCart() {
-  const { isAuthenticated } = useAuth();
+export const useCart = () => {
   const {
     items,
     count,
@@ -14,44 +14,80 @@ export function useCart() {
     updateQuantity,
     removeItem,
     clearCart,
-    getCartCount,
-    getCartTotal,
+    addItemOptimistic,
+    removeItemOptimistic,
+    updateItemOptimistic,
+    clearCartOptimistic,
   } = useCartStore();
 
-  // Fetch cart when authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchCart();
-    }
-  }, [isAuthenticated, fetchCart]);
+  const handleAddToCart = useCallback(async (productId: number, quantity: number = 1) => {
+    const tempId = Date.now();
+    try {
+      // Optimistic update
+      addItemOptimistic({
+        id: tempId,
+        userId: 0,
+        productId,
+        quantity,
+        price: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
 
-  // Sync cart count with server periodically
-  useEffect(() => {
-    if (isAuthenticated) {
-      const interval = setInterval(() => {
-        getCartCount();
-        getCartTotal();
-      }, 30000); // Sync every 30 seconds
-
-      return () => clearInterval(interval);
+      // Actual API call
+      await addToCart({ productId, quantity });
+    } catch (error) {
+      // Revert optimistic update on error
+      console.error('Failed to add to cart:', error);
+      removeItemOptimistic(tempId);
+      throw error;
     }
-  }, [isAuthenticated, getCartCount, getCartTotal]);
+  }, [addToCart, addItemOptimistic, removeItemOptimistic]);
+
+  const handleUpdateQuantity = useCallback(async (itemId: number, quantity: number) => {
+    try {
+      updateItemOptimistic(itemId, quantity);
+      await updateQuantity(itemId, quantity);
+    } catch (error) {
+      console.error('Failed to update quantity:', error);
+      await fetchCart(); // Refresh to get correct state
+      throw error;
+    }
+  }, [updateQuantity, updateItemOptimistic, fetchCart]);
+
+  const handleRemoveItem = useCallback(async (itemId: number) => {
+    try {
+      removeItemOptimistic(itemId);
+      await removeItem(itemId);
+    } catch (error) {
+      console.error('Failed to remove item:', error);
+      await fetchCart();
+      throw error;
+    }
+  }, [removeItem, removeItemOptimistic, fetchCart]);
+
+  const handleClearCart = useCallback(async () => {
+    try {
+      clearCartOptimistic();
+      await clearCart();
+    } catch (error) {
+      console.error('Failed to clear cart:', error);
+      await fetchCart();
+      throw error;
+    }
+  }, [clearCart, clearCartOptimistic, fetchCart]);
 
   return {
     items,
     count,
     total,
     isLoading,
-    addToCart: async (productId: number, quantity: number = 1) => {
-      if (!isAuthenticated) {
-        throw new Error('Please login to add items to cart');
-      }
-      return await addToCart({ productId, quantity });
-    },
-    updateQuantity,
-    removeItem,
-    clearCart,
-    getCartCount,
-    getCartTotal,
+
+    // Actions
+    fetchCart,
+    addToCart: handleAddToCart,
+    updateQuantity: handleUpdateQuantity,
+    removeItem: handleRemoveItem,
+    clearCart: handleClearCart,
   };
-}
+};

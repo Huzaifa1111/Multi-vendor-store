@@ -16,7 +16,7 @@ export class AuthService {
     private usersRepository: Repository<User>,
     private jwtService: JwtService,
     private emailService: EmailService,
-  ) {}
+  ) { }
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersRepository.findOne({ where: { email } });
@@ -56,7 +56,7 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
-    
+
     // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
@@ -117,7 +117,7 @@ export class AuthService {
     }
 
     // Mark email as verified and clear OTP
-   user.isEmailVerified = true;
+    user.isEmailVerified = true;
     user.verificationOtp = null;
     user.otpExpiresAt = null;
     await this.usersRepository.save(user);
@@ -171,6 +171,7 @@ export class AuthService {
     }
 
     const { password, verificationOtp, otpExpiresAt, ...userProfile } = user;
+    console.log(`🔍 getProfile - User ID: ${userId}, Role: ${user.role}`);
     return userProfile;
   }
 }

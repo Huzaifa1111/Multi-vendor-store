@@ -6,4 +6,8 @@ export class CreateOrderDto {
 
   @IsString()
   paymentMethod: string;
+
+  @IsOptional()
+  @IsString()
+  paymentIntentId?: string;
 }

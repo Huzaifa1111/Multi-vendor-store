@@ -1,6 +1,8 @@
 'use client';
 
 import { useAuth } from "@/lib/auth";
+import { useClickOutside } from "@/hooks/useClickOutside";
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import { useState, useEffect, useCallback } from 'react';
@@ -22,9 +24,11 @@ import {
 } from 'lucide-react';
 
 export default function Header() {
-  const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const dropdownRef = useClickOutside<HTMLDivElement>(() => setIsAccountOpen(false));
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -68,8 +72,8 @@ export default function Header() {
   }, [handleScroll, handleMouseMove]);
 
   const handleLogout = () => {
-    authService.logout();
-    window.location.href = '/login';
+    logout();
+    router.push('/auth/login');
   };
 
   const { count } = useCart();
@@ -188,10 +192,9 @@ export default function Header() {
             <div className="flex items-center space-x-2 md:space-x-5 text-black">
               {/* Account / Auth - Optimized for 1-click access */}
               {isAuthenticated ? (
-                <div className="relative">
+                <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setIsAccountOpen(!isAccountOpen)}
-                    onBlur={() => setTimeout(() => setIsAccountOpen(false), 200)}
                     className="p-1.5 px-3 hover:bg-gray-100 rounded-full transition-all flex items-center relative group space-x-2"
                   >
                     {user?.role === 'admin' ? (
@@ -223,7 +226,7 @@ export default function Header() {
                       {user?.role === 'admin' && (
                         <Link href="/admin" className="block px-4 py-2.5 text-sm font-medium text-purple-700 hover:bg-purple-50 transition-colors">Admin Panel</Link>
                       )}
-                      <Link href="/profile" className="block px-4 py-2.5 text-sm font-medium hover:bg-gray-50 hover:text-blue-600 transition-colors border-b border-gray-50">Profile Settings</Link>
+                      <Link href="/dashboard" className="block px-4 py-2.5 text-sm font-medium hover:bg-gray-50 hover:text-blue-600 transition-colors border-b border-gray-50">Profile Settings</Link>
                       <button
                         onClick={handleLogout}
                         className="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors"
@@ -258,12 +261,12 @@ export default function Header() {
                 <Heart size={22} />
                 <span className="absolute top-0 right-0 bg-white border border-black text-black text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full leading-none">0</span>
               </button>
-             <Link href="/cart" className="p-2 hover:bg-gray-100 rounded-full transition-colors relative">
-  <ShoppingBag size={22} />
-  <span className="absolute top-0 right-0 bg-white border border-black text-black text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full leading-none">
-    {count > 99 ? '99+' : count}
-  </span>
-</Link>
+              <Link href="/cart" className="p-2 hover:bg-gray-100 rounded-full transition-colors relative">
+                <ShoppingBag size={22} />
+                <span className="absolute top-0 right-0 bg-white border border-black text-black text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full leading-none">
+                  {count > 99 ? '99+' : count}
+                </span>
+              </Link>
             </div>
           </div>
         </div>
