@@ -17,19 +17,19 @@ import { CartModule } from './modules/cart/cart.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-  TypeOrmModule.forRootAsync({
-  useFactory: () => ({
-    type: 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432'),
-    username: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
-    database: process.env.DB_DATABASE || 'store_db', // Match your DB name
-    entities: [__dirname + '/**/*.entity{.ts,.js}'],
-    synchronize: true,
-    migrationsRun: false,
-  }),
-}),
+    TypeOrmModule.forRootAsync({
+      useFactory: () => ({
+        type: 'postgres',
+        host: process.env.DB_HOST || 'localhost',
+        port: parseInt(process.env.DB_PORT || '5432'),
+        username: process.env.DB_USERNAME || 'postgres',
+        password: process.env.DB_PASSWORD || 'postgres',
+        database: process.env.DB_DATABASE || 'store_db', // Match your DB name
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        synchronize: true,
+        migrationsRun: false,
+      }),
+    }),
     AuthModule,
     UsersModule,
     ProductsModule,
@@ -42,4 +42,4 @@ import { CartModule } from './modules/cart/cart.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

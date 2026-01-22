@@ -174,4 +174,53 @@ export class AuthService {
     console.log(`🔍 getProfile - User ID: ${userId}, Role: ${user.role}`);
     return userProfile;
   }
+
+  async googleLogin(req) {
+    if (!req.user) {
+      throw new UnauthorizedException('No user from google');
+    }
+
+    const { email, name, googleId, picture } = req.user;
+
+    let user = await this.usersRepository.findOne({ where: { email } });
+
+    if (!user) {
+      // Create new user if doesn't exist
+      user = this.usersRepository.create({
+        email,
+        name,
+        googleId,
+        picture,
+        isEmailVerified: true, // Google emails are already verified
+      });
+      await this.usersRepository.save(user);
+    } else {
+      // Update existing user with Google info if missing
+      let updated = false;
+      if (!user.googleId) {
+        user.googleId = googleId;
+        updated = true;
+      }
+      if (!user.picture) {
+        user.picture = picture;
+        updated = true;
+      }
+      if (updated) {
+        await this.usersRepository.save(user);
+      }
+    }
+
+    const payload = { email: user.email, sub: user.id, role: user.role };
+    return {
+      access_token: this.jwtService.sign(payload),
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        picture: user.picture,
+        isEmailVerified: user.isEmailVerified,
+      },
+    };
+  }
 }
