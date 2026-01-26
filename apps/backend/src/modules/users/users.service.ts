@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -10,7 +11,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async findAll(): Promise<User[]> {
     return this.usersRepository.find();
@@ -24,17 +25,26 @@ export class UsersService {
     return user;
   }
 
- async findByEmail(email: string): Promise<User | null> {
-  return this.usersRepository.findOne({ where: { email } });
-}
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { email } });
+  }
 
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    // Note: Creating users directly via UsersService might need password hashing if not called from AuthService.
+    // Assuming this is used by Admin where they might set a temporary password or similar.
+    // Ideally duplicate check logic should be here or in controller.
+    if (createUserDto.password) {
+      createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
+    }
     const user = this.usersRepository.create(createUserDto);
     return this.usersRepository.save(user);
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    if (updateUserDto.password) {
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
     await this.usersRepository.update(id, updateUserDto);
     return this.findOne(id);
   }

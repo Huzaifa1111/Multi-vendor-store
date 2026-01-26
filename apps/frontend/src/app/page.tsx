@@ -210,132 +210,168 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Products Section */}
-      <section className="py-32 bg-[#fafafa]">
-        <div className="max-w-[1440px] mx-auto px-6">
-          <motion.div
-            {...fadeInUp}
-            className="text-center mb-20"
-          >
-            <span className="text-blue-600 font-black uppercase tracking-[0.4em] text-[11px] mb-4 block">Bestselling Electronics</span>
-            <h2 className="text-5xl md:text-8xl font-black tracking-tighter text-black">Featured Products</h2>
+      {/* Featured Products Section - ANIMATED & POLISHED */}
+      <section className="py-24 bg-gray-50/50 relative overflow-hidden">
+        {/* Decorative Background Blob */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-100/40 rounded-full blur-[100px] pointer-events-none z-0"></div>
 
-            {/* Debug info - visible only in development */}
-            <div className="mt-4 text-sm">
-              <div className="inline-block bg-gray-100 px-3 py-1 rounded-lg">
-                Status: {isLoading ? '🔄 Loading...' : error ? `❌ ${error}` : `✅ ${featuredProducts.length} featured products`}
-              </div>
+        <div className="max-w-[1440px] mx-auto px-6 md:px-12 relative z-10">
+          {/* Section Header */}
+          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 border-b border-gray-200 pb-8">
+            <div>
+              <span className="text-blue-600 font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">Curated Collection</span>
+              <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-black leading-none">Featured Products</h2>
             </div>
-          </motion.div>
+
+            <div className="mb-2">
+              <Link href="/products" className="group flex items-center text-[10px] font-black uppercase tracking-[0.3em] text-black hover:text-blue-600 transition-colors">
+                View All Products <ArrowRight size={14} className="ml-3 group-hover:translate-x-2 transition-transform" />
+              </Link>
+            </div>
+          </div>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-10 gap-y-20">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="animate-pulse">
-                  <div className="aspect-[3/4] bg-gray-200 rounded-[2.5rem] mb-6 shadow-sm"></div>
-                  <div className="h-5 bg-gray-200 rounded-full w-2/3 mx-auto mb-3"></div>
-                  <div className="h-4 bg-gray-200 rounded-full w-1/3 mx-auto"></div>
+                  <div className="aspect-[4/5] bg-gray-200 rounded-[2.5rem] mb-6"></div>
+                  <div className="h-6 bg-gray-200 rounded w-2/3 mb-2"></div>
+                  <div className="h-5 bg-gray-200 rounded w-1/3 mb-3"></div>
+                  <div className="h-3 bg-gray-200 rounded w-full"></div>
                 </div>
               ))}
             </div>
           ) : error ? (
-            <div className="text-center py-16">
-              <div className="text-red-600 mb-4">{error}</div>
+            <div className="text-center py-20">
+              <div className="text-red-500 mb-4 font-medium">{error}</div>
               <button
                 onClick={() => window.location.reload()}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-6 py-3 bg-black text-white rounded-full text-sm font-bold hover:bg-gray-800 transition-colors"
               >
                 Retry
               </button>
             </div>
           ) : featuredProducts.length === 0 ? (
-            <div className="text-center py-16">
-              <Star className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Featured Products Yet</h3>
-              <p className="text-gray-600 mb-6">Mark products as "Featured" in the admin panel to see them here</p>
-              <div className="space-y-4">
-                <Link
-                  href="/admin/products/create"
-                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mr-4"
-                >
-                  <Star className="mr-2" size={20} />
-                  Create Featured Product
-                </Link>
-                <Link
-                  href="/products"
-                  className="inline-flex items-center text-blue-600 hover:text-blue-800"
-                >
-                  Browse All Products <ArrowRight className="ml-2" size={20} />
-                </Link>
-              </div>
+            <div className="text-center py-24 bg-white/50 backdrop-blur-sm rounded-3xl border border-gray-100">
+              <Star className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-black mb-2">No Featured Products</h3>
+              <p className="text-gray-500 mb-6">Mark products as "Featured" in the admin panel.</p>
+              <Link
+                href="/products"
+                className="inline-flex items-center text-sm font-bold text-blue-600 hover:text-blue-800"
+              >
+                Browse Store <ArrowRight className="ml-2" size={16} />
+              </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-10 gap-y-20">
+            <motion.div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12"
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.1
+                  }
+                }
+              }}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-100px" }}
+            >
               {featuredProducts.map((product) => (
                 <motion.div
                   key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
+                  variants={{
+                    hidden: { opacity: 0, y: 50 },
+                    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 50, damping: 20 } }
+                  }}
+                  className="group cursor-pointer h-full"
+                  whileHover={{ y: -8, transition: { duration: 0.3 } }}
                 >
-                  <div className="relative group">
-                    {/* Featured Badge */}
-                    {product.featured && (
-                      <div className="absolute top-4 left-4 z-10">
-                        <div className="flex items-center space-x-1 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse">
-                          <Star className="w-3 h-3" />
-                          <span>FEATURED</span>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="border border-gray-200 rounded-3xl overflow-hidden bg-white hover:shadow-2xl transition-all duration-300">
-                      <div className="aspect-[3/4] relative overflow-hidden">
+                  <div className="bg-white border border-gray-100/50 rounded-[2.5rem] p-4 shadow-sm hover:shadow-2xl transition-all duration-500 h-full flex flex-col">
+                    {/* Image Container - Compact Scale */}
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-gray-50 mb-5 shadow-inner">
+                      <Link href={`/products/${product.id}`} className="block w-full h-full">
                         <img
                           src={resolveProductImage(product.image)}
                           alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />
-                      </div>
-                      <div className="p-6">
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">{product.name}</h3>
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{product.description}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xl font-bold text-gray-900">${product.price}</span>
-                          <span className={`text-xs px-2 py-1 rounded-full ${product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                            {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
-                          </span>
+                      </Link>
+
+                      {/* Featured Badge - Compact Black Pill */}
+                      {product.featured && (
+                        <div className="absolute top-4 left-4 z-10">
+                          <motion.span
+                            initial={{ opacity: 0, x: -10 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="px-3 py-1.5 bg-black/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg"
+                          >
+                            Featured
+                          </motion.span>
                         </div>
+                      )}
+
+                      {/* Add to Cart Overlay */}
+                      <div className="absolute inset-x-4 bottom-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10">
                         <button
-                          onClick={() => handleAddToCart(product)}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleAddToCart(product);
+                          }}
                           disabled={addingToCartId === product.id || Number(product.stock) === 0}
-                          className="w-full mt-4 bg-black text-white py-3 rounded-xl hover:bg-gray-800 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full bg-white text-black py-3 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-gray-50 shadow-xl flex items-center justify-center gap-2"
                         >
-                          <ShoppingCart className="w-4 h-4 mr-2" />
-                          {addingToCartId === product.id ? 'Adding...' : Number(product.stock) === 0 ? 'Out of Stock' : 'Add to Cart'}
+                          {addingToCartId === product.id ? (
+                            'Adding...'
+                          ) : Number(product.stock) === 0 ? (
+                            'Out of Stock'
+                          ) : (
+                            <>
+                              Add <ShoppingCart size={12} />
+                            </>
+                          )}
                         </button>
                       </div>
+                    </div>
+
+                    {/* Product Info - Stacked & Clean */}
+                    <div className="px-1 pb-1 flex flex-col flex-grow">
+                      {/* Row 1: Title */}
+                      <div className="mb-1">
+                        <h3 className="font-bold text-black text-lg leading-tight group-hover:text-blue-600 transition-colors truncate" title={product.name}>
+                          <Link href={`/products/${product.id}`}>
+                            {product.name}
+                          </Link>
+                        </h3>
+                      </div>
+
+                      {/* Row 2: Price */}
+                      <div className="mb-3">
+                        <span className="font-black text-black text-xl tracking-tight block">
+                          ${product.price}
+                        </span>
+                      </div>
+
+                      {/* Row 3: Description */}
+                      <p className="text-gray-500 text-xs font-medium line-clamp-2 mb-4 flex-grow leading-relaxed">
+                        {product.description}
+                      </p>
+
+                      {/* Row 4: Category */}
+                      {product.category && (
+                        <div className="pt-3 border-t border-gray-50 mt-auto flex items-center justify-between">
+                          <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400">
+                            {product.category}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </motion.div>
               ))}
-            </div>
-          )}
-
-          {featuredProducts.length > 0 && (
-            <motion.div
-              {...fadeInUp}
-              className="mt-24 text-center"
-            >
-              <Link
-                href="/products"
-                className="group relative inline-block px-16 py-7 bg-white border-2 border-black text-black font-black uppercase tracking-[0.3em] text-[13px] overflow-hidden transition-all duration-500 hover:scale-110 active:scale-95 shadow-2xl rounded-full"
-              >
-                <span className="relative z-10 flex items-center">
-                  Explore The Full Collection <ArrowRight className="ml-4 group-hover:translate-x-3 transition-transform duration-500" size={20} />
-                </span>
-                <div className="absolute inset-0 bg-blue-50 translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-in-out"></div>
-              </Link>
             </motion.div>
           )}
         </div>

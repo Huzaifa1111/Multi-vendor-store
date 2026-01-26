@@ -38,11 +38,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Admin Content - Header removed from here */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+        <div className="flex flex-col lg:flex-row items-start">
           <AdminSidebar />
-          <main className="flex-1 ml-8">
+          <main className="flex-1 w-full lg:w-auto mt-6 lg:mt-0 lg:ml-8 min-w-0">
             {children}
           </main>
         </div>

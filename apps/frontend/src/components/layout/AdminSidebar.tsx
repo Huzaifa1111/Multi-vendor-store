@@ -2,16 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  Home, 
-  Package, 
-  Users, 
-  ShoppingCart, 
+import {
+  Home,
+  Package,
+  Users,
+  ShoppingCart,
   Settings,
   BarChart3,
   Folder,
   Shield,
-  PlusCircle
+  PlusCircle,
+  ArrowLeft
 } from 'lucide-react';
 
 const navItems = [
@@ -29,40 +30,52 @@ export default function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64">
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-            <Shield className="w-6 h-6 text-purple-600" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900">Admin Controls</h3>
-            <p className="text-sm text-gray-500">Full system access</p>
+    <aside className="w-full lg:w-72 flex-shrink-0">
+      <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden sticky top-8">
+        {/* Admin Header */}
+        <div className="p-8 border-b border-gray-50 bg-gradient-to-br from-purple-50/80 to-blue-50/80">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-200 text-white">
+              <Shield className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-gray-900 tracking-tight text-lg">Admin Panel</h3>
+              <p className="text-xs font-medium text-purple-600 uppercase tracking-wider">System Control</p>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <nav className="space-y-1">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
-          
-          return (
+
+        <nav className="p-4 space-y-1">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center px-4 py-3.5 text-sm font-bold rounded-xl transition-all duration-200 group ${isActive
+                    ? 'bg-black text-white shadow-lg shadow-gray-200'
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-black'
+                  }`}
+              >
+                <Icon className={`w-5 h-5 mr-3 transition-colors ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-black'}`} />
+                {item.label}
+              </Link>
+            );
+          })}
+
+          <div className="pt-4 mt-2 border-t border-gray-50">
             <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                isActive
-                  ? 'bg-purple-50 text-purple-700 border-l-4 border-purple-600'
-                  : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
-              }`}
+              href="/"
+              className="flex items-center px-4 py-3.5 text-sm font-bold text-gray-500 hover:bg-gray-50 hover:text-black rounded-xl transition-all duration-200"
             >
-              <Icon className="w-5 h-5 mr-3" />
-              {item.label}
+              <ArrowLeft className="w-5 h-5 mr-3" />
+              Back to Store
             </Link>
-          );
-        })}
-      </nav>
+          </div>
+        </nav>
+      </div>
     </aside>
   );
 }
