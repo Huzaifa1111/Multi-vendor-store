@@ -54,42 +54,57 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Our Products</h1>
-          <p className="text-gray-600 mt-2">Browse our amazing collection of products</p>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-black via-gray-900 to-gray-800 py-16">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-gray-700 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+          <div className="absolute top-0 right-1/4 w-96 h-96 bg-gray-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-1/2 w-96 h-96 bg-gray-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
         </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="mb-8 animate-fade-in-down">
+            <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight">Our Products</h1>
+            <p className="text-xl text-gray-300 max-w-2xl">Discover our curated collection of premium products with exceptional quality and value</p>
+          </div>
+        </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="lg:grid lg:grid-cols-4 lg:gap-8">
           {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
-            <ProductFilters
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onFilterChange={handleFilterChange}
-            />
+          <div className="lg:col-span-1 animate-fade-in-left">
+            <div className="sticky top-8">
+              <ProductFilters
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onFilterChange={handleFilterChange}
+              />
+            </div>
           </div>
 
           {/* Products Grid */}
-          <div className="lg:col-span-3">
-            <div className="mb-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-medium text-gray-900">
-                  {selectedCategory 
-                    ? `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Products`
-                    : 'All Products'}
-                </h2>
-                <span className="text-sm text-gray-500">
-                  {products.length} {products.length === 1 ? 'product' : 'products'} found
-                </span>
-              </div>
-              
-              {filters.featured && (
-                <div className="mt-2 inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm">
-                  <span>Showing featured products only</span>
+          <div className="lg:col-span-3 animate-fade-in-right">
+            <div className="mb-8">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900">
+                    {selectedCategory 
+                      ? `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Products`
+                      : 'All Products'}
+                  </h2>
+                  <p className="text-gray-600 text-sm mt-1">
+                    {products.length} {products.length === 1 ? 'item' : 'items'} available
+                  </p>
                 </div>
-              )}
+                {filters.featured && (
+                  <div className="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 border border-gray-300 text-gray-900 text-sm font-medium animate-pulse-slow">
+                    <span className="inline-block w-2 h-2 bg-black rounded-full mr-2"></span>
+                    Featured items only
+                  </div>
+                )}
+              </div>
             </div>
 
             <ProductList 

@@ -64,58 +64,61 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div
-      className={`group relative bg-white transition-all duration-700 font-jost rounded-3xl ${isHovered ? '-translate-y-2 shadow-2xl' : 'shadow-sm'
+      className={`group relative bg-white transition-all duration-500 font-jost rounded-2xl overflow-hidden animate-fade-in-up ${isHovered ? '-translate-y-3 shadow-2xl' : 'shadow-lg hover:shadow-xl'
         }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image Container */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-gray-50 rounded-2xl">
+      <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-gray-200 to-gray-100 rounded-xl">
         <img
           src={productImage}
           alt={product.name}
           className={`w-full h-full object-cover transition-transform duration-700 ease-out ${isHovered ? 'scale-110' : 'scale-100'
             }`}
           onError={(e) => {
-            e.currentTarget.src = 'https://placehold.co/600x600/3b82f6/ffffff?text=No+Image';
+            e.currentTarget.src = 'https://placehold.co/600x600/000000/ffffff?text=No+Image';
           }}
         />
+        
+        {/* Overlay Gradient */}
+        <div className={`absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`}></div>
 
         {/* Quick Actions - Professional Side Position */}
         <div
-          className={`absolute top-4 right-4 flex flex-col space-y-3 transition-all duration-500 ${isHovered ? 'translate-x-0 opacity-100' : 'translate-x-12 opacity-0'
+          className={`absolute top-4 right-4 flex flex-col space-y-3 transition-all duration-500 ${isHovered ? 'translate-x-0 opacity-100' : 'translate-x-16 opacity-0'
             }`}
         >
           <button
             onClick={handleAddToCart}
             disabled={isLoading || Number(product.stock) === 0}
-            className="w-11 h-11 bg-white hover:bg-black hover:text-white rounded-full flex items-center justify-center text-black transition-all duration-300 shadow-xl border border-gray-100 group/btn disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-black"
+            className="w-12 h-12 bg-white hover:bg-black hover:text-white rounded-full flex items-center justify-center text-gray-900 transition-all duration-300 shadow-xl border border-gray-100 group/btn disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-900 hover:scale-110"
             title={Number(product.stock) === 0 ? "Out of Stock" : "Add to cart"}
           >
-            <ShoppingBag size={18} className={`group-hover/btn:scale-110 transition-transform ${isLoading ? 'animate-pulse' : ''}`} />
+            <ShoppingBag size={20} className={`group-hover/btn:scale-110 transition-transform ${isLoading ? 'animate-pulse' : ''}`} />
           </button>
           <Link
             href={`/products/${product.id}`}
-            className="w-11 h-11 bg-white hover:bg-black hover:text-white rounded-full flex items-center justify-center text-black transition-all duration-300 shadow-xl border border-gray-100 group/btn"
+            className="w-12 h-12 bg-white hover:bg-black hover:text-white rounded-full flex items-center justify-center text-gray-900 transition-all duration-300 shadow-xl border border-gray-100 group/btn hover:scale-110"
           >
-            <Eye size={18} className="group-hover/btn:scale-110 transition-transform" />
+            <Eye size={20} className="group-hover/btn:scale-110 transition-transform" />
           </Link>
           <button
             onClick={(e) => {
               e.preventDefault();
               toggleWishlist(product);
             }}
-            className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl border border-gray-100 group/btn ${isWishlisted ? 'bg-red-50 text-red-500 border-red-100' : 'bg-white text-black hover:bg-black hover:text-white'
+            className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl border border-gray-100 group/btn hover:scale-110 ${isWishlisted ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-900 hover:bg-red-600 hover:text-white hover:border-red-600'
               }`}
           >
-            <Heart size={18} className={`group-hover/btn:scale-110 transition-transform ${isWishlisted ? 'fill-current' : ''}`} />
+            <Heart size={20} className={`group-hover/btn:scale-110 transition-transform ${isWishlisted ? 'fill-current' : ''}`} />
           </button>
         </div>
 
         {/* Category Badge */}
         {product.category && (
-          <div className="absolute top-4 left-4">
-            <span className="bg-white/90 backdrop-blur-sm text-black text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-sm">
+          <div className="absolute top-4 left-4 animate-fade-in-down animation-delay-200">
+            <span className="inline-block bg-black/90 backdrop-blur-md text-white text-[11px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg border border-white/20">
               {product.category}
             </span>
           </div>
@@ -123,30 +126,52 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Featured Badge */}
         {product.featured && (
-          <div className="absolute bottom-4 left-4">
-            <span className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">
-              Featured
+          <div className="absolute bottom-4 left-4 animate-fade-in-up animation-delay-300">
+            <span className="inline-block bg-gradient-to-r from-gray-800 to-black text-white text-[11px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg">
+              ✨ Featured
             </span>
           </div>
         )}
       </div>
 
       {/* Product Info */}
-      <div className="mt-6 text-center">
-        <h3 className="text-[17px] font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300 truncate px-2">
-          <Link href={`/products/${product.id}`}>
+      <div className="p-5">
+        <h3 className="text-[16px] font-bold text-gray-900 group-hover:text-black transition-colors duration-300 line-clamp-2 mb-3 min-h-[2.5rem]">
+          <Link href={`/products/${product.id}`} className="hover:underline">
             {product.name}
           </Link>
         </h3>
 
-        <div className="mt-2 flex items-center justify-center space-x-2">
-          <span className="text-[18px] font-black text-black">
-            ${Number(product.price).toFixed(2)}
-          </span>
-          {/* Optional: Add a crossed-out old price for premium look */}
-          <span className="text-sm text-gray-400 line-through font-medium">
-            ${(Number(product.price) * 1.2).toFixed(2)}
-          </span>
+        <div className="space-y-3">
+          {/* Price Section */}
+          <div className="flex items-center justify-center space-x-3">
+            <span className="text-2xl font-black text-black">
+              ${Number(product.price).toFixed(2)}
+            </span>
+            <span className="text-sm text-gray-400 line-through font-medium">
+              ${(Number(product.price) * 1.2).toFixed(2)}
+            </span>
+          </div>
+
+          {/* Stock Status */}
+          <div className="flex items-center justify-center">
+            {Number(product.stock) > 5 ? (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                <span className="inline-block w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>
+                In Stock
+              </span>
+            ) : Number(product.stock) > 0 ? (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
+                <span className="inline-block w-1.5 h-1.5 bg-yellow-500 rounded-full mr-1.5"></span>
+                Low Stock ({product.stock})
+              </span>
+            ) : (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                <span className="inline-block w-1.5 h-1.5 bg-red-500 rounded-full mr-1.5"></span>
+                Out of Stock
+              </span>
+            )}
+          </div>
         </div>
 
         {Number(product.stock) === 0 && (
