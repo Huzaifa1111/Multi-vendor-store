@@ -8,13 +8,24 @@ export default function ContactPage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
 
   const handleSubmit = async (data: any) => {
-    // Here you would typically send the data to your backend API
-    console.log('Contact form submitted:', data);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setFormSubmitted(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      setFormSubmitted(true);
+    } catch (error) {
+      console.error('Contact form error:', error);
+      alert('Failed to send message. Please try again later.');
+    }
   };
 
   return (
@@ -32,7 +43,7 @@ export default function ContactPage() {
           <div>
             <Card className="h-full">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a Message</h2>
-              
+
               {formSubmitted ? (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -61,7 +72,7 @@ export default function ContactPage() {
           <div className="space-y-6">
             <Card>
               <h3 className="text-xl font-bold text-gray-900 mb-4">Contact Information</h3>
-              
+
               <div className="space-y-4">
                 <div className="flex items-start">
                   <div className="flex-shrink-0">

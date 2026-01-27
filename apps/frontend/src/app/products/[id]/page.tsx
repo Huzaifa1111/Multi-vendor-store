@@ -4,12 +4,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import productService from '@/services/product.service';
-import { ArrowLeft, Package, ShoppingCart, Star, Shield, Truck, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Package, ShoppingCart, Star, Shield, Truck, RefreshCw, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/lib/auth';
 import Button from '@/components/ui/Button';
 import Image from 'next/image';
+import ReviewForm from '@/components/products/ReviewForm';
+import ReviewList from '@/components/products/ReviewList';
+import api from '@/lib/api';
 
 interface Product {
   id: number;
@@ -30,6 +33,8 @@ export default function ProductDetailPage() {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
 
   const { isAuthenticated } = useAuth();
@@ -49,8 +54,21 @@ export default function ProductDetailPage() {
 
     if (id) {
       fetchProduct();
+      fetchReviews();
     }
   }, [id]);
+
+  const fetchReviews = async () => {
+    try {
+      setReviewsLoading(true);
+      const response = await api.get(`/reviews/product/${id}`);
+      setReviews(response.data);
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
@@ -170,11 +188,14 @@ export default function ProductDetailPage() {
 
               <div className="flex items-center mb-6">
                 <div className="flex text-yellow-400 mr-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-current" />
-                  ))}
+                  {[...Array(5)].map((_, i) => {
+                    const avg = reviews.length > 0 ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length : 0;
+                    return <Star key={i} size={20} className={i < Math.round(avg) ? 'fill-current' : 'text-gray-200'} />;
+                  })}
                 </div>
-                <span className="text-gray-600">(4.5) 24 reviews</span>
+                <span className="text-gray-600">
+                  ({reviews.length > 0 ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1) : '0.0'}) {reviews.length} reviews
+                </span>
               </div>
 
               <div className="text-4xl font-bold text-gray-900 mb-8">
@@ -275,6 +296,43 @@ export default function ProductDetailPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Reviews Section */}
+      <div className="mt-16 space-y-12">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h2 className="text-3xl font-black text-gray-900 tracking-tight mb-2">Customer Reviews</h2>
+            <p className="text-gray-500 font-medium">Hear what other customers are saying about this product.</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="lg:col-span-2">
+            {reviewsLoading ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="animate-spin text-blue-600" size={32} />
+              </div>
+            ) : (
+              <ReviewList reviews={reviews} />
+            )}
+          </div>
+          <div>
+            {isAuthenticated ? (
+              <div className="sticky top-8">
+                <ReviewForm productId={id} onSuccess={fetchReviews} />
+              </div>
+            ) : (
+              <Card className="p-8 text-center bg-gray-50 border-dashed border-2">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Write a Review</h3>
+                <p className="text-gray-500 mb-6 font-medium">Please sign in to share your experience.</p>
+                <Button onClick={() => router.push(`/auth/login?redirect=/products/${id}`)}>
+                  Sign In to Review
+                </Button>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -10,7 +10,9 @@ import {
   TrendingDown,
   PlusCircle,
   Loader2,
-  ArrowRight
+  ArrowRight,
+  Mail,
+  Star
 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -21,6 +23,8 @@ interface DashboardData {
   userCount: number;
   productCount: number;
   orderCount: number;
+  messageCount: number;
+  reviewCount: number;
   totalRevenue: number;
   activities: any[];
 }
@@ -94,6 +98,24 @@ export default function AdminDashboardPage() {
       icon: ShoppingCart,
       gradient: 'from-purple-500 to-pink-500',
       shadow: 'shadow-purple-200'
+    },
+    {
+      title: 'Total Messages',
+      value: data?.messageCount || 0,
+      change: '+10%',
+      trending: 'up',
+      icon: Mail,
+      gradient: 'from-pink-500 to-rose-500',
+      shadow: 'shadow-pink-200'
+    },
+    {
+      title: 'Total Reviews',
+      value: data?.reviewCount || 0,
+      change: '+15%',
+      trending: 'up',
+      icon: Star,
+      gradient: 'from-yellow-400 to-orange-400',
+      shadow: 'shadow-yellow-200'
     },
     {
       title: 'Total Revenue',
@@ -202,6 +224,32 @@ export default function AdminDashboardPage() {
                   </div>
                   <h3 className="font-bold text-gray-900 group-hover:text-white mb-1">Analytics</h3>
                   <p className="text-xs text-gray-500 group-hover:text-white/80 font-medium">Check store performance</p>
+                </div>
+              </Link>
+
+              <Link href="/admin/messages" className="group">
+                <div className="p-5 rounded-[1.5rem] bg-rose-50/50 border border-rose-100 hover:bg-rose-600 hover:border-rose-600 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-rose-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="p-2 rounded-xl bg-rose-100 text-rose-600 group-hover:bg-white/20 group-hover:text-white transition-colors">
+                      <Mail size={20} />
+                    </span>
+                    <ArrowRight size={18} className="text-rose-400 group-hover:text-white transition-colors opacity-0 group-hover:opacity-100" />
+                  </div>
+                  <h3 className="font-bold text-gray-900 group-hover:text-white mb-1">Messages</h3>
+                  <p className="text-xs text-gray-500 group-hover:text-white/80 font-medium">View user inquiries</p>
+                </div>
+              </Link>
+
+              <Link href="/admin/reviews" className="group">
+                <div className="p-5 rounded-[1.5rem] bg-yellow-50/50 border border-yellow-100 hover:bg-yellow-500 hover:border-yellow-500 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-yellow-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="p-2 rounded-xl bg-yellow-100 text-yellow-600 group-hover:bg-white/20 group-hover:text-white transition-colors">
+                      <Star size={20} />
+                    </span>
+                    <ArrowRight size={18} className="text-yellow-400 group-hover:text-white transition-colors opacity-0 group-hover:opacity-100" />
+                  </div>
+                  <h3 className="font-bold text-gray-900 group-hover:text-white mb-1">Reviews</h3>
+                  <p className="text-xs text-gray-500 group-hover:text-white/80 font-medium">Manage customer ratings</p>
                 </div>
               </Link>
             </div>
