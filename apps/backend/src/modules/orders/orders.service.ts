@@ -139,6 +139,27 @@ export class OrdersService {
     return order;
   }
 
+  async trackOrder(id: number, email: string) {
+    const order = await this.orderRepository.findOne({
+      where: { id },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    // Join with user to verify email
+    const user = await this.productRepository.manager.getRepository('User').findOne({
+      where: { id: order.userId, email: email }
+    });
+
+    if (!user) {
+      throw new NotFoundException('Order not found or email mismatch');
+    }
+
+    return order;
+  }
+
   async updateOrderStatus(id: number, status: OrderStatus) {
     const order = await this.getOrderById(id);
     order.status = status;

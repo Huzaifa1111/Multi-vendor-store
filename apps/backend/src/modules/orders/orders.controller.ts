@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req, ParseIntPipe, Query } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderStatus } from './order.entity';
@@ -15,6 +15,14 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard)
   async createPaymentIntent(@Req() req) {
     return this.ordersService.createPaymentIntent(req.user.id);
+  }
+
+  @Get('track')
+  async trackOrder(
+    @Query('orderId') orderId: number,
+    @Query('email') email: string,
+  ) {
+    return this.ordersService.trackOrder(orderId, email);
   }
 
   @Post()
