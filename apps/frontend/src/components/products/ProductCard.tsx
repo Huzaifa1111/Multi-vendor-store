@@ -64,125 +64,114 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div
-      className={`group relative bg-white transition-all duration-500 font-jost rounded-2xl overflow-hidden animate-fade-in-up ${isHovered ? '-translate-y-3 shadow-2xl' : 'shadow-lg hover:shadow-xl'
+      className={`group relative bg-white transition-all duration-700 font-plus-jakarta-sans rounded-xl overflow-hidden animate-fade-in-up ${isHovered ? '-translate-y-2 shadow-xl' : 'shadow-sm border border-gray-100'
         }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Image Container */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-gray-200 to-gray-100 rounded-xl">
+      {/* Image Container - Professional Ratio */}
+      <div className="relative aspect-[10/13] overflow-hidden bg-gray-50 rounded-lg mx-3 mt-3">
         <img
           src={productImage}
           alt={product.name}
-          className={`w-full h-full object-cover transition-transform duration-700 ease-out ${isHovered ? 'scale-110' : 'scale-100'
+          className={`w-full h-full object-cover transition-transform duration-1000 ease-out ${isHovered ? 'scale-105' : 'scale-100'
             }`}
           onError={(e) => {
             e.currentTarget.src = 'https://placehold.co/600x600/000000/ffffff?text=No+Image';
           }}
         />
-        
+
         {/* Overlay Gradient */}
         <div className={`absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`}></div>
 
-        {/* Quick Actions - Professional Side Position */}
+        {/* Quick Actions - Minimalist Sidebar */}
         <div
-          className={`absolute top-4 right-4 flex flex-col space-y-3 transition-all duration-500 ${isHovered ? 'translate-x-0 opacity-100' : 'translate-x-16 opacity-0'
+          className={`absolute top-3 right-3 flex flex-col space-y-2 transition-all duration-500 z-20 ${isHovered ? 'translate-x-0 opacity-100' : 'translate-x-12 opacity-0'
             }`}
         >
           <button
             onClick={handleAddToCart}
             disabled={isLoading || Number(product.stock) === 0}
-            className="w-12 h-12 bg-white hover:bg-black hover:text-white rounded-full flex items-center justify-center text-gray-900 transition-all duration-300 shadow-xl border border-gray-100 group/btn disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-900 hover:scale-110"
+            className="w-10 h-10 bg-white/90 backdrop-blur-md hover:bg-emerald-600 hover:text-white rounded-full flex items-center justify-center text-gray-900 transition-all duration-300 shadow-lg border border-white/20 group/btn disabled:opacity-50 disabled:cursor-not-allowed"
             title={Number(product.stock) === 0 ? "Out of Stock" : "Add to cart"}
           >
-            <ShoppingBag size={20} className={`group-hover/btn:scale-110 transition-transform ${isLoading ? 'animate-pulse' : ''}`} />
+            <ShoppingBag size={18} className={`${isLoading ? 'animate-pulse' : ''}`} />
           </button>
           <Link
             href={`/products/${product.id}`}
-            className="w-12 h-12 bg-white hover:bg-black hover:text-white rounded-full flex items-center justify-center text-gray-900 transition-all duration-300 shadow-xl border border-gray-100 group/btn hover:scale-110"
+            className="w-10 h-10 bg-white/90 backdrop-blur-md hover:bg-black hover:text-white rounded-full flex items-center justify-center text-gray-900 transition-all duration-300 shadow-lg border border-white/20 group/btn"
           >
-            <Eye size={20} className="group-hover/btn:scale-110 transition-transform" />
+            <Eye size={18} />
           </Link>
           <button
             onClick={(e) => {
               e.preventDefault();
               toggleWishlist(product);
             }}
-            className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl border border-gray-100 group/btn hover:scale-110 ${isWishlisted ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-900 hover:bg-red-600 hover:text-white hover:border-red-600'
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg border border-white/20 ${isWishlisted ? 'bg-red-600 text-white border-red-600' : 'bg-white/90 backdrop-blur-md text-gray-900 hover:bg-red-600 hover:text-white'
               }`}
           >
-            <Heart size={20} className={`group-hover/btn:scale-110 transition-transform ${isWishlisted ? 'fill-current' : ''}`} />
+            <Heart size={18} className={`${isWishlisted ? 'fill-current' : ''}`} />
           </button>
         </div>
 
-        {/* Category Badge */}
-        {product.category && (
-          <div className="absolute top-4 left-4 animate-fade-in-down animation-delay-200">
-            <span className="inline-block bg-black/90 backdrop-blur-md text-white text-[11px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg border border-white/20">
+        {/* Status Badges - Sharp Labeling */}
+        <div className="absolute top-3 left-3 flex flex-col gap-2">
+          {product.category && (
+            <span className="inline-block bg-black/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded shadow-sm border border-white/10">
               {product.category}
             </span>
-          </div>
-        )}
-
-        {/* Featured Badge */}
-        {product.featured && (
-          <div className="absolute bottom-4 left-4 animate-fade-in-up animation-delay-300">
-            <span className="inline-block bg-gradient-to-r from-gray-800 to-black text-white text-[11px] font-black uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg">
-              ✨ Featured
+          )}
+          {product.featured && (
+            <span className="inline-block bg-emerald-600 text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded shadow-sm">
+              Featured
             </span>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Product Info */}
-      <div className="p-5">
-        <h3 className="text-[16px] font-bold text-gray-900 group-hover:text-black transition-colors duration-300 line-clamp-2 mb-3 min-h-[2.5rem]">
-          <Link href={`/products/${product.id}`} className="hover:underline">
+      {/* Product Info - Editorial Layout */}
+      <div className="p-4 text-center">
+        <h3 className="text-[14px] md:text-[15px] font-bold text-gray-900 group-hover:text-emerald-600 transition-colors duration-500 line-clamp-1 mb-2">
+          <Link href={`/products/${product.id}`}>
             {product.name}
           </Link>
         </h3>
 
-        <div className="space-y-3">
-          {/* Price Section */}
-          <div className="flex items-center justify-center space-x-3">
-            <span className="text-2xl font-black text-black">
+        <div className="space-y-2">
+          {/* Price Tracking */}
+          <div className="flex items-center justify-center space-x-2">
+            <span className="text-lg font-black text-black tracking-tight">
               ${Number(product.price).toFixed(2)}
             </span>
-            <span className="text-sm text-gray-400 line-through font-medium">
+            <span className="text-[10px] text-gray-400 line-through font-medium">
               ${(Number(product.price) * 1.2).toFixed(2)}
             </span>
           </div>
 
-          {/* Stock Status */}
+          {/* Minimalist Stock Status */}
           <div className="flex items-center justify-center">
             {Number(product.stock) > 5 ? (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                <span className="inline-block w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5"></span>
+              <span className="text-[10px] uppercase font-black tracking-widest text-emerald-600 flex items-center gap-1.5">
+                <span className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse"></span>
                 In Stock
               </span>
             ) : Number(product.stock) > 0 ? (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
-                <span className="inline-block w-1.5 h-1.5 bg-yellow-500 rounded-full mr-1.5"></span>
-                Low Stock ({product.stock})
+              <span className="text-[10px] uppercase font-black tracking-widest text-amber-600 flex items-center gap-1.5">
+                <span className="w-1 h-1 bg-amber-500 rounded-full"></span>
+                Strictly Limited ({product.stock})
               </span>
             ) : (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800">
-                <span className="inline-block w-1.5 h-1.5 bg-red-500 rounded-full mr-1.5"></span>
-                Out of Stock
+              <span className="text-[10px] uppercase font-black tracking-widest text-gray-400">
+                Unavailable
               </span>
             )}
           </div>
         </div>
 
-        {Number(product.stock) === 0 && (
-          <div className="mt-2 text-red-500 font-bold text-sm uppercase tracking-wider">
-            Out of Stock
-          </div>
-        )}
-
-        {/* Dynamic Underline on Hover */}
+        {/* Minimal Underline Accent */}
         <div className="mt-4 flex justify-center">
-          <div className={`h-0.5 bg-black transition-all duration-500 rounded-full ${isHovered ? 'w-12' : 'w-0'}`}></div>
+          <div className={`h-[1px] bg-emerald-500 transition-all duration-700 rounded-full ${isHovered ? 'w-8' : 'w-0'}`}></div>
         </div>
       </div>
     </div>

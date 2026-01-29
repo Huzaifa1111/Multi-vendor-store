@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import Hero from '@/components/home/Hero';
+import WatchHero from '@/components/WatchHero';
 import ProductCard from '@/components/products/ProductCard';
 import { ArrowRight, Truck, ShieldCheck, RefreshCcw, Headset, Star, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
@@ -127,14 +127,14 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white font-jost overflow-x-hidden">
-      {/* Hero Slider */}
-      <Hero />
+    <div className="min-h-screen bg-white font-plus-jakarta-sans overflow-x-hidden">
+      {/* Hero Watch Animation Section */}
+      <WatchHero />
 
-      {/* Feature Icons Section */}
+      {/* Feature Icons Section - Luxury Emerald Accents */}
       <motion.section
         {...fadeInUp}
-        className="py-20 border-b border-gray-100"
+        className="py-20 border-b border-gray-100 bg-[#0a0a0a]"
       >
         <div className="max-w-[1440px] mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16">
           {[
@@ -144,64 +144,71 @@ export default function HomePage() {
             { icon: <Headset size={36} />, title: '24/7 Support', desc: 'Dedicated support team' },
           ].map((item, i) => (
             <div key={i} className="flex flex-col items-center lg:items-start text-center lg:text-left space-y-4 group">
-              <div className="text-black group-hover:scale-110 group-hover:text-blue-600 transition-all duration-500 transform">
+              <div className="text-white group-hover:scale-110 group-hover:text-emerald-500 transition-all duration-500 transform drop-shadow-[0_0_15px_rgba(16,185,129,0)] group-hover:drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]">
                 {item.icon}
               </div>
               <div className="space-y-1">
-                <h4 className="font-black uppercase tracking-[0.2em] text-[14px]">{item.title}</h4>
-                <p className="text-gray-400 text-sm font-medium">{item.desc}</p>
+                <h4 className="font-black uppercase tracking-[0.2em] text-[12px] text-white/90">{item.title}</h4>
+                <p className="text-gray-500 text-sm font-medium">{item.desc}</p>
               </div>
             </div>
           ))}
         </div>
       </motion.section>
 
-      {/* Shop by Category */}
-      <section className="py-20 bg-white overflow-hidden">
+      {/* Shop by Category - Elite Editorial Layout */}
+      <section className="py-24 bg-white overflow-hidden border-b border-gray-50">
         <div className="container mx-auto px-6 md:px-12">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
-            <div>
-              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-600 mb-2 block">Premium Marketplace</span>
-              <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-black">Shop by Category</h2>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-10">
+            <div className="relative">
+              <span className="absolute -top-10 left-0 text-[10px] font-black uppercase tracking-[0.6em] text-emerald-600/40">Archive Selection</span>
+              <div className="flex items-end gap-3">
+                <h2 className="text-4xl md:text-5xl font-black font-plus-jakarta-sans tracking-tighter text-black leading-tight">
+                  Shop<br />
+                  <span className="font-light text-emerald-500">By</span> Category
+                </h2>
+                <div className="w-12 h-0.5 bg-emerald-500 mb-2.5 hidden md:block"></div>
+              </div>
             </div>
-            <div className="flex items-center">
-              <Link href="/products" className="group flex items-center text-[11px] font-black uppercase tracking-[0.3em] text-black border-b-2 border-black/10 pb-1 hover:border-black transition-all">
-                View All Collections <ArrowRight size={14} className="ml-2 group-hover:translate-x-2 transition-transform" />
+
+            <div className="max-w-md md:text-right">
+              <p className="text-gray-400 text-xs md:text-sm font-medium leading-relaxed mb-6 md:ml-auto">
+                Discover our meticulously curated collections, ranging from avant-garde horology to next-generation tech essentials.
+              </p>
+              <Link href="/products" className="group inline-flex items-center text-[10px] font-black uppercase tracking-[0.3em] text-black border-b-2 border-black/10 pb-1 hover:border-emerald-500 transition-all">
+                The Full Index <ArrowRight size={14} className="ml-2 group-hover:translate-x-2 transition-transform" />
               </Link>
             </div>
           </div>
 
           <div
             id="category-slider"
-            className="flex space-x-6 overflow-x-auto pb-10 scrollbar-hide snap-x snap-mandatory cursor-grab active:cursor-grabbing"
+            className="flex space-x-4 md:space-x-8 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory cursor-grab active:cursor-grabbing"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {categories.map((category, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.98 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.05 }}
-                className="flex-none w-[220px] md:w-[260px] lg:w-[300px] snap-start"
+                className="flex-none w-[160px] md:w-[200px] lg:w-[220px] snap-start"
               >
-                <Link href={category.link} className="group block relative aspect-square rounded-3xl overflow-hidden bg-gray-50 border border-gray-100 transition-all duration-500 hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)]">
+                <Link href={category.link} className="group block relative aspect-[10/13] rounded-xl overflow-hidden bg-gray-50 border border-gray-100 transition-all duration-700 hover:border-emerald-500/20">
                   <Image
                     src={category.image}
                     alt={category.name}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="object-cover transition-transform duration-1000 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                  {/* Subtle Gradient Veil */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
 
-                  <div className="absolute inset-x-0 bottom-0 p-6">
-                    <h3 className="text-xl md:text-2xl font-black text-white tracking-tight leading-[1.1]">
+                  <div className="absolute inset-x-0 bottom-0 p-5 text-center flex flex-col items-center justify-end h-1/2">
+                    <span className="text-[7px] font-black uppercase tracking-[0.4em] text-emerald-400 mb-2 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-3 group-hover:translate-y-0">Explore</span>
+                    <h3 className="text-[14px] md:text-[16px] font-black text-white uppercase tracking-widest leading-none drop-shadow-md">
                       {category.name}
                     </h3>
-                    <div className="mt-3 overflow-hidden h-0 group-hover:h-5 transition-all duration-500">
-                      <span className="flex items-center text-[9px] font-black uppercase tracking-[0.3em] text-white/80">
-                        View Products <ArrowRight size={12} className="ml-2" />
-                      </span>
-                    </div>
                   </div>
                 </Link>
               </motion.div>
@@ -210,22 +217,33 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Products Section - ANIMATED & POLISHED */}
-      <section className="py-24 bg-gray-50/50 relative overflow-hidden">
-        {/* Decorative Background Blob */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-100/40 rounded-full blur-[100px] pointer-events-none z-0"></div>
+      {/* Featured Products Section - Elite Curated Layout */}
+      <section className="py-24 bg-white relative overflow-hidden">
+        {/* Cinematic Background - Layered Emerald Mists */}
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent opacity-50"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1200px] h-[800px] bg-emerald-100/10 rounded-full blur-[140px] pointer-events-none z-0"></div>
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-emerald-50/20 rounded-full blur-[100px] pointer-events-none z-0"></div>
 
         <div className="max-w-[1440px] mx-auto px-6 md:px-12 relative z-10">
-          {/* Section Header */}
-          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 border-b border-gray-200 pb-8">
-            <div>
-              <span className="text-blue-600 font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">Curated Collection</span>
-              <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-black leading-none">Featured Products</h2>
+          {/* Section Header - Editorial Style */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-20 gap-10">
+            <div className="relative">
+              <span className="absolute -top-10 left-0 text-[10px] font-black uppercase tracking-[0.6em] text-emerald-600/40">Exclusive Selection</span>
+              <div className="flex items-end gap-3">
+                <h2 className="text-4xl md:text-5xl font-black font-plus-jakarta-sans tracking-tighter text-black leading-tight">
+                  Featured<br />
+                  Collections
+                </h2>
+                <div className="w-12 h-0.5 bg-emerald-500 mb-2.5 hidden md:block"></div>
+              </div>
             </div>
 
-            <div className="mb-2">
-              <Link href="/products" className="group flex items-center text-[10px] font-black uppercase tracking-[0.3em] text-black hover:text-blue-600 transition-colors">
-                View All Products <ArrowRight size={14} className="ml-3 group-hover:translate-x-2 transition-transform" />
+            <div className="max-w-md md:text-right">
+              <p className="text-gray-400 text-xs md:text-sm font-medium leading-relaxed mb-6 md:ml-auto">
+                Explore our handpicked curation of exceptional pieces, chosen for their unparalleled craft and timeless design.
+              </p>
+              <Link href="/products" className="group inline-flex items-center text-[10px] font-black uppercase tracking-[0.3em] text-black border-b-2 border-black/10 pb-1 hover:border-emerald-500 transition-all font-bold">
+                View All Creations <ArrowRight size={14} className="ml-2 group-hover:translate-x-2 transition-transform" />
               </Link>
             </div>
           </div>
@@ -258,14 +276,14 @@ export default function HomePage() {
               <p className="text-gray-500 mb-6">Mark products as "Featured" in the admin panel.</p>
               <Link
                 href="/products"
-                className="inline-flex items-center text-sm font-bold text-blue-600 hover:text-blue-800"
+                className="inline-flex items-center text-sm font-bold text-emerald-600 hover:text-emerald-800"
               >
                 Browse Store <ArrowRight className="ml-2" size={16} />
               </Link>
             </div>
           ) : (
             <motion.div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12"
               variants={{
                 hidden: { opacity: 0 },
                 show: {
@@ -283,93 +301,11 @@ export default function HomePage() {
                 <motion.div
                   key={product.id}
                   variants={{
-                    hidden: { opacity: 0, y: 50 },
-                    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 50, damping: 20 } }
+                    hidden: { opacity: 0, y: 30 },
+                    show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
                   }}
-                  className="group cursor-pointer h-full"
-                  whileHover={{ y: -8, transition: { duration: 0.3 } }}
                 >
-                  <div className="bg-white border border-gray-100/50 rounded-[2.5rem] p-4 shadow-sm hover:shadow-2xl transition-all duration-500 h-full flex flex-col">
-                    {/* Image Container - Compact Scale */}
-                    <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-gray-50 mb-5 shadow-inner">
-                      <Link href={`/products/${product.id}`} className="block w-full h-full">
-                        <img
-                          src={resolveProductImage(product.image)}
-                          alt={product.name}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                      </Link>
-
-                      {/* Featured Badge - Compact Black Pill */}
-                      {product.featured && (
-                        <div className="absolute top-4 left-4 z-10">
-                          <motion.span
-                            initial={{ opacity: 0, x: -10 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="px-3 py-1.5 bg-black/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg"
-                          >
-                            Featured
-                          </motion.span>
-                        </div>
-                      )}
-
-                      {/* Add to Cart Overlay */}
-                      <div className="absolute inset-x-4 bottom-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10">
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleAddToCart(product);
-                          }}
-                          disabled={addingToCartId === product.id || Number(product.stock) === 0}
-                          className="w-full bg-white text-black py-3 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-gray-50 shadow-xl flex items-center justify-center gap-2"
-                        >
-                          {addingToCartId === product.id ? (
-                            'Adding...'
-                          ) : Number(product.stock) === 0 ? (
-                            'Out of Stock'
-                          ) : (
-                            <>
-                              Add <ShoppingCart size={12} />
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Product Info - Stacked & Clean */}
-                    <div className="px-1 pb-1 flex flex-col flex-grow">
-                      {/* Row 1: Title */}
-                      <div className="mb-1">
-                        <h3 className="font-bold text-black text-lg leading-tight group-hover:text-blue-600 transition-colors truncate" title={product.name}>
-                          <Link href={`/products/${product.id}`}>
-                            {product.name}
-                          </Link>
-                        </h3>
-                      </div>
-
-                      {/* Row 2: Price */}
-                      <div className="mb-3">
-                        <span className="font-black text-black text-xl tracking-tight block">
-                          ${product.price}
-                        </span>
-                      </div>
-
-                      {/* Row 3: Description */}
-                      <p className="text-gray-500 text-xs font-medium line-clamp-2 mb-4 flex-grow leading-relaxed">
-                        {product.description}
-                      </p>
-
-                      {/* Row 4: Category */}
-                      {product.category && (
-                        <div className="pt-3 border-t border-gray-50 mt-auto flex items-center justify-between">
-                          <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400">
-                            {product.category}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  <ProductCard product={product} />
                 </motion.div>
               ))}
             </motion.div>
@@ -384,9 +320,9 @@ export default function HomePage() {
       >
         <div className="max-w-[1440px] mx-auto px-6 relative z-10 text-center">
           <div className="max-w-3xl mx-auto">
-            <span className="text-blue-600 font-black uppercase tracking-[0.4em] text-[11px] mb-6 block">Need Assistance?</span>
-            <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 text-black">Get in Touch</h2>
-            <p className="text-gray-500 text-xl mb-14 font-medium leading-relaxed">Have questions about our products or need technical support? Our team is here to help you find the perfect tech solution.</p>
+            <span className="text-emerald-600 font-black uppercase tracking-[0.4em] text-[10px] mb-6 block">Need Assistance?</span>
+            <h2 className="text-4xl md:text-[4.5rem] font-extrabold font-plus-jakarta-sans tracking-tighter mb-8 text-black leading-[0.9]">Get in Touch</h2>
+            <p className="text-gray-500 text-lg mb-14 font-medium leading-relaxed">Have questions about our products or need technical support? Our team is here to help you find the perfect luxury timepiece.</p>
 
             <div className="flex justify-center group">
               <Link
@@ -396,14 +332,14 @@ export default function HomePage() {
                 <span className="relative z-10 flex items-center">
                   Contact Us <ArrowRight className="ml-4 group-hover/btn:translate-x-3 transition-transform duration-500" size={20} />
                 </span>
-                <div className="absolute inset-0 bg-blue-600 -translate-x-full group-hover/btn:translate-x-0 transition-transform duration-500 ease-in-out"></div>
+                <div className="absolute inset-0 bg-emerald-600 -translate-x-full group-hover/btn:translate-x-0 transition-transform duration-500 ease-in-out"></div>
               </Link>
             </div>
           </div>
         </div>
 
-        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] bg-blue-50/30 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-purple-50/30 rounded-full blur-[120px]"></div>
+        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] bg-emerald-50/20 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-emerald-950/10 rounded-full blur-[120px]"></div>
       </motion.section>
     </div>
   );

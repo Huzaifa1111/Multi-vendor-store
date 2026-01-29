@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Star, User, Calendar } from 'lucide-react';
 
 interface Review {
@@ -33,74 +34,101 @@ export default function ReviewList({ reviews }: ReviewListProps) {
     const averageRating = reviews.reduce((acc, rev) => acc + rev.rating, 0) / reviews.length;
 
     return (
-        <div className="space-y-8">
-            {/* Review Stats Header */}
-            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 opacity-60"></div>
-                <div className="text-center md:text-left">
-                    <p className="text-sm font-black text-gray-400 uppercase tracking-widest mb-1">Average Rating</p>
-                    <div className="flex items-end gap-2">
-                        <h2 className="text-6xl font-black text-gray-900 tracking-tight">{averageRating.toFixed(1)}</h2>
-                        <div className="mb-2">
-                            <div className="flex gap-0.5 text-yellow-400 mb-1">
+        <div className="space-y-12 font-plus-jakarta-sans">
+            {/* Review Stats Header - Archive Signature */}
+            <div className="bg-white p-10 rounded-xl border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-12 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-50 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 opacity-40 group-hover:opacity-60 transition-opacity duration-1000"></div>
+
+                <div className="text-center md:text-left relative z-10">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.4em] mb-4">Metric: Average Rating</p>
+                    <div className="flex items-end gap-3 px-4 py-6 bg-gray-50/50 rounded-xl border border-gray-100">
+                        <h2 className="text-7xl font-black text-black tracking-tighter leading-none">{averageRating.toFixed(1)}</h2>
+                        <div className="mb-1">
+                            <div className="flex gap-1 text-emerald-600 mb-2">
                                 {[1, 2, 3, 4, 5].map((i) => (
-                                    <Star key={i} size={16} className={i <= Math.round(averageRating) ? 'fill-yellow-400' : 'text-gray-200'} />
+                                    <Star key={i} size={14} className={i <= Math.round(averageRating) ? 'fill-current' : 'text-gray-200'} strokeWidth={3} />
                                 ))}
                             </div>
-                            <p className="text-xs font-bold text-gray-500">{reviews.length} total reviews</p>
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{reviews.length} Total Testimony</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex-1 w-full max-w-xs space-y-2">
+                <div className="flex-1 w-full max-w-sm space-y-3 relative z-10">
                     {[5, 4, 3, 2, 1].map((rating) => {
                         const count = reviews.filter(r => r.rating === rating).length;
                         const percentage = (count / reviews.length) * 100;
                         return (
-                            <div key={rating} className="flex items-center gap-3">
-                                <span className="text-xs font-bold text-gray-500 w-3">{rating}</span>
-                                <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                    <div className="h-full bg-yellow-400 rounded-full" style={{ width: `${percentage}%` }}></div>
+                            <div key={rating} className="flex items-center gap-4">
+                                <span className="text-[10px] font-black text-gray-400 w-3">{rating}</span>
+                                <div className="flex-1 h-1.5 bg-gray-50 rounded-full overflow-hidden border border-gray-100">
+                                    <div className="h-full bg-emerald-600 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(5,150,105,0.2)]" style={{ width: `${percentage}%` }}></div>
                                 </div>
-                                <span className="text-[10px] font-bold text-gray-400 w-6 text-right">{count}</span>
+                                <span className="text-[9px] font-black text-gray-400 w-10 text-right uppercase tracking-widest">{percentage.toFixed(0)}%</span>
                             </div>
                         );
                     })}
                 </div>
             </div>
 
-            {/* Individual Reviews */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Individual Reviews - Editorial Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {reviews.map((review) => (
-                    <div key={review.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-lg transition-shadow">
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm overflow-hidden border border-blue-100">
-                                    {review.user.picture ? (
-                                        <img src={review.user.picture} alt={review.user.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                        review.user.name.charAt(0).toUpperCase()
-                                    )}
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-gray-900 text-sm">{review.user.name}</h4>
-                                    <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                                        <Calendar size={10} />
-                                        {new Date(review.createdAt).toLocaleDateString()}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex gap-0.5 text-yellow-400">
-                                {[1, 2, 3, 4, 5].map((i) => (
-                                    <Star key={i} size={12} className={i <= review.rating ? 'fill-yellow-400' : 'text-gray-200'} />
-                                ))}
-                            </div>
-                        </div>
-                        <p className="text-gray-700 text-sm font-medium leading-relaxed">
-                            {review.comment}
-                        </p>
-                    </div>
+                    <ReviewItem key={review.id} review={review} />
                 ))}
+            </div>
+        </div>
+    );
+}
+
+function ReviewItem({ review }: { review: any }) {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const isLong = review.comment.length > 150;
+
+    return (
+        <div className="group bg-white p-8 rounded-xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1">
+            <div className="flex items-start justify-between mb-8">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center font-black text-xs overflow-hidden border border-emerald-100 shadow-inner">
+                        {review.user.picture ? (
+                            <img src={review.user.picture} alt={review.user.name} className="w-full h-full object-cover" />
+                        ) : (
+                            review.user.name.charAt(0).toUpperCase()
+                        )}
+                    </div>
+                    <div>
+                        <h4 className="font-black text-black text-[13px] uppercase tracking-widest leading-none mb-1.5">{review.user.name}</h4>
+                        <div className="flex items-center gap-2 text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em]">
+                            <Calendar size={10} strokeWidth={3} />
+                            {new Date(review.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </div>
+                    </div>
+                </div>
+                <div className="flex gap-1 text-emerald-600 p-2 bg-emerald-50/50 rounded-lg">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                        <Star key={i} size={10} className={i <= review.rating ? 'fill-current' : 'text-gray-200'} strokeWidth={3} />
+                    ))}
+                </div>
+            </div>
+
+            <div className="relative">
+                <p className={`text-gray-500 text-[14px] font-medium leading-[1.8] italic group-hover:text-black transition-all duration-500 ${!isExpanded && isLong ? 'line-clamp-3' : ''}`}>
+                    "{review.comment}"
+                </p>
+
+                {isLong && (
+                    <button
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="mt-4 flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-emerald-600 hover:text-emerald-700 transition-all group/btn"
+                    >
+                        <span className="w-4 h-[1px] bg-emerald-200 group-hover/btn:w-8 transition-all"></span>
+                        {isExpanded ? 'Collapse' : 'Expand Testimony'}
+                    </button>
+                )}
+            </div>
+
+            <div className="mt-6 flex justify-end">
+                <div className="w-8 h-[1px] bg-gray-100 group-hover:w-16 group-hover:bg-emerald-200 transition-all duration-500"></div>
             </div>
         </div>
     );

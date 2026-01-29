@@ -143,7 +143,7 @@ export default function Header() {
 
             {/* Professional Category Dropdown */}
             <div className="relative group/mega">
-              <button className="flex items-center space-x-1.5 text-[15px] font-bold text-black uppercase tracking-tight group-hover:text-blue-600 transition-colors py-8">
+              <button className="flex items-center space-x-1.5 text-[15px] font-bold text-black uppercase tracking-tight group-hover:text-emerald-600 transition-colors py-8">
                 <span>Shop by Category</span>
                 <ChevronDown size={14} className="group-hover/mega:rotate-180 transition-transform duration-300" />
               </button>
@@ -155,12 +155,12 @@ export default function Header() {
                     href={`/products?category=${cat.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`}
                     className="flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
                   >
-                    <div className="w-1.5 h-1.5 rounded-full bg-gray-200 group-hover:bg-blue-600 transition-colors" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-gray-200 group-hover:bg-emerald-600 transition-colors" />
                     <span className="text-[14px] font-medium text-gray-600 group-hover:text-black transition-colors">{cat}</span>
                   </Link>
                 ))}
                 <div className="col-span-3 mt-4 pt-4 border-t border-gray-100">
-                  <Link href="/products" className="flex items-center text-blue-600 font-black uppercase tracking-[0.2em] text-[11px] hover:translate-x-2 transition-transform">
+                  <Link href="/products" className="flex items-center text-emerald-600 font-black uppercase tracking-[0.2em] text-[11px] hover:translate-x-2 transition-transform">
                     View All Products <ArrowRight size={14} className="ml-2" />
                   </Link>
                 </div>
@@ -181,9 +181,9 @@ export default function Header() {
           {/* Center: Logo */}
           <div className="absolute left-1/2 -translate-x-1/2">
             <Link href="/" className="text-3xl font-bold tracking-tighter text-black hover:scale-105 transition-transform duration-300 flex items-center group">
-              <span className="bg-white border-2 border-black text-black px-2 py-0.5 rounded mr-1 group-hover:bg-blue-50 transition-colors">E</span>
+              <span className="bg-white border-2 border-black text-black px-2 py-0.5 rounded mr-1 group-hover:bg-emerald-50 transition-colors">E</span>
               <span>Store</span>
-              <span className="text-blue-600 animate-pulse">.</span>
+              <span className="text-emerald-600 animate-pulse">.</span>
             </Link>
           </div>
 
@@ -203,7 +203,7 @@ export default function Header() {
                         <Crown size={12} className="absolute -top-1.5 -right-1.5 text-yellow-500 fill-yellow-500 animate-bounce" />
                       </div>
                     ) : (
-                      <User size={20} className="text-blue-600" />
+                      <User size={20} className="text-emerald-600" />
                     )}
 
                     <span className="hidden sm:inline-block text-[13px] font-bold text-black uppercase tracking-wider">
@@ -222,11 +222,11 @@ export default function Header() {
                           <span className="mt-1 text-[10px] uppercase font-black bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded w-fit">Admin</span>
                         )}
                       </div>
-                      <Link href="/dashboard" className="block px-4 py-2.5 text-sm font-medium hover:bg-gray-50 hover:text-blue-600 transition-colors">Dashboard</Link>
+                      <Link href="/dashboard" className="block px-4 py-2.5 text-sm font-medium hover:bg-gray-50 hover:text-emerald-600 transition-colors">Dashboard</Link>
                       {user?.role === 'admin' && (
                         <Link href="/admin" className="block px-4 py-2.5 text-sm font-medium text-purple-700 hover:bg-purple-50 transition-colors">Admin Panel</Link>
                       )}
-                      <Link href="/dashboard" className="block px-4 py-2.5 text-sm font-medium hover:bg-gray-50 hover:text-blue-600 transition-colors border-b border-gray-50">Profile Settings</Link>
+                      <Link href="/dashboard" className="block px-4 py-2.5 text-sm font-medium hover:bg-gray-50 hover:text-emerald-600 transition-colors border-b border-gray-50">Profile Settings</Link>
                       <button
                         onClick={handleLogout}
                         className="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors"
@@ -240,14 +240,14 @@ export default function Header() {
                 <div className="flex items-center space-x-1 sm:space-x-4">
                   <Link
                     href="/auth/login"
-                    className="text-[13px] font-bold uppercase tracking-widest text-black hover:text-blue-600 transition-colors px-2 py-1"
+                    className="text-[13px] font-bold uppercase tracking-widest text-black hover:text-emerald-600 transition-colors px-2 py-1"
                   >
                     Login
                   </Link>
                   <span className="text-gray-200 hidden sm:inline">|</span>
                   <Link
                     href="/auth/register"
-                    className="hidden sm:block text-[13px] font-bold uppercase tracking-widest text-black hover:text-blue-600 transition-colors px-2 py-1"
+                    className="hidden sm:block text-[13px] font-bold uppercase tracking-widest text-black hover:text-emerald-600 transition-colors px-2 py-1"
                   >
                     Register
                   </Link>

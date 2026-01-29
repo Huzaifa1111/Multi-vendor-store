@@ -55,7 +55,7 @@ export default function Hero() {
     };
 
     return (
-        <section ref={containerRef} className="relative h-[500px] md:h-[650px] bg-black overflow-hidden font-jost border-b border-gray-100">
+        <section ref={containerRef} className="relative h-[500px] md:h-[650px] bg-black overflow-hidden font-plus-jakarta-sans border-b border-gray-100">
             <AnimatePresence mode="wait">
                 <motion.div
                     key={currentSlide}
@@ -111,7 +111,7 @@ export default function Hero() {
                                     ></motion.div>
                                 </motion.div>
 
-                                <h1 className={`text-4xl md:text-5xl lg:text-7xl font-bold leading-[1] tracking-tighter mb-6 ${slides[currentSlide].textColor}`}>
+                                <h1 className={`text-4xl md:text-5xl lg:text-7xl font-bold font-plus-jakarta-sans leading-[1] tracking-tighter mb-6 ${slides[currentSlide].textColor}`}>
                                     {splitTitle(slides[currentSlide].title)}
                                 </h1>
 
