@@ -11,6 +11,9 @@ export class CartItem {
   @Column()
   productId: number;
 
+  @Column({ nullable: true })
+  variationId: number;
+
   @Column()
   quantity: number;
 

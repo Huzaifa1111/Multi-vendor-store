@@ -20,15 +20,23 @@ export class CartService {
       order: { createdAt: 'DESC' },
     });
 
-    // Get product details for each cart item
+    // Get product and variation details for each cart item
     const cartWithProducts = await Promise.all(
       cartItems.map(async (item) => {
         const product = await this.productRepository.findOne({
           where: { id: item.productId },
+          relations: ['variations', 'brand']
         });
+
+        let variation: any = null;
+        if (item.variationId && product?.variations) {
+          variation = product.variations.find(v => v.id === item.variationId) || null;
+        }
+
         return {
           ...item,
           product: product || null,
+          variation: variation,
         };
       })
     );
@@ -37,25 +45,40 @@ export class CartService {
   }
 
   async addToCart(userId: number, addToCartDto: AddToCartDto) {
-    const { productId, quantity } = addToCartDto;
+    const { productId, quantity, variationId } = addToCartDto;
 
     // Check if product exists
     const product = await this.productRepository.findOne({
       where: { id: productId },
+      relations: ['variations']
     });
 
     if (!product) {
       throw new NotFoundException('Product not found');
     }
 
-    // Check if product is in stock
-    if (product.stock < quantity) {
+    // Check variation if provided
+    let variation: any = null;
+    if (variationId) {
+      variation = product.variations?.find(v => v.id === variationId);
+      if (!variation) {
+        throw new NotFoundException('Variation not found');
+      }
+    }
+
+    // Check stock
+    const availableStock = variation ? variation.stock : product.stock;
+    if (availableStock < quantity) {
       throw new BadRequestException('Insufficient stock');
     }
 
-    // Check if item already in cart
+    // Check if item already in cart with same variation
     const existingCartItem = await this.cartItemRepository.findOne({
-      where: { userId, productId },
+      where: {
+        userId,
+        productId,
+        variationId: variationId ? variationId : undefined
+      } as any,
     });
 
     if (existingCartItem) {
@@ -68,9 +91,10 @@ export class CartService {
     const cartItem = this.cartItemRepository.create({
       userId,
       productId,
+      variationId: variationId ? variationId : undefined,
       quantity,
-      price: product.price,
-    });
+      price: variation ? variation.price : product.price,
+    } as any);
 
     return await this.cartItemRepository.save(cartItem);
   }

@@ -1,3 +1,4 @@
+// apps/frontend/src/app/admin/orders/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -11,12 +12,13 @@ import {
   Truck,
   Search,
   Filter,
-  MoreVertical,
   DollarSign,
   Calendar,
   User,
-  Loader2
+  Loader2,
+  ExternalLink
 } from 'lucide-react';
+import Link from 'next/link';
 
 interface Order {
   id: number;
@@ -67,15 +69,13 @@ export default function AdminOrdersPage() {
   const handleStatusChange = async (id: number, status: string) => {
     try {
       await ordersService.updateOrderStatus(id, status);
-      // Optimistic update
       setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
     } catch (error) {
       console.error('Failed to update status:', error);
-      fetchOrders(); // Revert on fail
+      fetchOrders();
     }
-  }
+  };
 
-  // Derived Statistics
   const totalRevenue = orders.reduce((sum, order) => sum + Number(order.total), 0);
   const pendingOrders = orders.filter(o => o.status === 'pending').length;
   const completedOrders = orders.filter(o => o.status === 'delivered').length;
@@ -124,7 +124,6 @@ export default function AdminOrdersPage() {
       initial="hidden"
       animate="show"
     >
-      {/* Header */}
       <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white rounded-[2.5rem] p-8 md:p-10 shadow-sm border border-gray-100 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-green-50 to-blue-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-70 pointer-events-none"></div>
         <div className="relative z-10">
@@ -133,7 +132,6 @@ export default function AdminOrdersPage() {
         </div>
       </motion.div>
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <motion.div variants={itemVariants} whileHover={{ y: -5 }} className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm">
           <div className="flex justify-between items-start mb-4">
@@ -176,7 +174,6 @@ export default function AdminOrdersPage() {
         </motion.div>
       </div>
 
-      {/* Filters and Search */}
       <motion.div variants={itemVariants} className="bg-white p-4 rounded-[1.5rem] border border-gray-100 shadow-sm flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -206,7 +203,6 @@ export default function AdminOrdersPage() {
         </div>
       </motion.div>
 
-      {/* Orders Table */}
       <motion.div variants={itemVariants} className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-100">
@@ -267,17 +263,26 @@ export default function AdminOrdersPage() {
                         </span>
                       </td>
                       <td className="px-8 py-5">
-                        <select
-                          value={order.status}
-                          onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                          className="text-xs font-bold p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer hover:bg-white transition-colors"
-                        >
-                          <option value="pending">Pending</option>
-                          <option value="processing">Processing</option>
-                          <option value="shipped">Shipped</option>
-                          <option value="delivered">Delivered</option>
-                          <option value="cancelled">Cancelled</option>
-                        </select>
+                        <div className="flex items-center gap-3">
+                          <Link
+                            href={`/admin/orders/${order.id}`}
+                            className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                            title="View Details"
+                          >
+                            <ExternalLink size={16} />
+                          </Link>
+                          <select
+                            value={order.status}
+                            onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                            className="text-xs font-bold p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 outline-none cursor-pointer hover:bg-white transition-colors"
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                          </select>
+                        </div>
                       </td>
                     </motion.tr>
                   ))}

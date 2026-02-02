@@ -119,11 +119,11 @@ export default function HomePage() {
   }, [featuredProducts]);
 
   const categories = [
-    { name: 'Electronic Devices', image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=1000&auto=format&fit=crop', link: '/products?category=electronic-devices' },
-    { name: 'Electronic Accessories', image: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=1000&auto=format&fit=crop', link: '/products?category=electronic-accessories' },
-    { name: 'TV & Home Appliances', image: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=1000&auto=format&fit=crop', link: '/products?category=tv-appliances' },
-    { name: 'Health & Beauty', image: 'https://images.unsplash.com/photo-1612817288484-6f916006741a?q=80&w=1000&auto=format&fit=crop', link: '/products?category=health-beauty' },
-    { name: 'Babies & Toys', image: 'https://images.unsplash.com/photo-1532330393533-443990a51d10?q=80&w=1000&auto=format&fit=crop', link: '/products?category=babies-toys' },
+    { name: 'Electronic Devices', image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=1000&auto=format&fit=crop', link: '/products?category=Electronic Devices' },
+    { name: 'Electronic Accessories', image: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=1000&auto=format&fit=crop', link: '/products?category=Electronic Accessories' },
+    { name: 'TV & Home Appliances', image: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=1000&auto=format&fit=crop', link: '/products?category=TV & Home Appliances' },
+    { name: 'Health & Beauty', image: 'https://images.unsplash.com/photo-1612817288484-6f916006741a?q=80&w=1000&auto=format&fit=crop', link: '/products?category=Health & Beauty' },
+    { name: 'Babies & Toys', image: 'https://images.unsplash.com/photo-1532330393533-443990a51d10?q=80&w=1000&auto=format&fit=crop', link: '/products?category=Babies & Toys' },
   ];
 
   return (

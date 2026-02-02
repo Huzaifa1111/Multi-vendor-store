@@ -93,10 +93,10 @@ export default function ProductTable({ products, loading = false, onDelete }: Pr
                   <td className="px-6 py-5">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-12 w-12 relative shadow-sm rounded-xl overflow-hidden border border-gray-100">
-                        {product.image ? (
+                        {product.images && product.images.length > 0 ? (
                           <img
                             className="h-full w-full object-cover"
-                            src={resolveProductImage(product.image)}
+                            src={resolveProductImage(product.images)}
                             alt={product.name}
                           />
                         ) : (
@@ -188,10 +188,10 @@ export default function ProductTable({ products, loading = false, onDelete }: Pr
             >
               <div className="flex items-start gap-4 mb-4">
                 <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
-                  {product.image ? (
+                  {product.images && product.images.length > 0 ? (
                     <img
                       className="h-full w-full object-cover"
-                      src={resolveProductImage(product.image)}
+                      src={resolveProductImage(product.images)}
                       alt={product.name}
                     />
                   ) : (

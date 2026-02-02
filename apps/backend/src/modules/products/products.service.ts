@@ -3,6 +3,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './product.entity';
+import { ProductVariation } from './variation.entity';
+import { Brand } from '../brands/brand.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductFilterDto } from './dto/product-filter.dto'; // ADD THIS IMPORT
 import { CloudinaryService } from '../uploads/cloudinary.service';
@@ -12,44 +14,69 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
+    @InjectRepository(ProductVariation)
+    private variationRepository: Repository<ProductVariation>,
+    @InjectRepository(Brand)
+    private brandRepository: Repository<Brand>,
     private cloudinaryService: CloudinaryService,
   ) { }
 
-  async create(createProductDto: CreateProductDto, image?: Express.Multer.File): Promise<any> {
+  async create(createProductDto: CreateProductDto, images?: Express.Multer.File[]): Promise<any> {
     console.log('Creating product:', createProductDto);
-    console.log('Image received:', image ? `Type: ${image.mimetype}, Size: ${image.size}` : 'No image');
+    console.log('Images received:', images ? images.length : 0);
 
-    let imageUrl: string | undefined = undefined;
+    const imageUrls: string[] = [];
 
-    if (image) {
+    if (images && images.length > 0) {
       try {
-        imageUrl = await this.cloudinaryService.uploadImage(image);
-        console.log('Image uploaded to Cloudinary:', imageUrl);
+        for (const image of images) {
+          const url = await this.cloudinaryService.uploadImage(image);
+          imageUrls.push(url);
+        }
+        console.log('Images uploaded to Cloudinary:', imageUrls);
       } catch (error) {
-        console.error('Failed to upload image:', error);
-        throw new Error('Failed to upload image to Cloudinary');
+        console.error('Failed to upload images:', error);
+        throw new Error('Failed to upload images to Cloudinary');
       }
     }
 
     const productData: Partial<Product> = {
       name: createProductDto.name,
       description: createProductDto.description,
+      longDescription: createProductDto.longDescription,
       price: createProductDto.price,
       stock: createProductDto.stock,
+      sku: createProductDto.sku,
       category: createProductDto.category || 'Uncategorized',
-      featured: createProductDto.featured || false, // ADD THIS LINE
+      featured: createProductDto.featured || false,
+      images: imageUrls,
     };
 
-    if (imageUrl) {
-      productData.image = imageUrl;
+    if (createProductDto.brandId) {
+      productData.brand = { id: createProductDto.brandId } as Brand;
+    }
+
+    if (createProductDto.upsellIds) {
+      productData.upsells = createProductDto.upsellIds.map(id => ({ id } as Product));
+    }
+
+    if (createProductDto.crossSellIds) {
+      productData.crossSells = createProductDto.crossSellIds.map(id => ({ id } as Product));
     }
 
     const product = this.productRepository.create(productData as Product);
     const savedProduct = await this.productRepository.save(product);
 
+    if (createProductDto.variations && createProductDto.variations.length > 0) {
+      const variations = createProductDto.variations.map(v =>
+        this.variationRepository.create({ ...v, product: savedProduct })
+      );
+      await this.variationRepository.save(variations);
+    }
+
     return {
       message: 'Product created successfully',
-      data: savedProduct,
+      data: await this.findOne(savedProduct.id),
     };
   }
 
@@ -78,6 +105,8 @@ export class ProductsService {
       });
     }
 
+    query.leftJoinAndSelect('product.brand', 'brand');
+    query.leftJoinAndSelect('product.variations', 'variations');
     query.orderBy('product.createdAt', 'DESC');
 
     if (filters?.limit) {
@@ -87,9 +116,11 @@ export class ProductsService {
     return query.getMany();
   }
 
-  async findFeaturedProducts(limit?: number): Promise<Product[]> { // ADD THIS METHOD
+  async findFeaturedProducts(limit?: number): Promise<Product[]> {
     const query = this.productRepository
       .createQueryBuilder('product')
+      .leftJoinAndSelect('product.brand', 'brand')
+      .leftJoinAndSelect('product.variations', 'variations')
       .where('product.featured = :featured', { featured: true })
       .orderBy('product.createdAt', 'DESC');
 
@@ -111,7 +142,10 @@ export class ProductsService {
   }
 
   async findOne(id: number): Promise<Product> {
-    const product = await this.productRepository.findOne({ where: { id } });
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: ['brand', 'variations', 'upsells', 'crossSells']
+    });
 
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
@@ -120,27 +154,24 @@ export class ProductsService {
     return product;
   }
 
-  async update(id: number, updateProductDto: any, image?: Express.Multer.File): Promise<Product> {
+  async update(id: number, updateProductDto: any, images?: Express.Multer.File[]): Promise<Product> {
     const product = await this.findOne(id);
 
-    // Upload new image if provided
-    let imageUrl: string | undefined = undefined;
-    if (image) {
-      try {
-        // Optional: Delete old image if it exists and is on Cloudinary
-        // if (product.image && product.image.includes('cloudinary')) {
-        //   // Extract public_id and delete
-        // }
+    const imageUrls: string[] = product.images || [];
 
-        imageUrl = await this.cloudinaryService.uploadImage(image);
-        console.log('New image uploaded to Cloudinary:', imageUrl);
+    if (images && images.length > 0) {
+      try {
+        for (const image of images) {
+          const url = await this.cloudinaryService.uploadImage(image);
+          imageUrls.push(url);
+        }
+        console.log('New images uploaded to Cloudinary:', imageUrls);
       } catch (error) {
-        console.error('Failed to upload new image:', error);
-        throw new Error('Failed to upload new image to Cloudinary');
+        console.error('Failed to upload new images:', error);
+        throw new Error('Failed to upload new images to Cloudinary');
       }
     }
 
-    // ADD featured to update data
     const updateData: any = { ...updateProductDto };
 
     // Handle types
@@ -153,18 +184,31 @@ export class ProductsService {
       updateData.stock = isNaN(s) ? 0 : s;
     }
 
-    console.log('=== PRODUCT UPDATE DEBUG ===');
-    console.log('Update Data Final:', updateData);
-
-    if (updateProductDto.featured !== undefined) {
-      updateData.featured = updateProductDto.featured;
+    if (updateProductDto.brandId) {
+      updateData.brand = { id: updateProductDto.brandId };
     }
 
-    if (imageUrl) {
-      updateData.image = imageUrl;
+    if (updateProductDto.upsellIds) {
+      updateData.upsells = updateProductDto.upsellIds.map(id => ({ id } as Product));
     }
 
-    await this.productRepository.update(id, updateData);
+    if (updateProductDto.crossSellIds) {
+      updateData.crossSells = updateProductDto.crossSellIds.map(id => ({ id } as Product));
+    }
+
+    updateData.images = imageUrls;
+
+    // Variations handling for update
+    if (updateProductDto.variations) {
+      await this.variationRepository.delete({ product: { id } });
+      const variations = updateProductDto.variations.map(v =>
+        this.variationRepository.create({ ...v, product: { id } as Product })
+      );
+      await this.variationRepository.save(variations);
+      delete updateData.variations;
+    }
+
+    await this.productRepository.save({ id, ...updateData });
     return this.findOne(id);
   }
 

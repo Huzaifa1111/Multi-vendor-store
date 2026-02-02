@@ -8,6 +8,7 @@ import { useCart } from '@/hooks/useCart';
 import { ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
 
 export default function CartPage() {
   const { items, isLoading, fetchCart } = useCart();
@@ -26,14 +27,15 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 py-10">
       <div className="container mx-auto px-4 max-w-7xl">
+        <Breadcrumbs />
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Shopping Cart</h1>
           <p className="text-gray-600 text-lg">
-            {items.length === 0 
-              ? 'Your cart is empty' 
+            {items.length === 0
+              ? 'Your cart is empty'
               : `You have ${items.reduce((sum, item) => sum + item.quantity, 0)} item${items.reduce((sum, item) => sum + item.quantity, 0) !== 1 ? 's' : ''} in your cart`
             }
           </p>

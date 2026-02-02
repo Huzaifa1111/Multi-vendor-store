@@ -126,11 +126,13 @@ export const useCartStore = create<CartStore>()(
       // Optimistic updates (for immediate UI feedback)
       addItemOptimistic: (item: CartItem) => {
         set((state) => {
-          const existingIndex = state.items.findIndex(i => i.productId === item.productId);
+          const existingIndex = state.items.findIndex(i =>
+            i.productId === item.productId && i.variationId === item.variationId
+          );
           let newItems = [...state.items];
 
           if (existingIndex > -1) {
-            // Update quantity if item exists
+            // Update quantity if item and variation match
             newItems[existingIndex].quantity += item.quantity;
           } else {
             // Add new item

@@ -7,9 +7,11 @@ import { Product } from '../products/product.entity';
 import { CartModule } from '../cart/cart.module';
 import { StripeService } from './stripe.service'; // Add this import
 
+import { OrderItem } from './order-item.entity';
+
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Order, Product]),
+    TypeOrmModule.forFeature([Order, Product, OrderItem]),
     CartModule,
   ],
   controllers: [OrdersController],

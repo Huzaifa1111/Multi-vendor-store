@@ -1,11 +1,11 @@
 // apps/frontend/src/app/admin/products/create/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, UploadCloud, Image as ImageIcon, Check, Loader2, DollarSign, Package, Tag, Layers, Star } from 'lucide-react';
+import { ArrowLeft, UploadCloud, Image as ImageIcon, Check, Loader2, DollarSign, Package, Tag, Layers, Star, Plus, Trash2, Search, Link as LinkIcon, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -22,19 +22,53 @@ const itemVariants = {
   show: { opacity: 1, y: 0 }
 };
 
+interface Variation {
+  color: string;
+  size: string;
+  sku: string;
+  price: number;
+  stock: number;
+}
+
 export default function CreateProductPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [brands, setBrands] = useState<{ id: number, name: string }[]>([]);
+  const [products, setProducts] = useState<{ id: number, name: string }[]>([]);
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    longDescription: '',
     price: 0,
     stock: 0,
     category: '',
+    brandId: '',
+    sku: '',
     featured: false,
+    upsellIds: [] as number[],
+    crossSellIds: [] as number[],
   });
-  const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const [variations, setVariations] = useState<Variation[]>([]);
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Fetch brands and products for selection
+    const fetchData = async () => {
+      try {
+        const brandsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/brands`);
+        if (brandsRes.ok) setBrands(await brandsRes.json());
+
+        const productsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/products`);
+        if (productsRes.ok) setProducts(await productsRes.json());
+      } catch (err) {
+        console.error('Failed to fetch data', err);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -48,16 +82,42 @@ export default function CreateProductPage() {
     }));
   };
 
+  const generateSku = () => {
+    if (!formData.name) return;
+    const prefix = formData.name.slice(0, 3).toUpperCase().replace(/[^A-Z]/g, 'X');
+    const random = Math.floor(1000 + Math.random() * 9000);
+    const generated = `${prefix}-${random}`;
+    setFormData(prev => ({ ...prev, sku: generated }));
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    const files = e.target.files;
+    if (files) {
+      const filesArray = Array.from(files);
+      setImages(prev => [...prev, ...filesArray]);
+
+      const newPreviews = filesArray.map(file => URL.createObjectURL(file));
+      setImagePreviews(prev => [...prev, ...newPreviews]);
     }
+  };
+
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const addVariation = () => {
+    setVariations([...variations, { color: '', size: '', sku: '', price: formData.price, stock: 0 }]);
+  };
+
+  const updateVariation = (index: number, field: keyof Variation, value: string | number) => {
+    const updated = [...variations];
+    updated[index] = { ...updated[index], [field]: value };
+    setVariations(updated);
+  };
+
+  const removeVariation = (index: number) => {
+    setVariations(variations.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,16 +126,20 @@ export default function CreateProductPage() {
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('name', formData.name);
-      formDataToSend.append('description', formData.description);
-      formDataToSend.append('price', formData.price.toString());
-      formDataToSend.append('stock', formData.stock.toString());
-      formDataToSend.append('featured', formData.featured.toString());
-      if (formData.category) {
-        formDataToSend.append('category', formData.category);
+      Object.entries(formData).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach(v => formDataToSend.append(key, v.toString()));
+        } else {
+          formDataToSend.append(key, value.toString());
+        }
+      });
+
+      if (variations.length > 0) {
+        formDataToSend.append('variations', JSON.stringify(variations));
       }
-      if (image) {
-        formDataToSend.append('image', image);
+
+      if (images.length > 0) {
+        images.forEach(img => formDataToSend.append('images', img));
       }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/products`, {
@@ -88,11 +152,13 @@ export default function CreateProductPage() {
         router.push('/admin/products');
         router.refresh();
       } else {
-        throw new Error('Failed to create product');
+        const errorData = await response.json();
+        console.error('Submission error:', errorData);
+        throw new Error(errorData.error || 'Failed to create product');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating product:', error);
-      alert('Failed to create product. Please try again.');
+      alert(`Error: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -164,16 +230,52 @@ export default function CreateProductPage() {
               </div>
 
               <div>
-                <label htmlFor="description" className="block text-sm font-bold text-gray-700 mb-2">Description</label>
+                <label htmlFor="sku" className="block text-sm font-bold text-gray-700 mb-2">Base SKU</label>
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    id="sku"
+                    name="sku"
+                    value={formData.sku}
+                    onChange={handleInputChange}
+                    className="flex-1 px-5 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all font-medium text-gray-900 placeholder:text-gray-400"
+                    placeholder="e.g. HN-1000-W"
+                  />
+                  <button
+                    type="button"
+                    onClick={generateSku}
+                    className="px-5 py-2 bg-blue-50 text-blue-600 rounded-2xl font-bold hover:bg-blue-100 transition-colors flex items-center gap-2"
+                    title="Auto-generate SKU"
+                  >
+                    <Sparkles size={18} /> Generate
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="description" className="block text-sm font-bold text-gray-700 mb-2">Short Description</label>
                 <textarea
                   id="description"
                   name="description"
                   required
-                  rows={6}
+                  rows={3}
                   value={formData.description}
                   onChange={handleInputChange}
                   className="w-full px-5 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all font-medium text-gray-900 placeholder:text-gray-400 resize-none"
-                  placeholder="Describe your product features, specs, and benefits..."
+                  placeholder="A brief overview of the product..."
+                />
+              </div>
+
+              <div>
+                <label htmlFor="longDescription" className="block text-sm font-bold text-gray-700 mb-2">Long Description</label>
+                <textarea
+                  id="longDescription"
+                  name="longDescription"
+                  rows={8}
+                  value={formData.longDescription}
+                  onChange={handleInputChange}
+                  className="w-full px-5 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all font-medium text-gray-900 placeholder:text-gray-400 resize-none"
+                  placeholder="Detailed product features, specifications, and benefits..."
                 />
               </div>
             </div>
@@ -211,7 +313,7 @@ export default function CreateProductPage() {
                 <label htmlFor="stock" className="block text-sm font-bold text-gray-700 mb-2">Stock Quantity</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Package size={16} className="text-gray-400" />
+                    <span className="text-gray-400"><Package size={16} /></span>
                   </div>
                   <input
                     type="number"
@@ -228,6 +330,154 @@ export default function CreateProductPage() {
               </div>
             </div>
           </div>
+
+          {/* Variations Section */}
+          <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <Layers className="text-indigo-600" /> Product Variations
+              </h2>
+              <button
+                type="button"
+                onClick={addVariation}
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl font-bold hover:bg-indigo-100 transition-colors"
+              >
+                <Plus size={18} /> Add Variation
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <AnimatePresence>
+                {variations.map((v, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="p-6 bg-gray-50/50 border border-gray-100 rounded-2xl grid grid-cols-2 md:grid-cols-5 gap-4 items-end"
+                  >
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">Color</label>
+                      <input
+                        type="text"
+                        value={v.color}
+                        onChange={(e) => updateVariation(index, 'color', e.target.value)}
+                        className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 transition-all text-sm font-medium"
+                        placeholder="e.g. Red"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">Size</label>
+                      <input
+                        type="text"
+                        value={v.size}
+                        onChange={(e) => updateVariation(index, 'size', e.target.value)}
+                        className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 transition-all text-sm font-medium"
+                        placeholder="e.g. XL"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">SKU</label>
+                      <input
+                        type="text"
+                        value={v.sku}
+                        onChange={(e) => updateVariation(index, 'sku', e.target.value)}
+                        className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 transition-all text-sm font-medium"
+                        placeholder="SKU-123"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">Price</label>
+                      <input
+                        type="number"
+                        value={v.price}
+                        onChange={(e) => updateVariation(index, 'price', parseFloat(e.target.value))}
+                        className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 transition-all text-sm font-medium"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <label className="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">Stock</label>
+                        <input
+                          type="number"
+                          value={v.stock}
+                          onChange={(e) => updateVariation(index, 'stock', parseInt(e.target.value))}
+                          className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 transition-all text-sm font-medium"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeVariation(index)}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+              {variations.length === 0 && (
+                <div className="text-center py-8 border-2 border-dashed border-gray-100 rounded-[2rem]">
+                  <p className="text-gray-400 font-medium">No variations added yet.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Related Products Card */}
+          <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm">
+            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <LinkIcon className="text-blue-500" /> Related Products
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Upsells</label>
+                <div className="space-y-2 max-h-48 overflow-y-auto p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
+                  {products.map(p => (
+                    <label key={p.id} className="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded-xl transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={formData.upsellIds.includes(p.id)}
+                        onChange={(e) => {
+                          const updated = e.target.checked
+                            ? [...formData.upsellIds, p.id]
+                            : formData.upsellIds.filter(id => id !== p.id);
+                          setFormData({ ...formData, upsellIds: updated });
+                        }}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700">{p.name}</span>
+                    </label>
+                  ))}
+                  {products.length === 0 && <p className="text-gray-400 text-xs text-center py-2">No products available</p>}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Cross-sells</label>
+                <div className="space-y-2 max-h-48 overflow-y-auto p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
+                  {products.map(p => (
+                    <label key={p.id} className="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded-xl transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={formData.crossSellIds.includes(p.id)}
+                        onChange={(e) => {
+                          const updated = e.target.checked
+                            ? [...formData.crossSellIds, p.id]
+                            : formData.crossSellIds.filter(id => id !== p.id);
+                          setFormData({ ...formData, crossSellIds: updated });
+                        }}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700">{p.name}</span>
+                    </label>
+                  ))}
+                  {products.length === 0 && <p className="text-gray-400 text-xs text-center py-2">No products available</p>}
+                </div>
+              </div>
+            </div>
+          </div>
         </motion.div>
 
         {/* Right Column - Organization & Media */}
@@ -239,35 +489,32 @@ export default function CreateProductPage() {
             </h2>
 
             <div className="space-y-4">
-              <label className="block text-sm font-bold text-gray-700">Product Image</label>
-              <div className="relative group">
-                {imagePreview ? (
-                  <div className="relative w-full aspect-square rounded-2xl overflow-hidden border-2 border-gray-100">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <label htmlFor="image-upload" className="cursor-pointer bg-white text-black px-4 py-2 rounded-lg font-bold text-sm transform translate-y-2 group-hover:translate-y-0 transition-transform">
-                        Change Image
-                      </label>
-                    </div>
+              <label className="block text-sm font-bold text-gray-700">Product Images</label>
+
+              <div className="grid grid-cols-2 gap-4">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative aspect-square rounded-2xl overflow-hidden border-2 border-gray-100 group">
+                    <img src={preview} alt="" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
-                ) : (
-                  <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full aspect-square border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 transition-all group">
-                    <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <UploadCloud className="w-8 h-8 text-blue-500" />
-                    </div>
-                    <p className="text-sm font-bold text-gray-600">Click to upload</p>
-                    <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</p>
-                  </label>
-                )}
+                ))}
+
+                <label htmlFor="image-upload" className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 transition-all group">
+                  <Plus className="w-6 h-6 text-gray-400 group-hover:text-blue-500" />
+                  <span className="text-[10px] font-bold text-gray-400 mt-1 uppercase">Add Image</span>
+                </label>
                 <input
                   id="image-upload"
                   type="file"
                   className="hidden"
                   accept="image/*"
+                  multiple
                   onChange={handleImageChange}
                 />
               </div>
@@ -301,6 +548,22 @@ export default function CreateProductPage() {
                 </select>
               </div>
 
+              <div>
+                <label htmlFor="brandId" className="block text-sm font-bold text-gray-700 mb-2">Brand</label>
+                <select
+                  id="brandId"
+                  name="brandId"
+                  value={formData.brandId}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-100 focus:border-orange-500 transition-all font-medium text-gray-900 appearance-none"
+                >
+                  <option value="">Select a brand</option>
+                  {brands.map(brand => (
+                    <option key={brand.id} value={brand.id}>{brand.name}</option>
+                  ))}
+                </select>
+              </div>
+
               <div className="p-4 bg-yellow-50/50 rounded-2xl border border-yellow-100">
                 <div className="flex items-start space-x-3">
                   <div className="flex items-center h-5 mt-1">
@@ -318,7 +581,7 @@ export default function CreateProductPage() {
                       Featured Product <Star size={14} className="fill-yellow-500 text-yellow-500" />
                     </label>
                     <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                      Featured products are pushed to the homepage top banner.
+                      Featured products are pushed to the homepage.
                     </p>
                   </div>
                 </div>

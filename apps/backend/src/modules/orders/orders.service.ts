@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order, OrderStatus } from './order.entity';
+import { OrderItem } from './order-item.entity';
 import { Product } from '../products/product.entity';
 import { CartService } from '../cart/cart.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -10,6 +11,8 @@ import { StripeService } from './stripe.service';
 @Injectable()
 export class OrdersService {
   constructor(
+    @InjectRepository(OrderItem)
+    private orderItemRepository: Repository<OrderItem>,
     @InjectRepository(Order)
     private orderRepository: Repository<Order>,
     @InjectRepository(Product)
@@ -61,6 +64,20 @@ export class OrdersService {
     }
 
     const savedOrder = await this.orderRepository.save(order);
+
+    // Create Order Items
+    for (const item of cartItems) {
+      const orderItem = this.orderItemRepository.create({
+        orderId: savedOrder.id,
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+        // If cart has color/size, we should save it here
+        // color: item.color,
+        // size: item.size,
+      });
+      await this.orderItemRepository.save(orderItem);
+    }
 
     // Deduct Stock
     for (const item of cartItems) {
@@ -114,12 +131,14 @@ export class OrdersService {
   async getUserOrders(userId: number) {
     return this.orderRepository.find({
       where: { userId },
+      relations: ['items', 'items.product'],
       order: { createdAt: 'DESC' },
     });
   }
 
   async getAllOrders() {
     return this.orderRepository.find({
+      relations: ['items', 'items.product'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -130,7 +149,10 @@ export class OrdersService {
       where.userId = userId;
     }
 
-    const order = await this.orderRepository.findOne({ where });
+    const order = await this.orderRepository.findOne({
+      where,
+      relations: ['items', 'items.product', 'items.product.brand']
+    });
 
     if (!order) {
       throw new NotFoundException('Order not found');

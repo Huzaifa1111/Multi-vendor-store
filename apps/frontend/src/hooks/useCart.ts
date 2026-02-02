@@ -1,7 +1,8 @@
 // apps/frontend/src/hooks/useCart.ts
+'use client';
+
 import { useCallback } from 'react';
 import { useCartStore } from '@/store/useCartStore';
-import { AddToCartPayload } from '@/types/cart';
 
 export const useCart = () => {
   const {
@@ -20,7 +21,7 @@ export const useCart = () => {
     clearCartOptimistic,
   } = useCartStore();
 
-  const handleAddToCart = useCallback(async (productId: number, quantity: number = 1) => {
+  const handleAddToCart = useCallback(async (productId: number, quantity: number = 1, variationId?: number) => {
     const tempId = Date.now();
     try {
       // Optimistic update
@@ -28,6 +29,7 @@ export const useCart = () => {
         id: tempId,
         userId: 0,
         productId,
+        variationId,
         quantity,
         price: 0,
         createdAt: new Date().toISOString(),
@@ -35,7 +37,7 @@ export const useCart = () => {
       });
 
       // Actual API call
-      await addToCart({ productId, quantity });
+      await addToCart({ productId, quantity, variationId });
     } catch (error) {
       // Revert optimistic update on error
       console.error('Failed to add to cart:', error);

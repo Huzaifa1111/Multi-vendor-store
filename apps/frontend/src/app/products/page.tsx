@@ -1,26 +1,40 @@
 // apps/frontend/src/app/products/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Package } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/Card';
 import { resolveProductImage } from '@/lib/image';
 import ProductList from '@/components/products/ProductList';
 import ProductFilters from '@/components/products/ProductFilters';
 import productService, { Product } from '@/services/product.service';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
 
-export default function ProductsPage() {
+function ProductsContent() {
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get('category') || undefined;
+
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(initialCategory);
   const [filters, setFilters] = useState({
-    category: undefined as string | undefined,
+    category: initialCategory,
     featured: undefined as boolean | undefined,
     minPrice: undefined as number | undefined,
     maxPrice: undefined as number | undefined,
     search: undefined as string | undefined,
   });
   const [loading, setLoading] = useState(true);
+
+  // Sync state if URL changes
+  useEffect(() => {
+    const category = searchParams.get('category');
+    if (category !== filters.category) {
+      setFilters(prev => ({ ...prev, category: category || undefined }));
+      setSelectedCategory(category || undefined);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,7 +73,8 @@ export default function ProductsPage() {
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-emerald-50/20 rounded-full blur-[120px] -z-10 translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-emerald-50/10 rounded-full blur-[120px] -z-10 -translate-x-1/2 translate-y-1/2" />
 
-      <div className="max-w-[1440px] mx-auto px-6 md:px-12 py-16 md:py-24 relative z-10">
+      <div className="max-w-[1440px] mx-auto px-6 md:px-12 py-10 md:py-16 relative z-10">
+        <Breadcrumbs />
 
         {/* Cinematic Header Section */}
         <div className="mb-20 md:mb-32">
@@ -131,5 +146,17 @@ export default function ProductsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-gray-400 font-bold animate-pulse uppercase tracking-widest text-xs">Loading Showroom...</div>
+      </div>
+    }>
+      <ProductsContent />
+    </Suspense>
   );
 }

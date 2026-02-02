@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, ManyToMany, JoinTable } from 'typeorm';
 import { Review } from '../reviews/review.entity';
+import { Brand } from '../brands/brand.entity';
+import { ProductVariation } from './variation.entity';
 
 @Entity('products')
 export class Product {
@@ -18,14 +20,42 @@ export class Product {
   @Column({ default: 0 }) // Add default value
   stock: number;
 
-  @Column({ nullable: true })
-  image: string;
+  @Column('simple-array', { nullable: true })
+  images: string[];
 
   @Column({ nullable: true })
   category: string;
 
   @Column({ default: false })
   featured: boolean;
+
+  @Column({ nullable: true })
+  sku: string;
+
+  @Column('text', { nullable: true })
+  longDescription: string;
+
+  @ManyToOne(() => Brand, (brand) => brand.products, { nullable: true })
+  brand: Brand;
+
+  @OneToMany(() => ProductVariation, (variation) => variation.product, { cascade: true })
+  variations: ProductVariation[];
+
+  @ManyToMany(() => Product)
+  @JoinTable({
+    name: 'product_upsells',
+    joinColumn: { name: 'product_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'upsell_id', referencedColumnName: 'id' }
+  })
+  upsells: Product[];
+
+  @ManyToMany(() => Product)
+  @JoinTable({
+    name: 'product_cross_sells',
+    joinColumn: { name: 'product_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'cross_sell_id', referencedColumnName: 'id' }
+  })
+  crossSells: Product[];
 
   @CreateDateColumn()
   createdAt: Date;

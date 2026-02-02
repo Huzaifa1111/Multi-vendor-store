@@ -1,5 +1,8 @@
 // apps/frontend/src/lib/image.ts - UPDATED
-export const resolveProductImage = (imageUrl: string | null): string => {
+export const resolveProductImage = (imageUrl: string | string[] | null): string => {
+  if (Array.isArray(imageUrl)) {
+    imageUrl = imageUrl.length > 0 ? imageUrl[0] : null;
+  }
   if (!imageUrl || imageUrl.trim() === '') {
     // Use a reliable placeholder from a public service
     return 'https://placehold.co/600x600/3b82f6/ffffff?text=No+Image';
