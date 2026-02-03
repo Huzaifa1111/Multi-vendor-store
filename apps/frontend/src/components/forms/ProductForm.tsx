@@ -29,7 +29,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     { id: 6, name: 'Sports' },
     { id: 7, name: 'Toys' },
   ]);
-  
+
   const [formData, setFormData] = useState<CreateProductData & { featured?: boolean }>({
     name: initialData?.name || '',
     description: initialData?.description || '',
@@ -38,19 +38,19 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     category: initialData?.category,
     featured: initialData?.featured || false, // ADD THIS LINE
   });
-  
+
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    
+
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' 
-        ? (e.target as HTMLInputElement).checked 
-        : type === 'number' 
-        ? parseFloat(value) || 0 
-        : value,
+      [name]: type === 'checkbox'
+        ? (e.target as HTMLInputElement).checked
+        : type === 'number'
+          ? parseFloat(value) || 0
+          : value,
     }));
   };
 
@@ -69,7 +69,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     }
 
     setImageFile(file);
-    
+
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result as string);

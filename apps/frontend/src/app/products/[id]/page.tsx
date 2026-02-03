@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import productService, { Product } from '@/services/product.service';
-import { ArrowLeft, Package, Star, Loader2, Sparkles, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Package, Star, Loader2, Sparkles, TrendingUp, MessageSquare, Info } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/lib/auth';
 import ReviewForm from '@/components/products/ReviewForm';
@@ -23,6 +23,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'details' | 'reviews'>('details');
 
   const { isAuthenticated } = useAuth();
 
@@ -84,16 +85,16 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fafafa] relative overflow-hidden font-plus-jakarta-sans text-black pb-32">
+    <div className="min-h-screen bg-[#fafafa] relative overflow-hidden font-plus-jakarta-sans text-black pb-16">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-emerald-50 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 opacity-40 pointer-events-none"></div>
 
-      <div className="max-w-[1440px] mx-auto px-6 md:px-12 py-10 md:py-16 relative z-10">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-12 py-6 md:py-10 relative z-10">
         <Breadcrumbs customLabels={{ [id.toString()]: product.name }} />
 
         <button
           onClick={() => router.back()}
-          className="group flex items-center text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 hover:text-emerald-600 mb-8 transition-all"
+          className="group flex items-center text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 hover:text-emerald-600 mb-6 transition-all"
         >
           <ArrowLeft className="w-4 h-4 mr-3 group-hover:-translate-x-2 transition-transform" />
           The Collection
@@ -101,9 +102,86 @@ export default function ProductDetailPage() {
 
         <ProductDetail product={product as any} />
 
+        {/* Tab Selection */}
+        <div className="mt-12 md:mt-20 border-b border-gray-100 mb-8 flex items-center justify-center gap-8 md:gap-12">
+          <button
+            onClick={() => setActiveTab('details')}
+            className={`flex items-center gap-3 pb-6 text-xs font-black uppercase tracking-[0.3em] transition-all relative ${activeTab === 'details' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
+          >
+            <Info size={16} />
+            Description
+            {activeTab === 'details' && (
+              <div className="absolute bottom-0 left-0 w-full h-1 bg-emerald-600 rounded-full animate-in fade-in slide-in-from-bottom-1 duration-300"></div>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`flex items-center gap-3 pb-6 text-xs font-black uppercase tracking-[0.3em] transition-all relative ${activeTab === 'reviews' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
+          >
+            <MessageSquare size={16} />
+            Testimony & Reviews
+            {activeTab === 'reviews' && (
+              <div className="absolute bottom-0 left-0 w-full h-1 bg-emerald-600 rounded-full animate-in fade-in slide-in-from-bottom-1 duration-300"></div>
+            )}
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        <div className="min-h-[300px]">
+          {activeTab === 'details' ? (
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-emerald-50/30 p-8 md:p-12 rounded-[2.5rem] border border-emerald-50/50 shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-6 text-emerald-900/10 group-hover:scale-110 transition-transform duration-700">
+                  <Package size={100} />
+                </div>
+                <div className="prose prose-emerald max-w-none text-emerald-900/70 font-medium leading-[2] text-base md:text-lg">
+                  {product.longDescription || product.description || "No extended dossier available for this selection."}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+              <div className="lg:col-span-8">
+                {reviewsLoading ? (
+                  <div className="flex justify-center py-20 bg-gray-50/50 rounded-3xl animate-pulse">
+                    <Loader2 className="animate-spin text-emerald-600" size={32} />
+                  </div>
+                ) : reviews.length === 0 ? (
+                  <div className="py-24 text-center bg-gray-50/30 rounded-[3rem] border-2 border-dashed border-gray-100">
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-300">Testimony Archive Empty</span>
+                  </div>
+                ) : (
+                  <ReviewList reviews={reviews} />
+                )}
+              </div>
+
+              <div className="lg:col-span-4">
+                {isAuthenticated ? (
+                  <div className="sticky top-8 bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-2xl shadow-gray-100">
+                    <ReviewForm productId={id} onSuccess={fetchReviews} />
+                  </div>
+                ) : (
+                  <div className="sticky top-8 p-12 text-center bg-gray-900 text-white rounded-[2.5rem] shadow-2xl overflow-hidden relative">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
+                    <Star className="w-10 h-10 text-emerald-500 mx-auto mb-8 opacity-50" />
+                    <h3 className="text-xl font-black mb-4 uppercase tracking-[0.2em]">Join Consensus</h3>
+                    <p className="text-white/40 text-[10px] mb-10 font-bold uppercase tracking-widest leading-loose">Verify your acquisition to contribute premium testimony.</p>
+                    <button
+                      onClick={() => router.push(`/auth/login?redirect=/products/${id}`)}
+                      className="w-full py-4 bg-white text-black rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-emerald-500 hover:text-white transition-all shadow-lg"
+                    >
+                      Authenticate
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Upsells Section */}
         {product.upsells && product.upsells.length > 0 && (
-          <div className="mt-32 space-y-12">
+          <div className="mt-24 md:mt-32 space-y-10">
             <div className="flex flex-col items-center text-center space-y-4">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full">
                 <Sparkles size={14} />
@@ -122,10 +200,10 @@ export default function ProductDetailPage() {
 
         {/* Cross-sells Section */}
         {product.crossSells && product.crossSells.length > 0 && (
-          <div className="mt-32 space-y-12 bg-white p-12 rounded-[3.5rem] border border-gray-100 shadow-xl shadow-gray-50">
+          <div className="mt-24 md:mt-32 space-y-10 bg-white p-8 md:p-12 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-50">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-gray-50 pb-10">
               <div className="space-y-4 text-left">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-blue-600 rounded-full">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full">
                   <TrendingUp size={14} />
                   <span className="text-[10px] font-black uppercase tracking-[0.2em]">Frequently Synergized</span>
                 </div>
@@ -140,59 +218,6 @@ export default function ProductDetailPage() {
             </div>
           </div>
         )}
-
-        {/* Reviews Section */}
-        <div className="mt-32 border-t border-gray-100 pt-24">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-20 gap-10">
-            <div className="relative">
-              <span className="absolute -top-10 left-0 text-[10px] font-black uppercase tracking-[0.6em] text-emerald-600/40">User Testimony</span>
-              <div className="flex items-end gap-3">
-                <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-black leading-tight">
-                  Public<br />
-                  <span className="font-light text-emerald-500 italic">Consensus</span>
-                </h2>
-                <div className="w-12 h-1 bg-emerald-500 mb-3.5 hidden md:block rounded-full"></div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-            <div className="lg:col-span-8">
-              {reviewsLoading ? (
-                <div className="flex justify-center py-20 bg-gray-50/50 rounded-3xl animate-pulse">
-                  <Loader2 className="animate-spin text-emerald-600" size={32} />
-                </div>
-              ) : reviews.length === 0 ? (
-                <div className="py-24 text-center bg-gray-50/30 rounded-[3rem] border-2 border-dashed border-gray-100">
-                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-300">Testimony Archive Empty</span>
-                </div>
-              ) : (
-                <ReviewList reviews={reviews} />
-              )}
-            </div>
-
-            <div className="lg:col-span-4">
-              {isAuthenticated ? (
-                <div className="sticky top-8 bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-2xl shadow-gray-100">
-                  <ReviewForm productId={id} onSuccess={fetchReviews} />
-                </div>
-              ) : (
-                <div className="sticky top-8 p-12 text-center bg-gray-900 text-white rounded-[2.5rem] shadow-2xl overflow-hidden relative">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
-                  <Star className="w-10 h-10 text-emerald-500 mx-auto mb-8 opacity-50" />
-                  <h3 className="text-xl font-black mb-4 uppercase tracking-[0.2em]">Join Consensus</h3>
-                  <p className="text-white/40 text-[10px] mb-10 font-bold uppercase tracking-widest leading-loose">Verify your acquisition to contribute premium testimony.</p>
-                  <button
-                    onClick={() => router.push(`/auth/login?redirect=/products/${id}`)}
-                    className="w-full py-4 bg-white text-black rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-emerald-500 hover:text-white transition-all shadow-lg"
-                  >
-                    Authenticate
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
