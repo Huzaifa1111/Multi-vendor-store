@@ -11,7 +11,7 @@ export async function seedAdmin(dataSource: DataSource) {
 
   if (!adminExists) {
     const hashedPassword = await bcrypt.hash('Admin@123', 10);
-    
+
     const admin = userRepository.create({
       name: 'Admin User',
       email: 'admin@store.com',
@@ -22,7 +22,7 @@ export async function seedAdmin(dataSource: DataSource) {
 
     await userRepository.save(admin);
     console.log('✅ Admin user created successfully');
-    
+
     console.log('\n👑 Admin credentials:');
     console.log('📧 Email: admin@store.com');
     console.log('🔑 Password: Admin@123');
@@ -35,17 +35,21 @@ export async function seedAdmin(dataSource: DataSource) {
 // If you need a standalone script, add this:
 if (require.main === module) {
   const dataSource = new DataSource({
-    type: 'postgres',
+    type: 'mysql',
     host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432'),
-    username: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || 'admin',
-    database: process.env.DB_DATABASE || 'store_db',
+    port: parseInt(process.env.DB_PORT || '3306'),
+    username: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'store_db',
     entities: [User],
     synchronize: false,
   });
 
-  seedAdmin(dataSource)
+  dataSource.initialize()
+    .then(() => {
+      console.log('✅ Data Source has been initialized!');
+      return seedAdmin(dataSource);
+    })
     .then(() => {
       console.log('✅ Seed completed');
       process.exit(0);
