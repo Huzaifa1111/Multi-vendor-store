@@ -14,6 +14,12 @@ import { EmailModule } from './modules/email/email.module';
 import { CartModule } from './modules/cart/cart.module';
 import { ContactModule } from './modules/contact/contact.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
+import { createDatabaseIfNotExists } from 'dbsetup';
+
+
+async function initDb() {
+  await createDatabaseIfNotExists();
+}
 
 @Module({
   imports: [
@@ -21,17 +27,20 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
-      useFactory: () => ({
-        type: 'postgres',
-        host: process.env.DB_HOST || 'localhost',
-        port: parseInt(process.env.DB_PORT || '5432'),
-        username: process.env.DB_USERNAME || 'postgres',
-        password: process.env.DB_PASSWORD || 'postgres',
-        database: process.env.DB_DATABASE || 'store_db', // Match your DB name
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: true,
-        migrationsRun: false,
-      }),
+      useFactory: async () => {
+        await initDb();
+        return {
+          type: 'mysql',
+          host: process.env.DB_HOST || 'localhost',
+          port: parseInt(process.env.DB_PORT || '3306'),
+          username: process.env.DB_USER || 'root',
+          password: process.env.DB_PASSWORD || '',
+          database: process.env.DB_NAME || 'store_db',
+          synchronize: true,
+          migrationsRun: false,
+          autoLoadEntities: true,
+        }
+      },
     }),
     AuthModule,
     UsersModule,
