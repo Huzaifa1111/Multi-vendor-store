@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from '../../modules/users/user.entity';
@@ -42,7 +43,7 @@ if (require.main === module) {
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'store_db',
     entities: [User],
-    synchronize: false,
+    synchronize: true,
   });
 
   dataSource.initialize()

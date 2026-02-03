@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import productService, { Product } from '@/services/product.service';
-import { ArrowLeft, Package, Star, Loader2, Sparkles, TrendingUp, MessageSquare, Info } from 'lucide-react';
+import { ArrowLeft, Package, Star, Loader2, Sparkles, TrendingUp, MessageSquare, Info, Truck, RotateCcw, Award } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/lib/auth';
 import ReviewForm from '@/components/products/ReviewForm';
@@ -23,7 +23,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'details' | 'reviews'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'reviews' | 'shipping' | 'brand'>('details');
 
   const { isAuthenticated } = useAuth();
 
@@ -124,18 +124,93 @@ export default function ProductDetailPage() {
               <div className="absolute bottom-0 left-0 w-full h-1 bg-emerald-600 rounded-full animate-in fade-in slide-in-from-bottom-1 duration-300"></div>
             )}
           </button>
+          <button
+            onClick={() => setActiveTab('shipping')}
+            className={`flex items-center gap-3 pb-6 text-xs font-black uppercase tracking-[0.3em] transition-all relative ${activeTab === 'shipping' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
+          >
+            <Truck size={16} />
+            Shipping & Return
+            {activeTab === 'shipping' && (
+              <div className="absolute bottom-0 left-0 w-full h-1 bg-emerald-600 rounded-full animate-in fade-in slide-in-from-bottom-1 duration-300"></div>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('brand')}
+            className={`flex items-center gap-3 pb-6 text-xs font-black uppercase tracking-[0.3em] transition-all relative ${activeTab === 'brand' ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'}`}
+          >
+            <Award size={16} />
+            About Brand
+            {activeTab === 'brand' && (
+              <div className="absolute bottom-0 left-0 w-full h-1 bg-emerald-600 rounded-full animate-in fade-in slide-in-from-bottom-1 duration-300"></div>
+            )}
+          </button>
         </div>
 
         {/* Tab Content */}
         <div className="min-h-[300px]">
           {activeTab === 'details' ? (
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-emerald-50/30 p-8 md:p-12 rounded-[2.5rem] border border-emerald-50/50 shadow-sm relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-6 text-emerald-900/10 group-hover:scale-110 transition-transform duration-700">
-                  <Package size={100} />
+            <div className="bg-emerald-50/30 p-6 md:p-8 rounded-3xl border border-emerald-50/50 shadow-sm relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-6 text-emerald-900/10 group-hover:scale-110 transition-transform duration-700">
+                <Package size={100} />
+              </div>
+              <div className="prose prose-emerald max-w-none text-emerald-900/70 font-medium leading-[2] text-base md:text-lg">
+                {product.longDescription || product.description || "No extended dossier available for this selection."}
+              </div>
+            </div>
+          ) : activeTab === 'shipping' ? (
+            <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6">
+              <div className="flex items-start gap-4 p-4 bg-emerald-50/30 rounded-2xl border border-emerald-100/50">
+                <Truck className="text-emerald-600 flex-shrink-0 mt-1" size={24} />
+                <div className="space-y-2">
+                  <h3 className="text-lg font-black text-gray-900 uppercase tracking-wide">Shipping Policy</h3>
+                  <ul className="space-y-2 text-sm text-gray-600 leading-relaxed">
+                    <li className="flex items-start gap-2"><span className="text-emerald-600 font-bold">•</span> Free standard shipping on orders over $100</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-600 font-bold">•</span> Express delivery available (2-3 business days)</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-600 font-bold">•</span> International shipping to select countries</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-600 font-bold">•</span> All items are carefully packaged and insured</li>
+                  </ul>
                 </div>
-                <div className="prose prose-emerald max-w-none text-emerald-900/70 font-medium leading-[2] text-base md:text-lg">
-                  {product.longDescription || product.description || "No extended dossier available for this selection."}
+              </div>
+              <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                <RotateCcw className="text-gray-600 flex-shrink-0 mt-1" size={24} />
+                <div className="space-y-2">
+                  <h3 className="text-lg font-black text-gray-900 uppercase tracking-wide">Return Policy</h3>
+                  <ul className="space-y-2 text-sm text-gray-600 leading-relaxed">
+                    <li className="flex items-start gap-2"><span className="text-emerald-600 font-bold">•</span> 30-day return window for unworn items</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-600 font-bold">•</span> Original packaging and tags must be intact</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-600 font-bold">•</span> Free return shipping on defective items</li>
+                    <li className="flex items-start gap-2"><span className="text-emerald-600 font-bold">•</span> Refunds processed within 5-7 business days</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          ) : activeTab === 'brand' ? (
+            <div className="bg-gradient-to-br from-emerald-50/50 to-white p-6 md:p-8 rounded-3xl border border-emerald-100/50 shadow-sm space-y-6">
+              <div className="flex items-center gap-4 pb-4 border-b border-emerald-100">
+                <Award className="text-emerald-600" size={32} />
+                <div>
+                  <h3 className="text-2xl font-black text-gray-900 tracking-tight">{product.brand?.name || 'Premium Brand'}</h3>
+                  <p className="text-xs font-bold uppercase tracking-widest text-emerald-600">Est. Since Excellence</p>
+                </div>
+              </div>
+              <div className="prose prose-emerald max-w-none text-gray-700 leading-relaxed space-y-4">
+                <p className="font-medium">
+                  {product.brand?.name || 'Our brand'} represents the pinnacle of craftsmanship and innovation in luxury goods.
+                  With decades of heritage and a commitment to excellence, we deliver products that transcend trends and stand the test of time.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                  <div className="p-4 bg-white rounded-2xl border border-gray-100 text-center">
+                    <div className="text-3xl font-black text-emerald-600 mb-2">50+</div>
+                    <div className="text-xs font-bold uppercase tracking-wider text-gray-500">Years Heritage</div>
+                  </div>
+                  <div className="p-4 bg-white rounded-2xl border border-gray-100 text-center">
+                    <div className="text-3xl font-black text-emerald-600 mb-2">100%</div>
+                    <div className="text-xs font-bold uppercase tracking-wider text-gray-500">Authentic</div>
+                  </div>
+                  <div className="p-4 bg-white rounded-2xl border border-gray-100 text-center">
+                    <div className="text-3xl font-black text-emerald-600 mb-2">Global</div>
+                    <div className="text-xs font-bold uppercase tracking-wider text-gray-500">Presence</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -181,16 +256,12 @@ export default function ProductDetailPage() {
 
         {/* Upsells Section */}
         {product.upsells && product.upsells.length > 0 && (
-          <div className="mt-24 md:mt-32 space-y-10">
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full">
-                <Sparkles size={14} />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Elevate Experience</span>
-              </div>
-              <h2 className="text-4xl font-black tracking-tight text-gray-900">You May Also Like</h2>
-              <p className="text-gray-500 max-w-xl font-medium">Strategic additions curated to complement your primary selection.</p>
+          <div className="mt-12 md:mt-16 space-y-4">
+            <div className="flex items-center gap-3">
+              <Sparkles size={16} className="text-emerald-600" />
+              <h2 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900">You May Also Like</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {product.upsells.map((upsell) => (
                 <ProductCard key={upsell.id} product={upsell as any} />
               ))}
@@ -200,18 +271,12 @@ export default function ProductDetailPage() {
 
         {/* Cross-sells Section */}
         {product.crossSells && product.crossSells.length > 0 && (
-          <div className="mt-24 md:mt-32 space-y-10 bg-white p-8 md:p-12 rounded-[2.5rem] border border-gray-100 shadow-xl shadow-gray-50">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-gray-50 pb-10">
-              <div className="space-y-4 text-left">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full">
-                  <TrendingUp size={14} />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Frequently Synergized</span>
-                </div>
-                <h2 className="text-4xl font-black tracking-tight text-gray-900">Bought Together</h2>
-              </div>
-              <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] mb-2">Curated Systems</p>
+          <div className="mt-12 md:mt-16 space-y-4 bg-white p-4 md:p-6 rounded-3xl border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
+              <TrendingUp size={16} className="text-emerald-600" />
+              <h2 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900">Bought Together</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {product.crossSells.map((crossSell) => (
                 <ProductCard key={crossSell.id} product={crossSell as any} />
               ))}

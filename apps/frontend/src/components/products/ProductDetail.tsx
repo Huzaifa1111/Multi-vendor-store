@@ -102,13 +102,13 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const descriptionPoints = product.description.split('\n').filter(p => p.trim() !== '');
 
   return (
-    <div className="space-y-8 md:space-y-12 pb-12 md:pb-24 font-plus-jakarta-sans text-gray-900 animate-fade-in-up">
+    <div className="space-y-4 md:space-y-6 pb-6 md:pb-12 font-plus-jakarta-sans text-gray-900 animate-fade-in-up">
       <Card className="border-none shadow-[0_20px_50px_rgba(0,0,0,0.04)] rounded-[2.5rem] md:rounded-[3rem] overflow-hidden bg-white/70 backdrop-blur-xl border border-white/20">
-        <CardContent className="p-6 md:p-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 xl:gap-20">
+        <CardContent className="p-4 md:p-6 lg:p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-10">
             {/* Image Gallery */}
-            <div className="space-y-8">
-              <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden bg-gray-50/50 border border-gray-100 shadow-inner group">
+            <div className="space-y-4 md:space-y-6">
+              <div className="relative aspect-square w-full max-w-md mx-auto rounded-[2.5rem] overflow-hidden bg-gray-50/50 border border-gray-100 shadow-inner group">
                 <img
                   src={resolveProductImage(allImages[selectedImage])}
                   alt={product.name}
@@ -151,7 +151,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             </div>
 
             {/* Product Info */}
-            <div className="flex flex-col space-y-8">
+            <div className="flex flex-col space-y-4 md:space-y-6">
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-3">
@@ -186,7 +186,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 <div className="overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
                   <button
                     onClick={() => setIsShortDescOpen(!isShortDescOpen)}
-                    className="w-full px-6 py-4 flex items-center justify-between text-left bg-gradient-to-r from-[#0a2e2e] to-[#041a1a] text-white transition-all hover:to-[#062626]"
+                    className="w-full px-6 py-4 flex items-center justify-between text-left bg-emerald-900 text-white transition-all hover:bg-emerald-800"
                   >
                     <span className="text-xs font-black uppercase tracking-[0.2em]">Short Description</span>
                     {isShortDescOpen ? <Minus size={16} /> : <Plus size={16} />}
@@ -252,18 +252,18 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                  <div className="flex items-center gap-4 p-4 md:p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
+                  <div className="flex items-center gap-3 p-3 md:p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
                     <Truck className="text-emerald-500 flex-shrink-0" size={18} />
                     <span className="text-[10px] font-black uppercase tracking-widest text-emerald-900">White Glove Shipping</span>
                   </div>
-                  <div className="flex items-center gap-4 p-4 md:p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                  <div className="flex items-center gap-3 p-3 md:p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
                     <ShieldCheck className="text-emerald-500 flex-shrink-0" size={18} />
                     <span className="text-[10px] font-black uppercase tracking-widest text-emerald-900">Authentic Seal</span>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-50">
+                <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-50">
                   <div className="flex items-center bg-gray-50 rounded-2xl p-2 px-5 gap-6 border border-gray-100 self-start sm:self-auto shadow-inner h-[60px]">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -279,7 +279,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   <button
                     onClick={handleAddToCart}
                     disabled={currentStock === 0 || addingToCart}
-                    className="flex-grow h-[60px] flex items-center justify-center px-8 md:px-12 py-4 md:py-5 bg-emerald-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 disabled:opacity-50 active:scale-95 group overflow-hidden relative"
+                    className="flex-grow h-[60px] flex items-center justify-center px-8 md:px-12 py-4 md:py-5 bg-emerald-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-emerald-950 transition-colors shadow-lg shadow-emerald-900/20 active:scale-95 group overflow-hidden relative"
                   >
                     <div className="relative flex items-center">
                       <ShoppingCart className="w-4 h-4 mr-4 animate-bounce-slow" />
