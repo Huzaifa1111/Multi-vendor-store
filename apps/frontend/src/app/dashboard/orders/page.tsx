@@ -142,58 +142,63 @@ export default function MyOrdersPage() {
                                 const StatusIcon = statusConfig.icon;
 
                                 return (
-                                    <motion.div
+                                    <Link
                                         key={order.id}
-                                        variants={itemVariants}
-                                        className="bg-white rounded-[2rem] p-6 sm:p-8 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 group"
+                                        href={`/dashboard/orders/${order.id}`}
+                                        className="block"
                                     >
-                                        <div className="flex flex-col lg:flex-row gap-6 lg:items-center justify-between">
-                                            {/* Order Info */}
-                                            <div className="flex items-start gap-4">
-                                                <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center flex-shrink-0 text-gray-400">
-                                                    <Package size={28} />
+                                        <motion.div
+                                            variants={itemVariants}
+                                            className="bg-white rounded-[2rem] p-6 sm:p-8 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 group cursor-pointer"
+                                        >
+                                            <div className="flex flex-col lg:flex-row gap-6 lg:items-center justify-between">
+                                                {/* Order Info */}
+                                                <div className="flex items-start gap-4">
+                                                    <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center flex-shrink-0 text-gray-400">
+                                                        <Package size={28} />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-xl font-bold text-gray-900 mb-1">Order #{order.id}</h3>
+                                                        <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-500 font-medium">
+                                                            <span className="flex items-center">
+                                                                <Calendar size={14} className="mr-1.5" />
+                                                                {new Date(order.createdAt).toLocaleDateString(undefined, {
+                                                                    year: 'numeric',
+                                                                    month: 'long',
+                                                                    day: 'numeric'
+                                                                })}
+                                                            </span>
+                                                            <span className="flex items-center">
+                                                                <Clock size={14} className="mr-1.5" />
+                                                                {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <h3 className="text-xl font-bold text-gray-900 mb-1">Order #{order.id}</h3>
-                                                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-500 font-medium">
-                                                        <span className="flex items-center">
-                                                            <Calendar size={14} className="mr-1.5" />
-                                                            {new Date(order.createdAt).toLocaleDateString(undefined, {
-                                                                year: 'numeric',
-                                                                month: 'long',
-                                                                day: 'numeric'
-                                                            })}
-                                                        </span>
-                                                        <span className="flex items-center">
-                                                            <Clock size={14} className="mr-1.5" />
-                                                            {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                        </span>
+
+                                                {/* Status & Price */}
+                                                <div className="flex items-center justify-between lg:justify-end gap-6 flex-1 border-t lg:border-t-0 border-gray-50 pt-4 lg:pt-0">
+                                                    <span className={`inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold ${statusConfig.color} ${statusConfig.bg}`}>
+                                                        <StatusIcon size={16} className="mr-2" />
+                                                        {statusConfig.text || order.status}
+                                                    </span>
+
+                                                    <div className="text-right">
+                                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-0.5">Total</p>
+                                                        <p className="text-2xl font-black text-gray-900">
+                                                            ${Number(order.total).toFixed(2)}
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="hidden sm:block pl-4 border-l border-gray-100">
+                                                        <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-black group-hover:text-white transition-all">
+                                                            <ChevronRight size={20} />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            {/* Status & Price */}
-                                            <div className="flex items-center justify-between lg:justify-end gap-6 flex-1 border-t lg:border-t-0 border-gray-50 pt-4 lg:pt-0">
-                                                <span className={`inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold ${statusConfig.color} ${statusConfig.bg}`}>
-                                                    <StatusIcon size={16} className="mr-2" />
-                                                    {statusConfig.text || order.status}
-                                                </span>
-
-                                                <div className="text-right">
-                                                    <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-0.5">Total</p>
-                                                    <p className="text-2xl font-black text-gray-900">
-                                                        ${Number(order.total).toFixed(2)}
-                                                    </p>
-                                                </div>
-
-                                                <div className="hidden sm:block pl-4 border-l border-gray-100">
-                                                    <button className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-black group-hover:text-white transition-all">
-                                                        <ChevronRight size={20} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </motion.div>
+                                        </motion.div>
+                                    </Link>
                                 );
                             })}
                         </AnimatePresence>

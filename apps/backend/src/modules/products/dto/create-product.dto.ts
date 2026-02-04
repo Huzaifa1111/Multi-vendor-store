@@ -44,6 +44,14 @@ export class CreateProductDto {
   longDescription?: string;
 
   @IsOptional()
+  @IsString()
+  shippingPolicy?: string;
+
+  @IsOptional()
+  @IsString()
+  returnPolicy?: string;
+
+  @IsOptional()
   @IsNumber()
   brandId?: number;
 

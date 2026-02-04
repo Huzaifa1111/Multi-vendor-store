@@ -27,6 +27,8 @@ export interface Product {
   variations?: Variation[];
   upsells?: Product[];
   crossSells?: Product[];
+  shippingPolicy?: string;
+  returnPolicy?: string;
 }
 
 export interface CreateProductData {
@@ -37,6 +39,9 @@ export interface CreateProductData {
   category?: string;
   featured?: boolean; // ADD THIS LINE
   image?: File;
+  longDescription?: string;
+  shippingPolicy?: string;
+  returnPolicy?: string;
 }
 
 export interface UpdateProductData extends Partial<CreateProductData> { }
@@ -99,6 +104,10 @@ class ProductService {
       formData.append('image', productData.image);
     }
 
+    if (productData.longDescription) formData.append('longDescription', productData.longDescription);
+    if (productData.shippingPolicy) formData.append('shippingPolicy', productData.shippingPolicy);
+    if (productData.returnPolicy) formData.append('returnPolicy', productData.returnPolicy);
+
     const response = await api.post('/products', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -124,6 +133,10 @@ class ProductService {
     if (productData.image) {
       formData.append('image', productData.image);
     }
+
+    if (productData.longDescription) formData.append('longDescription', productData.longDescription);
+    if (productData.shippingPolicy) formData.append('shippingPolicy', productData.shippingPolicy);
+    if (productData.returnPolicy) formData.append('returnPolicy', productData.returnPolicy);
 
     const response = await api.patch(`/products/${id}`, formData, {
       headers: {

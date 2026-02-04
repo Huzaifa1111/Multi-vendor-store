@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, UploadCloud, Image as ImageIcon, Check, Loader2, DollarSign, Package, Tag, Layers, Star, Plus, Trash2, Search, Link as LinkIcon, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import RichTextEditor from '@/components/admin/RichTextEditor';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -48,6 +49,8 @@ export default function CreateProductPage() {
     featured: false,
     upsellIds: [] as number[],
     crossSellIds: [] as number[],
+    shippingPolicy: '',
+    returnPolicy: '',
   });
 
   const [variations, setVariations] = useState<Variation[]>([]);
@@ -79,6 +82,13 @@ export default function CreateProductPage() {
         : name === 'price' || name === 'stock'
           ? parseFloat(value) || 0
           : value
+    }));
+  };
+
+  const handleRichTextChange = (name: string, content: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: content
     }));
   };
 
@@ -253,29 +263,35 @@ export default function CreateProductPage() {
               </div>
 
               <div>
-                <label htmlFor="description" className="block text-sm font-bold text-gray-700 mb-2">Short Description</label>
-                <textarea
-                  id="description"
-                  name="description"
-                  required
-                  rows={3}
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  className="w-full px-5 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all font-medium text-gray-900 placeholder:text-gray-400 resize-none"
+                <RichTextEditor
+                  label="Short Description"
                   placeholder="A brief overview of the product..."
+                  value={formData.description}
+                  onChange={(content) => handleRichTextChange('description', content)}
                 />
               </div>
 
               <div>
-                <label htmlFor="longDescription" className="block text-sm font-bold text-gray-700 mb-2">Long Description</label>
-                <textarea
-                  id="longDescription"
-                  name="longDescription"
-                  rows={8}
-                  value={formData.longDescription}
-                  onChange={handleInputChange}
-                  className="w-full px-5 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all font-medium text-gray-900 placeholder:text-gray-400 resize-none"
+                <RichTextEditor
+                  label="Long Description"
                   placeholder="Detailed product features, specifications, and benefits..."
+                  value={formData.longDescription}
+                  onChange={(content) => handleRichTextChange('longDescription', content)}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <RichTextEditor
+                  label="Shipping Policy"
+                  placeholder="Custom shipping details for this product..."
+                  value={formData.shippingPolicy}
+                  onChange={(content) => handleRichTextChange('shippingPolicy', content)}
+                />
+                <RichTextEditor
+                  label="Return Policy"
+                  placeholder="Custom return details for this product..."
+                  value={formData.returnPolicy}
+                  onChange={(content) => handleRichTextChange('returnPolicy', content)}
                 />
               </div>
             </div>

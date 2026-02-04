@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import productService, { CreateProductData } from '@/services/product.service';
 import { Upload, X } from 'lucide-react';
+import RichTextEditor from '../admin/RichTextEditor';
 
 interface ProductFormProps {
   initialData?: CreateProductData & { id?: number; featured?: boolean };
@@ -37,6 +38,8 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     stock: initialData?.stock || 0,
     category: initialData?.category,
     featured: initialData?.featured || false, // ADD THIS LINE
+    shippingPolicy: initialData?.shippingPolicy || '',
+    returnPolicy: initialData?.returnPolicy || '',
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -51,6 +54,13 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
         : type === 'number'
           ? parseFloat(value) || 0
           : value,
+    }));
+  };
+
+  const handleRichTextChange = (name: string, content: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: content
     }));
   };
 
@@ -172,18 +182,26 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
 
       {/* Description */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-          Description *
-        </label>
-        <textarea
-          id="description"
-          name="description"
-          required
-          rows={4}
+        <RichTextEditor
+          label="Description *"
+          placeholder="Enter product description..."
           value={formData.description}
-          onChange={handleInputChange}
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          placeholder="Enter product description"
+          onChange={(content) => handleRichTextChange('description', content)}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <RichTextEditor
+          label="Shipping Policy"
+          placeholder="Custom shipping details..."
+          value={formData.shippingPolicy}
+          onChange={(content) => handleRichTextChange('shippingPolicy', content)}
+        />
+        <RichTextEditor
+          label="Return Policy"
+          placeholder="Custom return details..."
+          value={formData.returnPolicy}
+          onChange={(content) => handleRichTextChange('returnPolicy', content)}
         />
       </div>
 

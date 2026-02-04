@@ -40,6 +40,8 @@ export class ProductsController {
     createProductDto.name = body.name;
     createProductDto.description = body.description;
     createProductDto.longDescription = body.longDescription;
+    createProductDto.shippingPolicy = body.shippingPolicy;
+    createProductDto.returnPolicy = body.returnPolicy;
     createProductDto.sku = body.sku;
 
     // Robust parsing
@@ -136,6 +138,8 @@ export class ProductsController {
       if (updateProductDto.name !== undefined) updateData.name = updateProductDto.name;
       if (updateProductDto.description !== undefined) updateData.description = updateProductDto.description;
       if (updateProductDto.longDescription !== undefined) updateData.longDescription = updateProductDto.longDescription;
+      if (updateProductDto.shippingPolicy !== undefined) updateData.shippingPolicy = updateProductDto.shippingPolicy;
+      if (updateProductDto.returnPolicy !== undefined) updateData.returnPolicy = updateProductDto.returnPolicy;
       if (updateProductDto.sku !== undefined) updateData.sku = updateProductDto.sku;
       if (updateProductDto.price !== undefined) updateData.price = parseFloat(updateProductDto.price);
       if (updateProductDto.stock !== undefined) updateData.stock = parseInt(updateProductDto.stock);

@@ -35,6 +35,12 @@ export class Product {
   @Column('text', { nullable: true })
   longDescription: string;
 
+  @Column('text', { nullable: true })
+  shippingPolicy: string;
+
+  @Column('text', { nullable: true })
+  returnPolicy: string;
+
   @ManyToOne(() => Brand, (brand) => brand.products, { nullable: true })
   brand: Brand;
 

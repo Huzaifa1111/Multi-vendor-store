@@ -14,12 +14,70 @@ import ProductCard from '@/components/products/ProductCard';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
 import api from '@/lib/api';
 
+const SHIPPING_POLICIES = [
+  `
+  <ul class="space-y-2 text-sm text-gray-600 leading-relaxed">
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Free standard shipping on orders over $100</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Express delivery available (2-3 business days)</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> International shipping available to over 50 countries</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> All items are carefully packaged and insured</li>
+  </ul>
+  `,
+  `
+  <ul class="space-y-2 text-sm text-gray-600 leading-relaxed">
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Standard shipping takes 3-5 business days</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Priority handling for all premium orders</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Secure tracking provided via email</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Fragile items receive double-layered protection</li>
+  </ul>
+  `,
+  `
+  <ul class="space-y-2 text-sm text-gray-600 leading-relaxed">
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Ships within 24 hours of purchase</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Local delivery options for nearby areas</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Eco-friendly packaging used whenever possible</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Signature required for high-value shipments</li>
+  </ul>
+  `
+];
+
+const RETURN_POLICIES = [
+  `
+  <ul class="space-y-2 text-sm text-gray-600 leading-relaxed">
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> 30-day return window for unworn items</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Original packaging and tags must be intact</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Free return shipping on defective items</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Refunds processed within 5-7 business days</li>
+  </ul>
+  `,
+  `
+  <ul class="space-y-2 text-sm text-gray-600 leading-relaxed">
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Hassle-free returns within 14 days of receipt</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Store credit available for opened items</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Quick exchange for size or color variance</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Quality check required for all returned goods</li>
+  </ul>
+  `,
+  `
+  <ul class="space-y-2 text-sm text-gray-600 leading-relaxed">
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Lifetime guarantee on manufacturing defects</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> Easy return portal accessible via dashboard</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> No restocking fees for loyal members</li>
+    <li class="flex items-start gap-2"><span class="text-emerald-600 font-bold">•</span> International returns handled case-by-case</li>
+  </ul>
+  `
+];
+
+const getRandomPolicy = (policies: string[], seed: number) => {
+  return policies[seed % policies.length];
+};
+
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = parseInt(params.id as string);
 
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
@@ -153,34 +211,33 @@ export default function ProductDetailPage() {
               <div className="absolute top-0 right-0 p-6 text-emerald-900/10 group-hover:scale-110 transition-transform duration-700">
                 <Package size={100} />
               </div>
-              <div className="prose prose-emerald max-w-none text-emerald-900/70 font-medium leading-[2] text-base md:text-lg">
-                {product.longDescription || product.description || "No extended dossier available for this selection."}
-              </div>
+              <div
+                className="prose prose-emerald max-w-none text-emerald-900/70 font-medium leading-[2] text-base md:text-lg"
+                dangerouslySetInnerHTML={{ __html: product.longDescription || product.description || "No extended dossier available for this selection." }}
+              />
             </div>
           ) : activeTab === 'shipping' ? (
             <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6">
               <div className="flex items-start gap-4 p-4 bg-emerald-50/30 rounded-2xl border border-emerald-100/50">
                 <Truck className="text-emerald-600 flex-shrink-0 mt-1" size={24} />
-                <div className="space-y-2">
+                <div className="space-y-2 w-full">
                   <h3 className="text-lg font-black text-gray-900 uppercase tracking-wide">Shipping Policy</h3>
-                  <ul className="space-y-2 text-sm text-gray-600 leading-relaxed">
-                    <li className="flex items-start gap-2"><span className="text-emerald-600 font-bold">•</span> Free standard shipping on orders over $100</li>
-                    <li className="flex items-start gap-2"><span className="text-emerald-600 font-bold">•</span> Express delivery available (2-3 business days)</li>
-                    <li className="flex items-start gap-2"><span className="text-emerald-600 font-bold">•</span> International shipping to select countries</li>
-                    <li className="flex items-start gap-2"><span className="text-emerald-600 font-bold">•</span> All items are carefully packaged and insured</li>
-                  </ul>
+                  {product.shippingPolicy ? (
+                    <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: product.shippingPolicy }} />
+                  ) : (
+                    <div className="w-full" dangerouslySetInnerHTML={{ __html: getRandomPolicy(SHIPPING_POLICIES, id) }} />
+                  )}
                 </div>
               </div>
               <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
                 <RotateCcw className="text-gray-600 flex-shrink-0 mt-1" size={24} />
-                <div className="space-y-2">
+                <div className="space-y-2 w-full">
                   <h3 className="text-lg font-black text-gray-900 uppercase tracking-wide">Return Policy</h3>
-                  <ul className="space-y-2 text-sm text-gray-600 leading-relaxed">
-                    <li className="flex items-start gap-2"><span className="text-emerald-600 font-bold">•</span> 30-day return window for unworn items</li>
-                    <li className="flex items-start gap-2"><span className="text-emerald-600 font-bold">•</span> Original packaging and tags must be intact</li>
-                    <li className="flex items-start gap-2"><span className="text-emerald-600 font-bold">•</span> Free return shipping on defective items</li>
-                    <li className="flex items-start gap-2"><span className="text-emerald-600 font-bold">•</span> Refunds processed within 5-7 business days</li>
-                  </ul>
+                  {product.returnPolicy ? (
+                    <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: product.returnPolicy }} />
+                  ) : (
+                    <div className="w-full" dangerouslySetInnerHTML={{ __html: getRandomPolicy(RETURN_POLICIES, id) }} />
+                  )}
                 </div>
               </div>
             </div>

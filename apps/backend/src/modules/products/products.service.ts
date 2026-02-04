@@ -44,6 +44,8 @@ export class ProductsService {
       name: createProductDto.name,
       description: createProductDto.description,
       longDescription: createProductDto.longDescription,
+      shippingPolicy: createProductDto.shippingPolicy,
+      returnPolicy: createProductDto.returnPolicy,
       price: createProductDto.price,
       stock: createProductDto.stock,
       sku: createProductDto.sku,
@@ -182,6 +184,14 @@ export class ProductsService {
     if (updateProductDto.stock !== undefined) {
       const s = parseInt(updateProductDto.stock);
       updateData.stock = isNaN(s) ? 0 : s;
+    }
+
+    if (updateProductDto.shippingPolicy !== undefined) {
+      updateData.shippingPolicy = updateProductDto.shippingPolicy;
+    }
+
+    if (updateProductDto.returnPolicy !== undefined) {
+      updateData.returnPolicy = updateProductDto.returnPolicy;
     }
 
     if (updateProductDto.brandId) {
