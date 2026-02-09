@@ -9,6 +9,9 @@ import {
 } from '@stripe/react-stripe-js';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
+import { addressesService, Address as SavedAddress } from '@/services/addresses.service';
+import { Home, Briefcase, MapPin, Loader2, Check } from 'lucide-react';
+import { useEffect } from 'react';
 
 export default function CheckoutForm({ clientSecret }: { clientSecret: string }) {
     const stripe = useStripe();
@@ -21,6 +24,44 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
     const [paymentMethod, setPaymentMethod] = useState('stripe');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+    const [selectedAddressId, setSelectedAddressId] = useState<number | 'new'>('new');
+    const [isFetchingAddresses, setIsFetchingAddresses] = useState(false);
+
+    useEffect(() => {
+        const fetchAddresses = async () => {
+            setIsFetchingAddresses(true);
+            try {
+                const data = await addressesService.getAll();
+                setSavedAddresses(data);
+                const defaultAddr = data.find(a => a.isDefault);
+                if (defaultAddr) {
+                    setSelectedAddressId(defaultAddr.id);
+                    setAddress(defaultAddr.street);
+                    setCity(defaultAddr.city);
+                }
+            } catch (error) {
+                console.error('Failed to fetch addresses:', error);
+            } finally {
+                setIsFetchingAddresses(false);
+            }
+        };
+        fetchAddresses();
+    }, []);
+
+    const handleAddressSelect = (id: number | 'new') => {
+        setSelectedAddressId(id);
+        if (id === 'new') {
+            setAddress('');
+            setCity('');
+        } else {
+            const addr = savedAddresses.find(a => a.id === id);
+            if (addr) {
+                setAddress(addr.street);
+                setCity(addr.city);
+            }
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -79,26 +120,72 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
     return (
         <form onSubmit={handleSubmit} className="space-y-8">
             <div className="bg-white p-6 rounded-lg shadow">
-                <h2 className="text-xl font-semibold mb-4">Shipping Information</h2>
-                <div className="grid grid-cols-1 gap-4">
+                <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+                    <MapPin className="text-indigo-600" size={24} />
+                    Shipping Information
+                </h2>
+
+                {isFetchingAddresses ? (
+                    <div className="flex items-center justify-center py-4">
+                        <Loader2 className="animate-spin text-indigo-600" />
+                    </div>
+                ) : savedAddresses.length > 0 ? (
+                    <div className="space-y-4 mb-8">
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Select a saved address</label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {savedAddresses.map((addr) => (
+                                <button
+                                    key={addr.id}
+                                    type="button"
+                                    onClick={() => handleAddressSelect(addr.id)}
+                                    className={`relative p-4 rounded-xl border-2 text-left transition-all ${selectedAddressId === addr.id ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 hover:border-gray-200'}`}
+                                >
+                                    {selectedAddressId === addr.id && (
+                                        <div className="absolute top-2 right-2 w-5 h-5 bg-indigo-600 text-white rounded-full flex items-center justify-center">
+                                            <Check size={12} />
+                                        </div>
+                                    )}
+                                    <div className="flex items-center gap-2 mb-1">
+                                        {addr.type === 'home' ? <Home size={16} className="text-gray-400" /> : <Briefcase size={16} className="text-gray-400" />}
+                                        <span className="text-xs font-black uppercase text-gray-500">{addr.type}</span>
+                                    </div>
+                                    <p className="text-sm font-medium text-gray-900 truncate">{addr.street}</p>
+                                    <p className="text-xs text-gray-500">{addr.city}, {addr.zipCode}</p>
+                                </button>
+                            ))}
+                            <button
+                                type="button"
+                                onClick={() => handleAddressSelect('new')}
+                                className={`p-4 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-all ${selectedAddressId === 'new' ? 'border-indigo-600 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
+                            >
+                                <MapPin size={20} />
+                                <span className="text-xs font-bold">New Address</span>
+                            </button>
+                        </div>
+                    </div>
+                ) : null}
+
+                <div className={`grid grid-cols-1 gap-4 transition-all ${savedAddresses.length > 0 && selectedAddressId !== 'new' ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Email</label>
                         <input
                             type="email"
                             required
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border font-medium"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            placeholder="your@email.com"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Address</label>
+                        <label className="block text-sm font-medium text-gray-700">Address line</label>
                         <input
                             type="text"
                             required
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border font-medium"
                             value={address}
                             onChange={(e) => setAddress(e.target.value)}
+                            placeholder="Street address, apartment, suite, etc."
                         />
                     </div>
                     <div>
@@ -106,9 +193,10 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
                         <input
                             type="text"
                             required
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border font-medium"
                             value={city}
                             onChange={(e) => setCity(e.target.value)}
+                            placeholder="City"
                         />
                     </div>
                 </div>

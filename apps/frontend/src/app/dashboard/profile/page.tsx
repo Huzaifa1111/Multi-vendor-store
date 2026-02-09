@@ -56,6 +56,42 @@ export default function ProfilePage() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !user) return;
+
+        setIsLoading(true);
+        setMessage(null);
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:3001/uploads/image', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('Upload failed');
+
+            const data = await response.json();
+            const imageUrl = data.url;
+
+            await usersService.updateProfile(user.id, { picture: imageUrl });
+            setMessage({ type: 'success', text: 'Profile picture updated!' });
+            // Ideally call some refreshUser() here or window.location.reload()
+            setTimeout(() => window.location.reload(), 1000);
+        } catch (error: any) {
+            setMessage({ type: 'error', text: error.message || 'Failed to upload image' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!user) return;
@@ -70,21 +106,16 @@ export default function ProfilePage() {
 
             const updateData: UpdateUserDto = {
                 name: formData.name,
-                phone: formData.phone, // Include phone if your backend supports it
-                // Only include password if provided
+                phone: formData.phone,
                 ...(formData.newPassword ? { password: formData.newPassword } : {})
             };
 
-            // Note: Typically email update requires re-verification, so we might want to disable it or handle it carefully.
-            // For now, let's allow sending it if it changed.
             if (formData.email !== user.email) {
                 updateData.email = formData.email;
             }
 
-            const updatedUser = await usersService.updateProfile(user.id, updateData);
-
+            await usersService.updateProfile(user.id, updateData);
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
-            // In a real app, you might want to refresh the auth context here
         } catch (error: any) {
             setMessage({
                 type: 'error',
@@ -121,11 +152,24 @@ export default function ProfilePage() {
                     <div className="relative group">
                         <div className="w-32 h-32 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-1">
                             <div className="w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden">
-                                {/* Placeholder Avatar */}
-                                <span className="text-4xl font-bold text-white">{user.name?.charAt(0) || 'U'}</span>
+                                {user.picture ? (
+                                    <img src={user.picture} alt={user.name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-4xl font-bold text-white">{user.name?.charAt(0) || 'U'}</span>
+                                )}
                             </div>
                         </div>
-                        <button className="absolute bottom-0 right-0 p-2 bg-white text-black rounded-full shadow-lg hover:bg-gray-100 transition-colors">
+                        <input
+                            type="file"
+                            id="avatar-upload"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                        />
+                        <button
+                            onClick={() => document.getElementById('avatar-upload')?.click()}
+                            className="absolute bottom-0 right-0 p-2 bg-white text-black rounded-full shadow-lg hover:bg-gray-100 transition-colors"
+                        >
                             <Camera size={18} />
                         </button>
                     </div>

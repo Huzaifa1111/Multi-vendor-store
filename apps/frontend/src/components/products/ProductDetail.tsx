@@ -1,21 +1,30 @@
 // apps/frontend/src/components/products/ProductDetail.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Package, ShoppingCart, Star, Layers, Truck, ShieldCheck, Check, Heart, Share2, Info, Plus, Minus } from 'lucide-react';
+import { ShoppingCart, Heart, Share2, Info, Plus, Minus, Check, Truck, ShieldCheck } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { resolveProductImage } from '@/lib/image';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/lib/auth';
 
+interface AttributeValue {
+  id: number;
+  value: string;
+  attribute: {
+    name: string;
+  };
+}
+
 interface Variation {
   id: number;
-  color: string;
-  size: string;
   sku: string;
   price: number;
+  salePrice?: number;
   stock: number;
+  images?: string[];
+  attributeValues: AttributeValue[];
 }
 
 interface Product {
@@ -48,26 +57,47 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isShortDescOpen, setIsShortDescOpen] = useState(true);
 
-  // Variation state
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  // Group attributes from all variations
+  const attributes = useMemo(() => {
+    const map: { [key: string]: Set<string> } = {};
+    product.variations?.forEach(v => {
+      v.attributeValues.forEach(av => {
+        if (!map[av.attribute.name]) {
+          map[av.attribute.name] = new Set();
+        }
+        map[av.attribute.name].add(av.value);
+      });
+    });
+    return Object.keys(map).map(name => ({
+      name,
+      values: Array.from(map[name])
+    }));
+  }, [product.variations]);
 
-  const formatPrice = (price: number): string => {
-    return `$${Number(price).toFixed(2)}`;
+  // Selected values state: { "Color": "Red", "Size": "XL" }
+  const [selectedAttributes, setSelectedAttributes] = useState<{ [key: string]: string }>({});
+
+  const handleAttributeSelect = (name: string, value: string) => {
+    setSelectedAttributes(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  // Extract unique colors and sizes
-  const colors = Array.from(new Set(product.variations?.map(v => v.color).filter(Boolean)));
-  const sizes = Array.from(new Set(product.variations?.map(v => v.size).filter(Boolean)));
+  // Find matching variation based on ALL selected attributes
+  const selectedVariation = useMemo(() => {
+    if (!product.variations) return null;
+    return product.variations.find(v => {
+      // Every selected attribute must match the value in this variation
+      return Object.entries(selectedAttributes).every(([name, value]) => {
+        return v.attributeValues.some(av => av.attribute.name === name && av.value === value);
+      });
+    });
+  }, [product.variations, selectedAttributes]);
 
-  // Find matching variation
-  const selectedVariation = product.variations?.find(v =>
-    (!selectedColor || v.color === selectedColor) &&
-    (!selectedSize || v.size === selectedSize)
-  );
-
-  const currentPrice = selectedVariation ? selectedVariation.price : product.price;
-  const currentStock = selectedVariation ? selectedVariation.stock : product.stock;
+  const currentPrice = selectedVariation?.price || product.price;
+  const currentStock = selectedVariation?.stock || product.stock;
+  const currentSku = selectedVariation?.sku || `KOT-SG-${product.id}`;
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
@@ -75,12 +105,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       return;
     }
 
-    if (colors.length > 0 && !selectedColor) {
-      alert('Please select a color');
-      return;
-    }
-    if (sizes.length > 0 && !selectedSize) {
-      alert('Please select a size');
+    const missingAttributes = attributes.filter(attr => !selectedAttributes[attr.name]);
+    if (missingAttributes.length > 0) {
+      alert(`Please select ${missingAttributes.map(a => a.name).join(', ')}`);
       return;
     }
 
@@ -95,11 +122,17 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     }
   };
 
-  const allImages = product.images && product.images.length > 0
-    ? product.images
-    : [product.image || ''];
+  const allImages = useMemo(() => {
+    const images = product.images && product.images.length > 0
+      ? [...product.images]
+      : [product.image || ''];
 
-  const descriptionPoints = product.description.split('\n').filter(p => p.trim() !== '');
+    // Add variation images if a variation is selected
+    if (selectedVariation?.images && selectedVariation.images.length > 0) {
+      return [...selectedVariation.images, ...images];
+    }
+    return images;
+  }, [product, selectedVariation]);
 
   return (
     <div className="space-y-4 md:space-y-6 pb-6 md:pb-12 font-plus-jakarta-sans text-gray-900 animate-fade-in-up">
@@ -112,7 +145,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 <img
                   src={resolveProductImage(allImages[selectedImage])}
                   alt={product.name}
-                  className="w-full h-full object-cover transition-all duration-1000 ease-out group-hover:scale-110"
+                  className="w-full h-full object-contain transition-all duration-1000 ease-out group-hover:scale-110"
                 />
                 <div className="absolute top-6 right-6 flex flex-col gap-3">
                   <button
@@ -128,22 +161,17 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               </div>
 
               {allImages.length > 1 && (
-                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x">
+                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x justify-center">
                   {allImages.map((img, idx) => (
                     <button
                       key={idx}
                       onClick={() => setSelectedImage(idx)}
-                      className={`relative w-24 h-24 rounded-2xl overflow-hidden border-2 transition-all duration-500 flex-shrink-0 snap-center ${selectedImage === idx
+                      className={`relative w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all duration-500 flex-shrink-0 snap-center ${selectedImage === idx
                         ? 'border-emerald-600 scale-95 shadow-lg'
                         : 'border-transparent opacity-50 hover:opacity-100 hover:scale-105'
                         }`}
                     >
                       <img src={resolveProductImage(img)} className="w-full h-full object-cover" alt="" />
-                      {selectedImage === idx && (
-                        <div className="absolute inset-0 bg-emerald-600/10 flex items-center justify-center">
-                          <Check size={16} className="text-emerald-600 shadow-sm" />
-                        </div>
-                      )}
                     </button>
                   ))}
                 </div>
@@ -176,81 +204,63 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 </h1>
 
                 <p className="text-[11px] font-black text-emerald-900/40 uppercase tracking-[0.3em]">
-                  SKU : {selectedVariation?.sku || `KOT-SG-${product.id}`}
+                  SKU : {currentSku}
                 </p>
               </div>
 
               {/* Variations */}
               <div className="space-y-6 md:space-y-8 pt-2 md:pt-4">
                 {/* Collapsible Short Description */}
-                <div className="overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
+                <div className="overflow-hidden rounded-3xl border border-gray-100 shadow-sm bg-white">
                   <button
                     onClick={() => setIsShortDescOpen(!isShortDescOpen)}
                     className="w-full px-6 py-4 flex items-center justify-between text-left bg-emerald-900 text-white transition-all hover:bg-emerald-800"
                   >
-                    <span className="text-xs font-black uppercase tracking-[0.2em]">Short Description</span>
+                    <span className="text-xs font-black uppercase tracking-[0.2em]">Product Highlights</span>
                     {isShortDescOpen ? <Minus size={16} /> : <Plus size={16} />}
                   </button>
                   <div className={`transition-all duration-300 ease-in-out ${isShortDescOpen ? 'max-h-[500px] opacity-100 p-6' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-                    <ul className="space-y-3">
-                      {descriptionPoints.map((point, i) => (
-                        <li key={i} className="flex items-start gap-3 text-gray-600 font-medium text-sm md:text-base">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
-                          {point.trim()}
-                        </li>
-                      ))}
-                    </ul>
+                    <div
+                      className="prose prose-sm max-w-none text-gray-600 font-medium leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: product.description }}
+                    />
                   </div>
                 </div>
 
-                {colors.length > 0 && (
-                  <div className="space-y-4">
-                    <label className="text-[11px] font-black uppercase tracking-[0.25em] text-gray-900">Colors</label>
-                    <div className="flex flex-wrap gap-4">
-                      {colors.map((color) => (
-                        <button
-                          key={color}
-                          onClick={() => setSelectedColor(color as string)}
-                          className={`group relative w-12 h-12 rounded-full border-2 transition-all duration-300 p-1 ${selectedColor === color
-                            ? 'border-emerald-600 scale-110 shadow-lg shadow-emerald-100'
-                            : 'border-transparent hover:border-gray-200'
-                            }`}
-                          title={color as string}
-                        >
-                          <div
-                            className="w-full h-full rounded-full shadow-inner border border-black/5"
-                            style={{ backgroundColor: (color as string).toLowerCase() }}
-                          />
-                          {selectedColor === color && (
-                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-600 rounded-full border-2 border-white flex items-center justify-center">
-                              <Check size={10} className="text-white" />
-                            </div>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {sizes.length > 0 && (
-                  <div className="space-y-4">
-                    <label className="text-[11px] font-black uppercase tracking-[0.25em] text-gray-900">Scale Dynamics</label>
+                {/* Dynamic Attributes */}
+                {attributes.map((attr) => (
+                  <div key={attr.name} className="space-y-4">
+                    <label className="text-[11px] font-black uppercase tracking-[0.25em] text-gray-900 flex items-center gap-2">
+                      {attr.name} Selection
+                    </label>
                     <div className="flex flex-wrap gap-3">
-                      {sizes.map((size) => (
-                        <button
-                          key={size}
-                          onClick={() => setSelectedSize(size as string)}
-                          className={`w-14 h-14 rounded-2xl border-2 font-black text-xs transition-all duration-300 flex items-center justify-center ${selectedSize === size
-                            ? 'border-black bg-black text-white shadow-xl shadow-black/20 translate-y-[-4px]'
-                            : 'border-gray-100 bg-white text-gray-500 hover:border-gray-200'
-                            }`}
-                        >
-                          {size as string}
-                        </button>
-                      ))}
+                      {attr.values.map((val) => {
+                        const isSelected = selectedAttributes[attr.name] === val;
+                        // For Colors, we can try to render a circle if it looks like a color name
+                        const isColor = attr.name.toLowerCase() === 'color';
+
+                        return (
+                          <button
+                            key={val}
+                            onClick={() => handleAttributeSelect(attr.name, val)}
+                            className={`min-w-[56px] h-14 px-4 rounded-2xl border-2 font-black text-xs transition-all duration-300 flex items-center justify-center gap-2 ${isSelected
+                              ? 'border-black bg-black text-white shadow-xl shadow-black/20 translate-y-[-4px]'
+                              : 'border-gray-100 bg-white text-gray-500 hover:border-gray-200'
+                              }`}
+                          >
+                            {isColor && (
+                              <div
+                                className="w-4 h-4 rounded-full border border-white/20"
+                                style={{ backgroundColor: val.toLowerCase() }}
+                              />
+                            )}
+                            {val}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
-                )}
+                ))}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
                   <div className="flex items-center gap-3 p-3 md:p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
@@ -282,8 +292,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                     className="flex-grow h-[60px] flex items-center justify-center px-8 md:px-12 py-4 md:py-5 bg-emerald-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-emerald-950 transition-colors shadow-lg shadow-emerald-900/20 active:scale-95 group overflow-hidden relative"
                   >
                     <div className="relative flex items-center">
-                      <ShoppingCart className="w-4 h-4 mr-4 animate-bounce-slow" />
-                      {addingToCart ? 'Authenticating...' : 'Acquire Policy'}
+                      <ShoppingCart className="w-4 h-4 mr-4" />
+                      {addingToCart ? 'Authenticating...' : currentStock === 0 ? 'Out of Stock' : 'Acquire Policy'}
                     </div>
                   </button>
                 </div>

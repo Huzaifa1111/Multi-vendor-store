@@ -110,7 +110,7 @@ export default function ProductTable({ products, loading = false, onDelete }: Pr
                           {product.name}
                         </div>
                         <div className="text-xs text-gray-500 truncate max-w-[200px]">
-                          {product.description?.substring(0, 50)}
+                          {product.description?.replace(/<[^>]*>/g, '').substring(0, 50)}
                         </div>
                       </div>
                     </div>

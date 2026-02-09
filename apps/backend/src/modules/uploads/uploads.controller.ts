@@ -11,8 +11,7 @@ export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) { }
 
   @Post('image')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('image'))
   async uploadImage(@UploadedFile() file: Express.Multer.File) {
     return this.uploadsService.uploadImage(file);

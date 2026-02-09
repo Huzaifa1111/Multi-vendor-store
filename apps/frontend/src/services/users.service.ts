@@ -22,6 +22,7 @@ export interface UpdateUserDto {
     email?: string;
     phone?: string;
     password?: string;
+    picture?: string;
 }
 
 export const usersService = {

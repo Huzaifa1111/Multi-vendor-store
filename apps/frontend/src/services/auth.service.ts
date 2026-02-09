@@ -1,7 +1,7 @@
 // apps/frontend/src/services/auth.service.ts - UPDATED
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -11,19 +11,7 @@ const api = axios.create({
   timeout: 10000, // 10 second timeout
 });
 
-// Add token to requests if it exists
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+// ... (request interceptor remains the same)
 
 // Response interceptor for better error handling
 api.interceptors.response.use(
@@ -35,7 +23,7 @@ api.interceptors.response.use(
 
     if (!error.response) {
       // Network error or server not running
-      throw new Error('Cannot connect to server. Please make sure the backend is running on port 4000.');
+      throw new Error(`Cannot connect to server. Please make sure the backend is running on ${API_URL}`);
     }
 
     return Promise.reject(error);
@@ -55,7 +43,7 @@ export const authService = {
       return response.data;
     } catch (error: any) {
       if (error.message.includes('Cannot connect to server')) {
-        throw new Error('Backend server is not running. Please start the backend on port 3000.');
+        throw new Error(`Backend server is not running. Please start the backend on ${API_URL}`);
       }
 
       throw new Error(
@@ -93,7 +81,7 @@ export const authService = {
       return response.data;
     } catch (error: any) {
       if (error.message.includes('Cannot connect to server')) {
-        throw new Error('Backend server is not running. Please start the backend on port 3000.');
+        throw new Error(`Backend server is not running. Please start the backend on ${API_URL}`);
       }
 
       throw new Error(

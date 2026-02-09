@@ -3,11 +3,20 @@ import { IsString, IsNumber, IsOptional, Min, MaxLength, IsBoolean, IsArray, Val
 import { Type } from 'class-transformer';
 
 class VariationDto {
-  @IsOptional() @IsString() color?: string;
-  @IsOptional() @IsString() size?: string;
   @IsString() sku: string;
   @IsNumber() @Min(0) price: number;
+  @IsOptional() @IsNumber() @Min(0) salePrice?: number;
+  @IsOptional() @IsString() saleStartDate?: string;
+  @IsOptional() @IsString() saleEndDate?: string;
   @IsNumber() @Min(0) stock: number;
+  @IsOptional() @IsBoolean() inStock?: boolean;
+  @IsOptional() @IsArray() @IsString({ each: true }) images?: string[];
+  @IsOptional() @IsNumber() weight?: number;
+  @IsOptional() @IsNumber() length?: number;
+  @IsOptional() @IsNumber() width?: number;
+  @IsOptional() @IsNumber() height?: number;
+  @IsOptional() @IsBoolean() isDefault?: boolean;
+  @IsOptional() @IsArray() @IsNumber({}, { each: true }) attributeValueIds?: number[];
 }
 
 export class CreateProductDto {

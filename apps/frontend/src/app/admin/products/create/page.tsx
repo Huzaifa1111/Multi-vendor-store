@@ -3,10 +3,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, UploadCloud, Image as ImageIcon, Check, Loader2, DollarSign, Package, Tag, Layers, Star, Plus, Trash2, Search, Link as LinkIcon, Sparkles } from 'lucide-react';
+import { ArrowLeft, UploadCloud, Image as ImageIcon, Check, Loader2, DollarSign, Package, Tag, Layers, Star, Plus, Trash2, Search, Link as LinkIcon, Sparkles, Scissors, Info } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import RichTextEditor from '@/components/admin/RichTextEditor';
+import AttributeSelector from '@/components/admin/AttributeSelector';
+import VariationEditor from '@/components/admin/VariationEditor';
+import ProductSearchSelect from '@/components/admin/ProductSearchSelect';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -23,19 +26,33 @@ const itemVariants = {
   show: { opacity: 1, y: 0 }
 };
 
+interface AttributeValue {
+  id: number;
+  value: string;
+}
+
 interface Variation {
-  color: string;
-  size: string;
   sku: string;
   price: number;
+  salePrice?: number;
+  saleStartDate?: string;
+  saleEndDate?: string;
   stock: number;
+  inStock: boolean;
+  images: string[];
+  weight?: number;
+  length?: number;
+  width?: number;
+  height?: number;
+  isDefault: boolean;
+  attributeValues: AttributeValue[];
+  attributeValueIds: number[];
 }
 
 export default function CreateProductPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [brands, setBrands] = useState<{ id: number, name: string }[]>([]);
-  const [products, setProducts] = useState<{ id: number, name: string }[]>([]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -57,15 +74,18 @@ export default function CreateProductPage() {
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
+  // Attribute Management State
+  const [useVariations, setUseVariations] = useState(false);
+  const [selectedAttributeValues, setSelectedAttributeValues] = useState<{ [key: string]: AttributeValue[] }>({
+    'Color': [],
+    'Size': []
+  });
+
   useEffect(() => {
-    // Fetch brands and products for selection
     const fetchData = async () => {
       try {
         const brandsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/brands`);
         if (brandsRes.ok) setBrands(await brandsRes.json());
-
-        const productsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/products`);
-        if (productsRes.ok) setProducts(await productsRes.json());
       } catch (err) {
         console.error('Failed to fetch data', err);
       }
@@ -116,14 +136,59 @@ export default function CreateProductPage() {
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
-  const addVariation = () => {
-    setVariations([...variations, { color: '', size: '', sku: '', price: formData.price, stock: 0 }]);
+  // Variation Logic
+  const generateVariations = () => {
+    const attributes = Object.keys(selectedAttributeValues).filter(k => selectedAttributeValues[k].length > 0);
+    if (attributes.length === 0) return;
+
+    const combinations: AttributeValue[][] = [[]];
+    for (const attr of attributes) {
+      const values = selectedAttributeValues[attr];
+      const newCombinations: AttributeValue[][] = [];
+      for (const combo of combinations) {
+        for (const val of values) {
+          newCombinations.push([...combo, val]);
+        }
+      }
+      combinations.length = 0;
+      combinations.push(...newCombinations);
+    }
+
+    const newVariations: Variation[] = combinations.map((combo, idx) => ({
+      sku: `${formData.sku}-${combo.map(v => v.value.slice(0, 2).toUpperCase()).join('-')}-${idx}`,
+      price: formData.price,
+      stock: 0,
+      inStock: true,
+      images: [],
+      isDefault: idx === 0,
+      attributeValues: combo,
+      attributeValueIds: combo.map(v => v.id)
+    }));
+
+    setVariations(newVariations);
   };
 
-  const updateVariation = (index: number, field: keyof Variation, value: string | number) => {
-    const updated = [...variations];
-    updated[index] = { ...updated[index], [field]: value };
-    setVariations(updated);
+  const addManualVariation = () => {
+    setVariations([...variations, {
+      sku: `${formData.sku}-VAR-${variations.length + 1}`,
+      price: formData.price,
+      stock: 0,
+      inStock: true,
+      images: [],
+      isDefault: variations.length === 0,
+      attributeValues: [],
+      attributeValueIds: []
+    }]);
+  };
+
+  const updateVariation = (index: number, updated: Variation) => {
+    const newVariations = [...variations];
+    // Ensure only one default
+    if (updated.isDefault) {
+      newVariations.forEach((v, i) => { if (i !== index) v.isDefault = false; });
+    }
+    newVariations[index] = updated;
+    setVariations(newVariations);
   };
 
   const removeVariation = (index: number) => {
@@ -144,7 +209,7 @@ export default function CreateProductPage() {
         }
       });
 
-      if (variations.length > 0) {
+      if (useVariations && variations.length > 0) {
         formDataToSend.append('variations', JSON.stringify(variations));
       }
 
@@ -163,7 +228,6 @@ export default function CreateProductPage() {
         router.refresh();
       } else {
         const errorData = await response.json();
-        console.error('Submission error:', errorData);
         throw new Error(errorData.error || 'Failed to create product');
       }
     } catch (error: any) {
@@ -305,7 +369,7 @@ export default function CreateProductPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <label htmlFor="price" className="block text-sm font-bold text-gray-700 mb-2">Price</label>
+                <label htmlFor="price" className="block text-sm font-bold text-gray-700 mb-2">Base Price</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <span className="text-gray-400 font-bold">$</span>
@@ -326,7 +390,7 @@ export default function CreateProductPage() {
               </div>
 
               <div>
-                <label htmlFor="stock" className="block text-sm font-bold text-gray-700 mb-2">Stock Quantity</label>
+                <label htmlFor="stock" className="block text-sm font-bold text-gray-700 mb-2">Base Stock Quantity</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <span className="text-gray-400"><Package size={16} /></span>
@@ -347,97 +411,98 @@ export default function CreateProductPage() {
             </div>
           </div>
 
-          {/* Variations Section */}
+          {/* Variable Product Settings */}
           <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                <Layers className="text-indigo-600" /> Product Variations
-              </h2>
-              <button
-                type="button"
-                onClick={addVariation}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl font-bold hover:bg-indigo-100 transition-colors"
-              >
-                <Plus size={18} /> Add Variation
-              </button>
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <Layers className="text-indigo-600" /> Variable Product
+                </h2>
+                <p className="text-sm text-gray-500 font-medium">Enable variations like size, color, etc.</p>
+              </div>
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div className={`w-14 h-7 rounded-full transition-all relative ${useVariations ? 'bg-indigo-600' : 'bg-gray-200'}`}>
+                  <input
+                    type="checkbox"
+                    className="hidden"
+                    checked={useVariations}
+                    onChange={(e) => setUseVariations(e.target.checked)}
+                  />
+                  <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all ${useVariations ? 'left-8' : 'left-1'}`} />
+                </div>
+              </label>
             </div>
 
-            <div className="space-y-4">
-              <AnimatePresence>
-                {variations.map((v, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="p-6 bg-gray-50/50 border border-gray-100 rounded-2xl grid grid-cols-2 md:grid-cols-5 gap-4 items-end"
-                  >
-                    <div>
-                      <label className="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">Color</label>
-                      <input
-                        type="text"
-                        value={v.color}
-                        onChange={(e) => updateVariation(index, 'color', e.target.value)}
-                        className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 transition-all text-sm font-medium"
-                        placeholder="e.g. Red"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">Size</label>
-                      <input
-                        type="text"
-                        value={v.size}
-                        onChange={(e) => updateVariation(index, 'size', e.target.value)}
-                        className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 transition-all text-sm font-medium"
-                        placeholder="e.g. XL"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">SKU</label>
-                      <input
-                        type="text"
-                        value={v.sku}
-                        onChange={(e) => updateVariation(index, 'sku', e.target.value)}
-                        className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 transition-all text-sm font-medium"
-                        placeholder="SKU-123"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">Price</label>
-                      <input
-                        type="number"
-                        value={v.price}
-                        onChange={(e) => updateVariation(index, 'price', parseFloat(e.target.value))}
-                        className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 transition-all text-sm font-medium"
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <div className="flex-1">
-                        <label className="block text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">Stock</label>
-                        <input
-                          type="number"
-                          value={v.stock}
-                          onChange={(e) => updateVariation(index, 'stock', parseInt(e.target.value))}
-                          className="w-full px-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-100 transition-all text-sm font-medium"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeVariation(index)}
-                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 size={20} />
-                      </button>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-              {variations.length === 0 && (
-                <div className="text-center py-8 border-2 border-dashed border-gray-100 rounded-[2rem]">
-                  <p className="text-gray-400 font-medium">No variations added yet.</p>
+            {useVariations && (
+              <div className="space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
+                {/* Attribute Selection */}
+                <div className="p-6 bg-gray-50/50 rounded-2xl border border-gray-100 space-y-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Scissors className="text-indigo-500" size={18} />
+                    <h3 className="font-bold text-gray-900">Define Attributes</h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <AttributeSelector
+                      attributeName="Color"
+                      selectedValues={selectedAttributeValues['Color']}
+                      onChange={(vals) => setSelectedAttributeValues({ ...selectedAttributeValues, 'Color': vals })}
+                    />
+                    <AttributeSelector
+                      attributeName="Size"
+                      selectedValues={selectedAttributeValues['Size']}
+                      onChange={(vals) => setSelectedAttributeValues({ ...selectedAttributeValues, 'Size': vals })}
+                    />
+                  </div>
+
+                  <div className="flex justify-end pt-4">
+                    <button
+                      type="button"
+                      onClick={generateVariations}
+                      className="px-6 py-2 bg-white border-2 border-indigo-100 text-indigo-600 rounded-xl font-bold hover:bg-indigo-50 transition-colors flex items-center gap-2"
+                    >
+                      <Sparkles size={18} /> Generate Combinations
+                    </button>
+                  </div>
                 </div>
-              )}
-            </div>
+
+                {/* Variations List */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                      Variations ({variations.length})
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={addManualVariation}
+                      className="px-4 py-2 text-indigo-600 hover:bg-indigo-50 rounded-xl font-bold transition-all text-sm flex items-center gap-2"
+                    >
+                      <Plus size={16} /> Add Manually
+                    </button>
+                  </div>
+
+                  {variations.map((v, idx) => (
+                    <VariationEditor
+                      key={idx}
+                      variation={v}
+                      onUpdate={(updated) => updateVariation(idx, updated)}
+                      onRemove={() => removeVariation(idx)}
+                      isSingle={variations.length === 1}
+                    />
+                  ))}
+
+                  {variations.length === 0 && (
+                    <div className="text-center py-12 border-2 border-dashed border-gray-100 rounded-[2.5rem] bg-gray-50/30">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Layers size={24} className="text-gray-400" />
+                      </div>
+                      <p className="text-gray-500 font-bold mb-1">No Variations Yet</p>
+                      <p className="text-sm text-gray-400 max-w-xs mx-auto">Select attributes above and generate combinations or add them manually.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Related Products Card */}
@@ -447,51 +512,16 @@ export default function CreateProductPage() {
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Upsells</label>
-                <div className="space-y-2 max-h-48 overflow-y-auto p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
-                  {products.map(p => (
-                    <label key={p.id} className="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded-xl transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={formData.upsellIds.includes(p.id)}
-                        onChange={(e) => {
-                          const updated = e.target.checked
-                            ? [...formData.upsellIds, p.id]
-                            : formData.upsellIds.filter(id => id !== p.id);
-                          setFormData({ ...formData, upsellIds: updated });
-                        }}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm font-medium text-gray-700">{p.name}</span>
-                    </label>
-                  ))}
-                  {products.length === 0 && <p className="text-gray-400 text-xs text-center py-2">No products available</p>}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Cross-sells</label>
-                <div className="space-y-2 max-h-48 overflow-y-auto p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
-                  {products.map(p => (
-                    <label key={p.id} className="flex items-center gap-3 cursor-pointer hover:bg-white p-2 rounded-xl transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={formData.crossSellIds.includes(p.id)}
-                        onChange={(e) => {
-                          const updated = e.target.checked
-                            ? [...formData.crossSellIds, p.id]
-                            : formData.crossSellIds.filter(id => id !== p.id);
-                          setFormData({ ...formData, crossSellIds: updated });
-                        }}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm font-medium text-gray-700">{p.name}</span>
-                    </label>
-                  ))}
-                  {products.length === 0 && <p className="text-gray-400 text-xs text-center py-2">No products available</p>}
-                </div>
-              </div>
+              <ProductSearchSelect
+                label="Upsells"
+                selectedIds={formData.upsellIds}
+                onChange={(ids) => setFormData({ ...formData, upsellIds: ids })}
+              />
+              <ProductSearchSelect
+                label="Cross-sells"
+                selectedIds={formData.crossSellIds}
+                onChange={(ids) => setFormData({ ...formData, crossSellIds: ids })}
+              />
             </div>
           </div>
         </motion.div>

@@ -70,10 +70,14 @@ export class ProductsService {
     const savedProduct = await this.productRepository.save(product);
 
     if (createProductDto.variations && createProductDto.variations.length > 0) {
-      const variations = createProductDto.variations.map(v =>
-        this.variationRepository.create({ ...v, product: savedProduct })
-      );
-      await this.variationRepository.save(variations);
+      for (const vDto of createProductDto.variations) {
+        const variation = this.variationRepository.create({
+          ...vDto,
+          product: savedProduct,
+          attributeValues: vDto.attributeValueIds ? vDto.attributeValueIds.map(id => ({ id })) : [],
+        } as any);
+        await this.variationRepository.save(variation);
+      }
     }
 
     return {
@@ -146,7 +150,7 @@ export class ProductsService {
   async findOne(id: number): Promise<Product> {
     const product = await this.productRepository.findOne({
       where: { id },
-      relations: ['brand', 'variations', 'upsells', 'crossSells']
+      relations: ['brand', 'variations', 'variations.attributeValues', 'variations.attributeValues.attribute', 'upsells', 'crossSells']
     });
 
     if (!product) {
@@ -211,10 +215,14 @@ export class ProductsService {
     // Variations handling for update
     if (updateProductDto.variations) {
       await this.variationRepository.delete({ product: { id } });
-      const variations = updateProductDto.variations.map(v =>
-        this.variationRepository.create({ ...v, product: { id } as Product })
-      );
-      await this.variationRepository.save(variations);
+      for (const vDto of updateProductDto.variations) {
+        const variation = this.variationRepository.create({
+          ...vDto,
+          product: { id } as Product,
+          attributeValues: vDto.attributeValueIds ? vDto.attributeValueIds.map(id => ({ id })) : [],
+        } as any);
+        await this.variationRepository.save(variation);
+      }
       delete updateData.variations;
     }
 

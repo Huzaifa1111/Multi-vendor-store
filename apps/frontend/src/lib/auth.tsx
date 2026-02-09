@@ -4,12 +4,25 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService } from '@/services/auth.service';
 
+interface Address {
+  id?: number;
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+  isDefault?: boolean;
+}
+
 interface User {
   id: number;
   email: string;
   name: string;
   role: string;
   isEmailVerified?: boolean;
+  phone?: string;
+  picture?: string;
+  addresses?: Address[];
 }
 
 interface AuthContextType {
