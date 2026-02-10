@@ -101,7 +101,7 @@ export default function Footer() {
                         <h4 className="font-black text-[12px] uppercase tracking-[0.25em] mb-8 text-black">Experience</h4>
                         <ul className="space-y-4 text-[15px] text-gray-500 font-medium">
                             <li><Link href="#" className="hover:text-black transition-colors">My Profile</Link></li>
-                            <li><Link href="#" className="hover:text-black transition-colors">Order Tracking</Link></li>
+                            <li><Link href="/track-order" className="hover:text-black transition-colors">Order Tracking</Link></li>
                             <li><Link href="/wishlist" className="hover:text-black transition-colors">Wishlist</Link></li>
                             <li><Link href="/gift-cards" className="hover:text-black transition-colors">Gift Cards</Link></li>
                             <li><Link href="/sustainability" className="hover:text-black transition-colors">Sustainability</Link></li>

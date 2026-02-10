@@ -34,9 +34,16 @@ export class OrdersService {
       return sum + (item.price * item.quantity);
     }, 0);
 
+    // Generate professional order number (e.g., ORD-20240210-ABCD)
+    const date = new Date();
+    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+    const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const orderNumber = `ORD-${dateStr}-${randomStr}`;
+
     // Create order
     const order = this.orderRepository.create({
       userId,
+      orderNumber,
       total,
       shippingAddress: createOrderDto.shippingAddress,
       paymentMethod: createOrderDto.paymentMethod,
@@ -72,9 +79,6 @@ export class OrdersService {
         productId: item.productId,
         quantity: item.quantity,
         price: item.price,
-        // If cart has color/size, we should save it here
-        // color: item.color,
-        // size: item.size,
       });
       await this.orderItemRepository.save(orderItem);
     }
@@ -82,7 +86,7 @@ export class OrdersService {
     // Deduct Stock
     for (const item of cartItems) {
       const product = await this.productRepository.findOne({ where: { id: item.productId } });
-      if (product) {
+      if (product) { // Ensure product exists
         if (product.stock < item.quantity) {
           throw new Error(`Insufficient stock for product: ${product.name}`);
         }
@@ -96,6 +100,19 @@ export class OrdersService {
     await this.cartService.clearCart(userId);
 
     return savedOrder;
+  }
+
+  async getOrderByOrderNumber(orderNumber: string) {
+    const order = await this.orderRepository.findOne({
+      where: { orderNumber },
+      relations: ['items', 'items.product', 'items.product.brand']
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    return order;
   }
 
   async createPaymentIntent(userId: number) {

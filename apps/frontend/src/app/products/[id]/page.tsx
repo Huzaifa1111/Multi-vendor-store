@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import productService, { Product } from '@/services/product.service';
+import { resolveProductImage } from '@/lib/image';
 import { ArrowLeft, Package, Star, Loader2, Sparkles, TrendingUp, MessageSquare, Info, Truck, RotateCcw, Award } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/lib/auth';
@@ -212,9 +213,31 @@ export default function ProductDetailPage() {
                 <Package size={100} />
               </div>
               <div
-                className="prose prose-emerald max-w-none text-emerald-900/70 font-medium leading-[2] text-base md:text-lg"
+                className="prose prose-emerald max-w-none text-emerald-900/70 font-medium leading-[2] text-base md:text-lg rich-text-content"
                 dangerouslySetInnerHTML={{ __html: product.longDescription || product.description || "No extended dossier available for this selection." }}
               />
+
+              {/* Description Images Gallery */}
+              {product.descriptionImages && product.descriptionImages.length > 0 && (
+                <div className="mt-12 space-y-6">
+                  <h3 className="text-2xl font-black text-emerald-900 tracking-tight flex items-center gap-3">
+                    <span className="w-2 h-2 bg-emerald-600 rounded-full animate-pulse"></span>
+                    Product Gallery
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {product.descriptionImages.map((img: string, idx: number) => (
+                      <div key={idx} className="group relative aspect-video rounded-3xl overflow-hidden border-4 border-white shadow-2xl hover:shadow-emerald-200/50 transition-all duration-700">
+                        <img
+                          src={resolveProductImage(img)}
+                          alt={`${product.name} - Image ${idx + 1}`}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : activeTab === 'shipping' ? (
             <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6">
@@ -319,7 +342,7 @@ export default function ProductDetailPage() {
               <h2 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900">You May Also Like</h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {product.upsells.map((upsell) => (
+              {product.upsells.map((upsell: any) => (
                 <ProductCard key={upsell.id} product={upsell as any} />
               ))}
             </div>
@@ -334,7 +357,7 @@ export default function ProductDetailPage() {
               <h2 className="text-2xl md:text-3xl font-black tracking-tight text-gray-900">Bought Together</h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {product.crossSells.map((crossSell) => (
+              {product.crossSells.map((crossSell: any) => (
                 <ProductCard key={crossSell.id} product={crossSell as any} />
               ))}
             </div>

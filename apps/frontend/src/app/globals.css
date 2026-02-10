@@ -489,6 +489,26 @@ header {
   }
 }
 
+/* Rich Text Content Styles - Non-negotiable visiblity */
+.prose img,
+.rich-text-content img {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  margin: 3rem auto !important;
+  border-radius: 2rem !important;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15), 0 10px 15px -3px rgb(0 0 0 / 0.1) !important;
+  border: 1px solid rgb(0 0 0 / 0.05) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Ensure typography plugin doesn't hide images if it's actually loaded */
+.prose :where(img):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  margin-top: 3rem !important;
+  margin-bottom: 3rem !important;
+}
+
 @layer base {
   * {
     @apply border-border;

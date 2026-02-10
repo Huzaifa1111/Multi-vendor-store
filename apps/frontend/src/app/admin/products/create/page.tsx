@@ -73,6 +73,7 @@ export default function CreateProductPage() {
   const [variations, setVariations] = useState<Variation[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [descriptionImageUrls, setDescriptionImageUrls] = useState<string[]>([]);
 
   // Attribute Management State
   const [useVariations, setUseVariations] = useState(false);
@@ -134,6 +135,53 @@ export default function CreateProductPage() {
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDescriptionImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    try {
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const fd = new FormData();
+        fd.append('image', file);
+        console.log('Uploading image:', file.name);
+
+        const token = localStorage.getItem('token');
+        const headers: HeadersInit = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/uploads/image`, {
+          method: 'POST',
+          body: fd,
+          credentials: 'include',
+          headers,
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Upload failed:', response.status, errorText);
+          throw new Error(`Upload failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Upload successful:', data.url);
+        return data.url;
+      });
+
+      const urls = await Promise.all(uploadPromises);
+      setDescriptionImageUrls(prev => [...prev, ...urls]);
+      console.log('All images uploaded successfully');
+    } catch (error) {
+      console.error('Failed to upload description images:', error);
+      alert(`Failed to upload one or more images. Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  const removeDescriptionImage = (index: number) => {
+    setDescriptionImageUrls(prev => prev.filter((_, i) => i !== index));
   };
 
   // Variation Logic
@@ -215,6 +263,10 @@ export default function CreateProductPage() {
 
       if (images.length > 0) {
         images.forEach(img => formDataToSend.append('images', img));
+      }
+
+      if (descriptionImageUrls.length > 0) {
+        formDataToSend.append('descriptionImages', JSON.stringify(descriptionImageUrls));
       }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/products`, {
@@ -342,6 +394,54 @@ export default function CreateProductPage() {
                   value={formData.longDescription}
                   onChange={(content) => handleRichTextChange('longDescription', content)}
                 />
+              </div>
+
+              {/* Description Images Gallery */}
+              <div className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl border border-purple-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <ImageIcon className="text-purple-600" size={20} />
+                  <div>
+                    <h3 className="font-bold text-gray-900">Description Images</h3>
+                    <p className="text-xs text-gray-500 font-medium">Upload images to display in the product description section</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                  <AnimatePresence>
+                    {descriptionImageUrls.map((url, idx) => (
+                      <motion.div
+                        key={url}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className="relative aspect-square group rounded-2xl overflow-hidden border-4 border-white shadow-lg"
+                      >
+                        <img src={url} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
+                        <button
+                          type="button"
+                          onClick={() => removeDescriptionImage(idx)}
+                          className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-xl opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-xl"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  <label className="aspect-square flex flex-col items-center justify-center bg-white border-4 border-dashed border-purple-200 rounded-2xl cursor-pointer hover:border-purple-400 hover:bg-purple-50/50 transition-all duration-500 group relative overflow-hidden">
+                    <div className="z-10 flex flex-col items-center gap-3">
+                      <div className="p-5 bg-purple-50 rounded-2xl shadow-sm text-purple-300 group-hover:text-purple-600 group-hover:shadow-xl transition-all duration-500 group-hover:scale-110">
+                        <UploadCloud size={24} />
+                      </div>
+                      <span className="text-[10px] font-black text-purple-300 uppercase tracking-widest group-hover:text-purple-600 transition-colors">Upload</span>
+                    </div>
+                    <input type="file" className="hidden" multiple accept="image/*" onChange={handleDescriptionImageUpload} />
+                  </label>
+                </div>
+
+                <div className="flex items-start gap-2 p-3 bg-white/60 rounded-xl border border-purple-100">
+                  <Info size={16} className="text-purple-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-gray-600 font-medium">These images will appear in a gallery within the product description on the frontend.</p>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

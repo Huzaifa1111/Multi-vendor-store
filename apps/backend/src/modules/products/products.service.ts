@@ -52,6 +52,7 @@ export class ProductsService {
       category: createProductDto.category || 'Uncategorized',
       featured: createProductDto.featured || false,
       images: imageUrls,
+      descriptionImages: createProductDto.descriptionImages || [],
     };
 
     if (createProductDto.brandId) {
@@ -211,6 +212,10 @@ export class ProductsService {
     }
 
     updateData.images = imageUrls;
+
+    if (updateProductDto.descriptionImages !== undefined) {
+      updateData.descriptionImages = updateProductDto.descriptionImages;
+    }
 
     // Variations handling for update
     if (updateProductDto.variations) {

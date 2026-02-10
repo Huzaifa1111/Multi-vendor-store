@@ -1,8 +1,7 @@
-'use client';
-
-import { useState } from 'react';
-import { Package, DollarSign, Image as ImageIcon, Trash2, Calendar, Maximize, Check, X, Plus } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Package, DollarSign, Image as ImageIcon, Trash2, Calendar, Maximize, Check, X, Plus, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import api from '@/lib/api';
 
 interface AttributeValue {
     id: number;
@@ -38,9 +37,39 @@ interface Props {
 
 export default function VariationEditor({ variation, onUpdate, onRemove, isSingle }: Props) {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleChange = (field: keyof Variation, value: any) => {
         onUpdate({ ...variation, [field]: value });
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const response = await api.post('/uploads/image', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.data) {
+                const imageUrl = typeof response.data === 'string' ? response.data : response.data.url;
+                handleChange('images', [...variation.images, imageUrl]);
+            }
+        } catch (error) {
+            console.error('Upload failed:', error);
+            alert('Failed to upload image');
+        } finally {
+            setUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
     };
 
     const label = variation.attributeValues.map(av => av.value).join(' / ') || 'New Variation';
@@ -59,8 +88,17 @@ export default function VariationEditor({ variation, onUpdate, onRemove, isSingl
                 </div>
 
                 <div className="flex items-center gap-3 text-sm font-bold">
-                    <div className="px-3 py-1 bg-green-50 text-green-600 rounded-lg">
-                        ${variation.price}
+                    <div className="flex flex-col items-end">
+                        {variation.salePrice ? (
+                            <>
+                                <span className="text-gray-400 line-through text-[10px] leading-none">${variation.price}</span>
+                                <span className="text-green-600">${variation.salePrice}</span>
+                            </>
+                        ) : (
+                            <div className="px-3 py-1 bg-green-50 text-green-600 rounded-lg">
+                                ${variation.price}
+                            </div>
+                        )}
                     </div>
                     <div className="px-3 py-1 bg-purple-50 text-purple-600 rounded-lg">
                         {variation.stock} in stock
@@ -236,30 +274,23 @@ export default function VariationEditor({ variation, onUpdate, onRemove, isSingl
                                             </button>
                                         </div>
                                     ))}
-                                    <div className="relative w-24 h-24 rounded-2xl border-2 border-dashed border-gray-200 flex items-center justify-center flex-shrink-0 hover:border-indigo-500 transition-colors group">
+                                    <div className="relative w-24 h-24 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center flex-shrink-0 hover:border-indigo-500 transition-colors group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                                         <input
-                                            type="text"
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                            placeholder="Paste Image URL"
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter') {
-                                                    const val = (e.target as HTMLInputElement).value;
-                                                    if (val) {
-                                                        handleChange('images', [...variation.images, val]);
-                                                        (e.target as HTMLInputElement).value = '';
-                                                    }
-                                                }
-                                            }}
-                                            onBlur={(e) => {
-                                                const val = (e.target as HTMLInputElement).value;
-                                                if (val) {
-                                                    handleChange('images', [...variation.images, val]);
-                                                    (e.target as HTMLInputElement).value = '';
-                                                }
-                                            }}
+                                            type="file"
+                                            ref={fileInputRef}
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={handleFileUpload}
+                                            disabled={uploading}
                                         />
-                                        <Plus className="text-gray-400 group-hover:text-indigo-500" size={24} />
-                                        <div className="absolute -bottom-6 left-0 right-0 text-[10px] text-center text-gray-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">PASTE URL + ENTER</div>
+                                        {uploading ? (
+                                            <Loader2 className="text-indigo-500 animate-spin" size={24} />
+                                        ) : (
+                                            <>
+                                                <Plus className="text-gray-400 group-hover:text-indigo-500" size={24} />
+                                                <span className="text-[10px] text-gray-400 font-bold mt-1">UPLOAD</span>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>

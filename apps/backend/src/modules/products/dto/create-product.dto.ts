@@ -79,4 +79,9 @@ export class CreateProductDto {
   @IsArray()
   @IsNumber({}, { each: true })
   crossSellIds?: number[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  descriptionImages?: string[];
 }

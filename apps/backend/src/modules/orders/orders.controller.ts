@@ -7,9 +7,17 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from '../users/enums/user-role.enum';
 
+import { Public } from '../../common/decorators/public.decorator';
+
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) { }
+
+  @Public()
+  @Get('track/:orderNumber')
+  async trackOrder(@Param('orderNumber') orderNumber: string) {
+    return this.ordersService.getOrderByOrderNumber(orderNumber);
+  }
 
   @Post('create-payment-intent')
   @UseGuards(JwtAuthGuard)

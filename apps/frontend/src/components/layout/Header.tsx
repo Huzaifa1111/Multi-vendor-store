@@ -168,6 +168,7 @@ export default function Header() {
             </div>
 
             <Link href="/about" className="text-[15px] font-semibold text-black hover:text-gray-600 transition-colors uppercase tracking-tight">About</Link>
+            <Link href="/contact" className="text-[15px] font-semibold text-black hover:text-gray-600 transition-colors uppercase tracking-tight">Contact</Link>
           </nav>
 
           {/* Mobile menu button */}

@@ -29,6 +29,7 @@ export interface Product {
   crossSells?: Product[];
   shippingPolicy?: string;
   returnPolicy?: string;
+  descriptionImages?: string[];
 }
 
 export interface CreateProductData {
@@ -42,6 +43,7 @@ export interface CreateProductData {
   longDescription?: string;
   shippingPolicy?: string;
   returnPolicy?: string;
+  descriptionImages?: string[];
 }
 
 export interface UpdateProductData extends Partial<CreateProductData> { }

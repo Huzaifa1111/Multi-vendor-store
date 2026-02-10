@@ -41,6 +41,9 @@ export class Product {
   @Column('text', { nullable: true })
   returnPolicy: string;
 
+  @Column('simple-array', { nullable: true })
+  descriptionImages: string[];
+
   @ManyToOne(() => Brand, (brand) => brand.products, { nullable: true })
   brand: Brand;
 

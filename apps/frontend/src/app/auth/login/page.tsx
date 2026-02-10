@@ -15,7 +15,7 @@ export default function LoginPage() {
     const { login, user } = useAuth();
     const searchParams = useSearchParams();
 
-    // Check for verification success message
+    // Check for verification success message and initialize email
     useEffect(() => {
         const verified = searchParams.get('verified');
         if (verified === 'true') {
@@ -25,6 +25,12 @@ export default function LoginPage() {
         const emailParam = searchParams.get('email');
         if (emailParam) {
             setEmail(emailParam);
+        } else {
+            // Initialize email from localStorage if available and no URL param
+            const rememberedEmail = localStorage.getItem('rememberedEmail');
+            if (rememberedEmail) {
+                setEmail(rememberedEmail);
+            }
         }
     }, [searchParams]);
 
@@ -44,6 +50,9 @@ export default function LoginPage() {
             }
 
             await login(email, password);
+
+            // Save email for pre-fill on next visit
+            localStorage.setItem('rememberedEmail', email);
         } catch (err: any) {
             if (err.message.includes('verify your email')) {
                 setError(err.message + ' Please check your email for verification OTP.');
@@ -127,7 +136,7 @@ export default function LoginPage() {
                                         id="email"
                                         name="email"
                                         type="email"
-                                        autoComplete="email"
+                                        autoComplete="email username"
                                         required
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}

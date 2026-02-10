@@ -19,9 +19,19 @@ interface RichTextEditorProps {
 
 export default function RichTextEditor({ value, onChange, placeholder, label }: RichTextEditorProps) {
     const quillRef = useRef<any>(null);
+    const lastSelectionRef = useRef<any>(null);
 
     const imageHandler = useMemo(() => {
         return () => {
+            const quill = quillRef.current?.getEditor();
+            if (quill) {
+                // Save current selection before showing file picker
+                const range = quill.getSelection();
+                if (range) {
+                    lastSelectionRef.current = range;
+                }
+            }
+
             const input = document.createElement('input');
             input.setAttribute('type', 'file');
             input.setAttribute('accept', 'image/*');
@@ -30,6 +40,7 @@ export default function RichTextEditor({ value, onChange, placeholder, label }: 
             input.onchange = async () => {
                 const file = input.files?.[0];
                 if (file) {
+                    console.log('RichTextEditor: Starting image upload...', file.name);
                     const formData = new FormData();
                     formData.append('image', file);
 
@@ -45,13 +56,23 @@ export default function RichTextEditor({ value, onChange, placeholder, label }: 
                         );
 
                         const url = response.data.url;
+                        console.log('RichTextEditor: Upload successful, URL:', url);
+
                         const quill = quillRef.current?.getEditor();
                         if (quill) {
-                            const range = quill.getSelection();
-                            quill.insertEmbed(range.index || 0, 'image', url);
+                            // Use last selection or fallback to current selection or end of content
+                            let range = quill.getSelection() || lastSelectionRef.current;
+                            const index = range ? range.index : quill.getLength();
+
+                            console.log('RichTextEditor: Inserting image at index:', index);
+                            quill.insertEmbed(index, 'image', url);
+                            quill.setSelection(index + 1); // Move cursor after image
+
+                            // Reset last selection
+                            lastSelectionRef.current = null;
                         }
                     } catch (error) {
-                        console.error('Image upload failed:', error);
+                        console.error('RichTextEditor: Image upload failed:', error);
                         alert('Failed to upload image. Please try again.');
                     }
                 }
@@ -112,6 +133,12 @@ export default function RichTextEditor({ value, onChange, placeholder, label }: 
         .rich-text-editor .ql-editor {
           padding: 1.25rem !important;
           min-height: 200px !important;
+        }
+        .rich-text-editor .ql-editor img {
+          max-width: 100%;
+          height: auto;
+          border-radius: 1rem;
+          margin: 1rem 0;
         }
         .rich-text-editor .ql-editor.ql-blank::before {
           left: 1.25rem !important;

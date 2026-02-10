@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { OrderItem } from './order-item.entity';
+import { User } from '../users/user.entity';
 
 export enum OrderStatus {
   PENDING = 'pending',
@@ -14,8 +15,15 @@ export class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ unique: true, nullable: true })
+  orderNumber: string;
+
   @Column()
   userId: number;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
   @Column('decimal', { precision: 10, scale: 2 })
   total: number;

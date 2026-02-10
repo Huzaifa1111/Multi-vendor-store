@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 const api = axios.create({
     baseURL: API_URL,
@@ -33,6 +33,11 @@ export const ordersService = {
 
     async getOrderById(id: number) {
         const response = await api.get(`/orders/${id}`);
+        return response.data;
+    },
+
+    async trackOrder(orderNumber: string) {
+        const response = await api.get(`/orders/track/${orderNumber}`);
         return response.data;
     }
 };

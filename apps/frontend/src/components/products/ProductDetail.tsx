@@ -84,6 +84,26 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     }));
   };
 
+  const handleImageSelect = (idx: number) => {
+    setSelectedImage(idx);
+    const clickedImage = allImages[idx];
+
+    // Find variation that has this image and select it
+    if (product.variations) {
+      const variationWithImage = product.variations.find(v =>
+        v.images?.some(vImg => vImg === clickedImage)
+      );
+
+      if (variationWithImage) {
+        const newAttributes: { [key: string]: string } = {};
+        variationWithImage.attributeValues.forEach(av => {
+          newAttributes[av.attribute.name] = av.value;
+        });
+        setSelectedAttributes(newAttributes);
+      }
+    }
+  };
+
   // Find matching variation based on ALL selected attributes
   const selectedVariation = useMemo(() => {
     if (!product.variations) return null;
@@ -96,6 +116,10 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   }, [product.variations, selectedAttributes]);
 
   const currentPrice = selectedVariation?.price || product.price;
+  const currentSalePrice = selectedVariation?.salePrice;
+  const displayPrice = currentSalePrice || currentPrice;
+  const hasSale = !!currentSalePrice && currentSalePrice < currentPrice;
+
   const currentStock = selectedVariation?.stock || product.stock;
   const currentSku = selectedVariation?.sku || `KOT-SG-${product.id}`;
 
@@ -129,7 +153,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
     // Add variation images if a variation is selected
     if (selectedVariation?.images && selectedVariation.images.length > 0) {
-      return [...selectedVariation.images, ...images];
+      const varImages = selectedVariation.images.filter((img: string) => !images.includes(img));
+      return [...varImages, ...images];
     }
     return images;
   }, [product, selectedVariation]);
@@ -165,7 +190,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   {allImages.map((img, idx) => (
                     <button
                       key={idx}
-                      onClick={() => setSelectedImage(idx)}
+                      onClick={() => handleImageSelect(idx)}
                       className={`relative w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all duration-500 flex-shrink-0 snap-center ${selectedImage === idx
                         ? 'border-emerald-600 scale-95 shadow-lg'
                         : 'border-transparent opacity-50 hover:opacity-100 hover:scale-105'
@@ -192,10 +217,17 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                       </span>
                     )}
                   </div>
-                  <div className="text-3xl font-black text-emerald-600 tracking-tighter flex items-start gap-1">
-                    <span className="text-lg mt-1 opacity-70 font-bold">$</span>
-                    {Number(currentPrice).toFixed(2).split('.')[0]}
-                    <span className="text-lg mt-1 opacity-70 font-bold">.{Number(currentPrice).toFixed(2).split('.')[1]}</span>
+                  <div className="flex flex-col items-end">
+                    {hasSale && (
+                      <span className="text-sm text-gray-400 line-through font-bold opacity-70">
+                        ${Number(currentPrice).toFixed(2)}
+                      </span>
+                    )}
+                    <div className="text-3xl font-black text-emerald-600 tracking-tighter flex items-start gap-1">
+                      <span className="text-lg mt-1 opacity-70 font-bold">$</span>
+                      {Number(displayPrice).toFixed(2).split('.')[0]}
+                      <span className="text-lg mt-1 opacity-70 font-bold">.{Number(displayPrice).toFixed(2).split('.')[1]}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -221,7 +253,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   </button>
                   <div className={`transition-all duration-300 ease-in-out ${isShortDescOpen ? 'max-h-[500px] opacity-100 p-6' : 'max-h-0 opacity-0 overflow-hidden'}`}>
                     <div
-                      className="prose prose-sm max-w-none text-gray-600 font-medium leading-relaxed"
+                      className="prose prose-sm max-w-none text-gray-600 font-medium leading-relaxed rich-text-content"
                       dangerouslySetInnerHTML={{ __html: product.description }}
                     />
                   </div>

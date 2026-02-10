@@ -1,5 +1,5 @@
 // apps/backend/src/modules/orders/order-item.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, JoinColumn } from 'typeorm';
 import { Order } from './order.entity';
 import { Product } from '../products/product.entity';
 
@@ -15,9 +15,11 @@ export class OrderItem {
     productId: number;
 
     @ManyToOne(() => Order, (order) => order.items)
+    @JoinColumn({ name: 'orderId' })
     order: Order;
 
     @ManyToOne(() => Product)
+    @JoinColumn({ name: 'productId' })
     product: Product;
 
     @Column()

@@ -20,10 +20,21 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersRepository.findOne({ where: { email } });
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const { password, ...result } = user;
-      return result;
+
+    // Safety check: if user doesn't exist or has no password, validation fails
+    if (!user || !user.password) {
+      return null;
     }
+
+    try {
+      if (await bcrypt.compare(password, user.password)) {
+        const { password: _, ...result } = user;
+        return result;
+      }
+    } catch (error) {
+      console.error('Password comparison error:', error);
+    }
+
     return null;
   }
 

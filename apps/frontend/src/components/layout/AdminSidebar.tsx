@@ -12,7 +12,8 @@ import {
   Folder,
   Shield,
   PlusCircle,
-  ArrowLeft
+  ArrowLeft,
+  Mail
 } from 'lucide-react';
 
 const navItems = [
@@ -21,6 +22,7 @@ const navItems = [
   { href: '/admin/products/create', label: 'Add Product', icon: PlusCircle },
   { href: '/admin/categories', label: 'Categories', icon: Folder },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
+  { href: '/admin/messages', label: 'Messages', icon: Mail },
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
@@ -55,8 +57,8 @@ export default function AdminSidebar() {
                 key={item.href}
                 href={item.href}
                 className={`flex items-center px-4 py-3.5 text-sm font-bold rounded-xl transition-all duration-200 group ${isActive
-                    ? 'bg-black text-white shadow-lg shadow-gray-200'
-                    : 'text-gray-500 hover:bg-gray-50 hover:text-black'
+                  ? 'bg-black text-white shadow-lg shadow-gray-200'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-black'
                   }`}
               >
                 <Icon className={`w-5 h-5 mr-3 transition-colors ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-black'}`} />
