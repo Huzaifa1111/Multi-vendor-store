@@ -19,7 +19,7 @@ export class OrdersController {
     return this.ordersService.getOrderByOrderNumber(orderNumber);
   }
 
-  @Post('create-payment-intent')
+  @Post("create-payment-intent")
   @UseGuards(JwtAuthGuard)
   async createPaymentIntent(@Req() req) {
     return this.ordersService.createPaymentIntent(req.user.id);
