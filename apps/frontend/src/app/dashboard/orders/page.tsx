@@ -22,6 +22,7 @@ import { ordersService } from '@/services/orders.service';
 
 interface Order {
     id: number;
+    orderNumber: string;
     total: number;
     status: string;
     createdAt: string;
@@ -82,7 +83,7 @@ export default function MyOrdersPage() {
             case 'shipped':
                 return { icon: Truck, color: 'text-blue-600', bg: 'bg-blue-100', text: 'In Transit' };
             case 'cancelled':
-                return { icon: XCircle, color: 'text-red-600', bg: 'bg-red-100', text: 'Cancelled' };
+                return { icon: XCircle, color: 'text-red-700', bg: 'bg-red-500/10', text: 'Cancelled' };
             default:
                 return { icon: Clock, color: 'text-yellow-600', bg: 'bg-yellow-100', text: 'Processing' };
         }
@@ -158,7 +159,7 @@ export default function MyOrdersPage() {
                                                         <Package size={28} />
                                                     </div>
                                                     <div>
-                                                        <h3 className="text-xl font-bold text-gray-900 mb-1">Order #{order.id}</h3>
+                                                        <h3 className="text-xl font-bold text-gray-900 mb-1">{order.orderNumber || order.id}</h3>
                                                         <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-500 font-medium">
                                                             <span className="flex items-center">
                                                                 <Calendar size={14} className="mr-1.5" />

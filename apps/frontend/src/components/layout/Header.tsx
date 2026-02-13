@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button';
 import { useState, useEffect, useCallback } from 'react';
 import { authService } from '@/services/auth.service';
 import { useCart } from '@/hooks/useCart';
+import { useWishlist } from '@/lib/WishlistContext';
 
 import {
   Search,
@@ -77,6 +78,7 @@ export default function Header() {
   };
 
   const { count } = useCart();
+  const { items: wishlistItems } = useWishlist();
 
 
   const categories = [
@@ -258,10 +260,12 @@ export default function Header() {
               <button className="hidden sm:p-2 hover:bg-gray-100 rounded-full transition-colors">
                 <Search size={22} />
               </button>
-              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors relative">
-                <Heart size={22} />
-                <span className="absolute top-0 right-0 bg-white border border-black text-black text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full leading-none">0</span>
-              </button>
+              <Link href="/wishlist" className="p-2 hover:bg-gray-100 rounded-full transition-colors relative">
+                <Heart size={22} className={wishlistItems.length > 0 ? "fill-red-500 text-red-500" : ""} />
+                <span className="absolute top-0 right-0 bg-white border border-black text-black text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full leading-none">
+                  {wishlistItems.length}
+                </span>
+              </Link>
               <Link href="/cart" className="p-2 hover:bg-gray-100 rounded-full transition-colors relative">
                 <ShoppingBag size={22} />
                 <span className="absolute top-0 right-0 bg-white border border-black text-black text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full leading-none">

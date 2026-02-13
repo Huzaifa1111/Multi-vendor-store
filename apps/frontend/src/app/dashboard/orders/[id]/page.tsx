@@ -36,6 +36,7 @@ interface OrderItem {
 
 interface Order {
     id: number;
+    orderNumber: string;
     total: number;
     status: string;
     createdAt: string;
@@ -96,7 +97,7 @@ export default function OrderDetailPage() {
             case 'shipped':
                 return { icon: Truck, color: 'text-blue-600', bg: 'bg-blue-100', text: 'Shipped' };
             case 'cancelled':
-                return { icon: XCircle, color: 'text-red-600', bg: 'bg-red-100', text: 'Cancelled' };
+                return { icon: XCircle, color: 'text-red-700', bg: 'bg-red-500/10', text: 'Cancelled' };
             case 'processing':
                 return { icon: Clock, color: 'text-yellow-600', bg: 'bg-yellow-100', text: 'Processing' };
             default:
@@ -144,7 +145,7 @@ export default function OrderDetailPage() {
                         <ArrowLeft size={16} className="mr-1" /> Back to My Orders
                     </Link>
                     <div className="flex items-center gap-4">
-                        <h1 className="text-4xl font-black text-gray-900 tracking-tight">Order #{order.id}</h1>
+                        <h1 className="text-4xl font-black text-gray-900 tracking-tight">{order.orderNumber || order.id}</h1>
                         <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider ${statusConfig.color} ${statusConfig.bg}`}>
                             <StatusIcon size={14} className="mr-1.5" />
                             {statusConfig.text}

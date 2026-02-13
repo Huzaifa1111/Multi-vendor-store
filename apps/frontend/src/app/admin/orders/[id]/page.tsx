@@ -105,7 +105,7 @@ export default function OrderDetailPage() {
                     </Link>
                     <div>
                         <div className="flex items-center gap-3 mb-1">
-                            <h1 className="text-3xl font-black text-gray-900 tracking-tight">Order #{order.id}</h1>
+                            <h1 className="text-3xl font-black text-gray-900 tracking-tight">{order.orderNumber || order.id}</h1>
                             <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${getStatusColor(order.status)}`}>
                                 {order.status}
                             </span>

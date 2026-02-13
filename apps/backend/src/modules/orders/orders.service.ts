@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order, OrderStatus } from './order.entity';
@@ -26,7 +26,7 @@ export class OrdersService {
     const cartItems = await this.cartService.getCart(userId);
 
     if (cartItems.length === 0) {
-      throw new Error('Cart is empty');
+      throw new BadRequestException('Cart is empty. Please add items before checkout.');
     }
 
     // Calculate total
@@ -103,44 +103,55 @@ export class OrdersService {
   }
 
   async getOrderByOrderNumber(orderNumber: string) {
-    const order = await this.orderRepository.findOne({
-      where: { orderNumber },
-      relations: ['items', 'items.product', 'items.product.brand']
-    });
-
-    if (!order) {
-      throw new NotFoundException('Order not found');
+    if (!orderNumber) {
+      throw new BadRequestException('Order number is required');
     }
 
-    return order;
+    try {
+      const order = await this.orderRepository.findOne({
+        where: { orderNumber: orderNumber.trim() },
+        relations: ['items', 'items.product', 'items.product.brand']
+      });
+
+      if (!order) {
+        throw new NotFoundException(`Order with identifier ${orderNumber} not found`);
+      }
+
+      return order;
+    } catch (error) {
+      console.error(`[OrdersService] Detailed Tracking Error for ${orderNumber}:`, error);
+      if (error instanceof NotFoundException) throw error;
+      throw new Error(`Technical tracking failure: ${error.message}`);
+    }
   }
 
   async createPaymentIntent(userId: number) {
     const cartItems = await this.cartService.getCart(userId);
 
     if (cartItems.length === 0) {
-      throw new Error('Cart is empty');
+      console.warn(`[OrdersService] CreatePaymentIntent failed: Cart is empty for user ${userId}`);
+      throw new BadRequestException('Cart is empty. Please add items before checkout.');
     }
 
     const total = cartItems.reduce((sum, item) => {
       return sum + (item.price * item.quantity);
     }, 0);
 
-    console.log('=== CREATE PAYMENT INTENT ===');
-    console.log('User ID:', userId);
-    console.log('Cart Items Count:', cartItems.length);
-    console.log('Calculated Total:', total);
+    // console.log('=== CREATE PAYMENT INTENT ===');
+    // console.log('User ID:', userId);
+    // console.log('Cart Items Count:', cartItems.length);
+    // console.log('Calculated Total:', total);
 
     try {
       const paymentIntent = await this.stripeService.createPaymentIntent(total);
-      console.log('Payment Intent Created:', paymentIntent.id);
+      // console.log('Payment Intent Created:', paymentIntent.id);
 
       return {
         clientSecret: paymentIntent.client_secret,
         total,
       };
     } catch (error) {
-      console.error('Stripe Payment Intent Creation Failed:', error);
+      console.error('[OrdersService] Stripe Payment Intent Creation Failed:', error.message);
       throw error;
     }
   }
@@ -166,16 +177,28 @@ export class OrdersService {
       where.userId = userId;
     }
 
-    const order = await this.orderRepository.findOne({
-      where,
-      relations: ['items', 'items.product', 'items.product.brand']
-    });
+    try {
+      const order = await this.orderRepository.findOne({
+        where,
+        relations: {
+          items: {
+            product: {
+              brand: true
+            }
+          }
+        }
+      });
 
-    if (!order) {
-      throw new NotFoundException('Order not found');
+      if (!order) {
+        throw new NotFoundException('Order not found');
+      }
+
+      return order;
+    } catch (error) {
+      console.error(`[OrdersService] Failed to fetch order by ID ${id}:`, error.message);
+      if (error instanceof NotFoundException) throw error;
+      throw new Error('Database operation failed while fetching order');
     }
-
-    return order;
   }
 
   async updateOrderStatus(id: number, status: OrderStatus) {

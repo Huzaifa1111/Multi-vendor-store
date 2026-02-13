@@ -8,6 +8,7 @@ import { ShoppingBag, Eye, Heart } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
+import { useWishlist } from '@/lib/WishlistContext';
 
 interface Product {
   id: number;
@@ -25,12 +26,6 @@ interface ProductCardProps {
   product: Product;
 }
 
-const useWishlist = () => {
-  return {
-    isInWishlist: (product: Product) => false,
-    toggleWishlist: (product: Product) => console.log('Toggle wishlist', product.id),
-  };
-};
 
 export default function ProductCard({ product }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
@@ -39,7 +34,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const productImage = resolveProductImage(product.images || product.image);
-  const isWishlisted = isInWishlist(product);
+  const isWishlisted = isInWishlist(product.id);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();

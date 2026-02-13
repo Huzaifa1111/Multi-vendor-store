@@ -8,8 +8,13 @@ export class StripeService {
     private stripe: Stripe;
 
     constructor(private configService: ConfigService) {
-        const secretKey = this.configService.get<string>('STRIPE_SECRET_KEY') || 'sk_test_...';
-        this.stripe = new Stripe(secretKey, {
+        const secretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
+
+        if (!secretKey) {
+            console.error('[StripeService] CRITICAL: STRIPE_SECRET_KEY is missing from ConfigService!');
+        }
+
+        this.stripe = new Stripe(secretKey || 'sk_test_placeholder', {
             // apiVersion: '2023-10-16', // Let it use default or pinned version
         });
     }

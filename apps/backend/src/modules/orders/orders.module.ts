@@ -5,13 +5,13 @@ import { OrdersService } from './orders.service';
 import { Order } from './order.entity';
 import { Product } from '../products/product.entity';
 import { CartModule } from '../cart/cart.module';
-import { StripeService } from './stripe.service'; // Add this import
-
+import { StripeService } from './stripe.service';
 import { OrderItem } from './order-item.entity';
+import { Brand } from '../brands/brand.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Order, Product, OrderItem]),
+    TypeOrmModule.forFeature([Order, Product, OrderItem, Brand]),
     CartModule,
   ],
   controllers: [OrdersController],

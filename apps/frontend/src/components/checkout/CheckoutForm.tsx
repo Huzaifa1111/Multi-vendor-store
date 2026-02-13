@@ -1,7 +1,7 @@
-
+// apps/frontend/src/components/checkout/CheckoutForm.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     PaymentElement,
     useStripe,
@@ -10,13 +10,16 @@ import {
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { addressesService, Address as SavedAddress } from '@/services/addresses.service';
-import { Home, Briefcase, MapPin, Loader2, Check } from 'lucide-react';
-import { useEffect } from 'react';
+import { Home, Briefcase, MapPin, Loader2, Check, CreditCard, Banknote, ShieldCheck, ArrowRight, Package } from 'lucide-react';
+import { useCart } from '@/hooks/useCart';
+import { resolveProductImage } from '@/lib/image';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function CheckoutForm({ clientSecret }: { clientSecret: string }) {
     const stripe = useStripe();
     const elements = useElements();
     const router = useRouter();
+    const { items, total } = useCart();
 
     const [email, setEmail] = useState('');
     const [address, setAddress] = useState('');
@@ -27,6 +30,10 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
     const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
     const [selectedAddressId, setSelectedAddressId] = useState<number | 'new'>('new');
     const [isFetchingAddresses, setIsFetchingAddresses] = useState(false);
+
+    const shippingCost = 5.99;
+    const tax = total * 0.1;
+    const grandTotal = total + shippingCost + tax;
 
     useEffect(() => {
         const fetchAddresses = async () => {
@@ -81,12 +88,6 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
                 elements,
                 confirmParams: {
                     return_url: `${window.location.origin}/checkout/success`,
-                    // You can pass extra data here but usually it's better to save order after webhook
-                    // However for this simple app, we might rely on the return_url query params
-                    // or create order *before* confirming? 
-                    // Best practice for simple app: confirmPayment, then backend webhook creates order.
-                    // OR: create order as PENDING, then pay.
-                    // Current flow: we have an intent. 
                 },
             });
 
@@ -94,12 +95,11 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
                 setErrorMessage(error.message || 'An error occurred');
                 setIsLoading(false);
             }
-            // If success, it redirects.
         } else {
             // COD Flow
             try {
                 const token = localStorage.getItem('token');
-                await axios.post(
+                const response = await axios.post(
                     'http://localhost:3001/orders',
                     {
                         shippingAddress,
@@ -109,7 +109,7 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
                         headers: { Authorization: `Bearer ${token}` },
                     }
                 );
-                router.push('/checkout/success?payment_intent=cod_success');
+                router.push(`/checkout/success?payment_intent=cod_success&orderNumber=${response.data.orderNumber}`);
             } catch (err: any) {
                 setErrorMessage(err.response?.data?.message || 'Failed to place order');
                 setIsLoading(false);
@@ -118,141 +118,271 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="bg-white p-6 rounded-lg shadow">
-                <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                    <MapPin className="text-indigo-600" size={24} />
-                    Shipping Information
-                </h2>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+            {/* LEFT COLUMN: Shipping & Payment */}
+            <div className="lg:col-span-7 space-y-8">
 
-                {isFetchingAddresses ? (
-                    <div className="flex items-center justify-center py-4">
-                        <Loader2 className="animate-spin text-indigo-600" />
-                    </div>
-                ) : savedAddresses.length > 0 ? (
-                    <div className="space-y-4 mb-8">
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Select a saved address</label>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {savedAddresses.map((addr) => (
-                                <button
-                                    key={addr.id}
-                                    type="button"
-                                    onClick={() => handleAddressSelect(addr.id)}
-                                    className={`relative p-4 rounded-xl border-2 text-left transition-all ${selectedAddressId === addr.id ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 hover:border-gray-200'}`}
-                                >
-                                    {selectedAddressId === addr.id && (
-                                        <div className="absolute top-2 right-2 w-5 h-5 bg-indigo-600 text-white rounded-full flex items-center justify-center">
-                                            <Check size={12} />
-                                        </div>
-                                    )}
-                                    <div className="flex items-center gap-2 mb-1">
-                                        {addr.type === 'home' ? <Home size={16} className="text-gray-400" /> : <Briefcase size={16} className="text-gray-400" />}
-                                        <span className="text-xs font-black uppercase text-gray-500">{addr.type}</span>
-                                    </div>
-                                    <p className="text-sm font-medium text-gray-900 truncate">{addr.street}</p>
-                                    <p className="text-xs text-gray-500">{addr.city}, {addr.zipCode}</p>
-                                </button>
-                            ))}
-                            <button
-                                type="button"
-                                onClick={() => handleAddressSelect('new')}
-                                className={`p-4 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-all ${selectedAddressId === 'new' ? 'border-indigo-600 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}
-                            >
-                                <MapPin size={20} />
-                                <span className="text-xs font-bold">New Address</span>
-                            </button>
+                {/* Shipping Section */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="bg-white p-6 sm:p-8 rounded-[2.5rem] border border-gray-100 shadow-sm"
+                >
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                            <MapPin size={24} />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold text-gray-900">Shipping Details</h2>
+                            <p className="text-gray-500 text-sm">Where should we create magic?</p>
                         </div>
                     </div>
-                ) : null}
 
-                <div className={`grid grid-cols-1 gap-4 transition-all ${savedAddresses.length > 0 && selectedAddressId !== 'new' ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Email</label>
-                        <input
-                            type="email"
-                            required
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border font-medium"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="your@email.com"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Address line</label>
-                        <input
-                            type="text"
-                            required
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border font-medium"
-                            value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                            placeholder="Street address, apartment, suite, etc."
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">City</label>
-                        <input
-                            type="text"
-                            required
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border font-medium"
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                            placeholder="City"
-                        />
-                    </div>
-                </div>
-            </div>
+                    {isFetchingAddresses ? (
+                        <div className="flex items-center justify-center py-8">
+                            <Loader2 className="animate-spin text-emerald-600" />
+                        </div>
+                    ) : savedAddresses.length > 0 ? (
+                        <div className="mb-8">
+                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Saved Addresses</label>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {savedAddresses.map((addr) => (
+                                    <button
+                                        key={addr.id}
+                                        type="button"
+                                        onClick={() => handleAddressSelect(addr.id)}
+                                        className={`relative p-4 rounded-xl border text-left transition-all duration-300 group ${selectedAddressId === addr.id ? 'border-emerald-500 bg-emerald-50/50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}
+                                    >
+                                        {selectedAddressId === addr.id && (
+                                            <div className="absolute top-3 right-3 w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-md">
+                                                <Check size={12} strokeWidth={3} />
+                                            </div>
+                                        )}
+                                        <div className="flex items-center gap-2 mb-1">
+                                            {addr.type === 'home' ? <Home size={14} className={selectedAddressId === addr.id ? 'text-emerald-600' : 'text-gray-400'} /> : <Briefcase size={14} className={selectedAddressId === addr.id ? 'text-emerald-600' : 'text-gray-400'} />}
+                                            <span className={`text-[10px] font-bold uppercase tracking-widest ${selectedAddressId === addr.id ? 'text-emerald-700' : 'text-gray-500'}`}>{addr.type}</span>
+                                        </div>
+                                        <p className="text-sm font-semibold text-gray-900 truncate mb-0.5">{addr.street}</p>
+                                        <p className="text-[11px] text-gray-500 font-medium">{addr.city}, {addr.zipCode}</p>
+                                    </button>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => handleAddressSelect('new')}
+                                    className={`p-4 rounded-xl border border-dashed flex flex-col items-center justify-center gap-2 transition-all ${selectedAddressId === 'new' ? 'border-emerald-500 bg-emerald-50/30 text-emerald-600' : 'border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600'}`}
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center">
+                                        <MapPin size={16} />
+                                    </div>
+                                    <span className="text-[11px] font-bold">New Address</span>
+                                </button>
+                            </div>
+                        </div>
+                    ) : null}
 
-            <div className="bg-white p-6 rounded-lg shadow">
-                <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
-                <div className="space-y-4">
-                    <div className="flex items-center">
-                        <input
-                            id="stripe"
-                            name="paymentMethod"
-                            type="radio"
-                            checked={paymentMethod === 'stripe'}
-                            onChange={() => setPaymentMethod('stripe')}
-                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                        />
-                        <label htmlFor="stripe" className="ml-3 block text-sm font-medium text-gray-700">
-                            Credit Card (Stripe)
+                    <div className={`space-y-4 transition-all duration-300 ${savedAddresses.length > 0 && selectedAddressId !== 'new' ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Email Address</label>
+                            <input
+                                type="email"
+                                required
+                                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 font-medium focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder:text-gray-400"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="your@email.com"
+                            />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="md:col-span-2">
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Street Address</label>
+                                <input
+                                    type="text"
+                                    required
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 font-medium focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder:text-gray-400"
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                    placeholder="123 Luxury Blvd"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">City</label>
+                                <input
+                                    type="text"
+                                    required
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 font-medium focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder:text-gray-400"
+                                    value={city}
+                                    onChange={(e) => setCity(e.target.value)}
+                                    placeholder="New York"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* Payment Section */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm"
+                >
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
+                            <CreditCard size={20} />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-bold text-gray-900">Payment Method</h2>
+                            <p className="text-gray-500 text-xs">Secure transaction.</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                        <label className={`relative cursor-pointer p-4 rounded-xl border transition-all duration-300 ${paymentMethod === 'stripe' ? 'border-emerald-500 bg-emerald-50/20' : 'border-gray-200 bg-white hover:border-gray-300'}`}>
+                            <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="stripe"
+                                checked={paymentMethod === 'stripe'}
+                                onChange={() => setPaymentMethod('stripe')}
+                                className="sr-only"
+                            />
+                            <div className="flex items-center gap-3">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${paymentMethod === 'stripe' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                    <CreditCard size={18} />
+                                </div>
+                                <div className="text-left">
+                                    <h3 className={`text-sm font-bold ${paymentMethod === 'stripe' ? 'text-gray-900' : 'text-gray-500'}`}>Card Payment</h3>
+                                    <p className="text-[10px] text-gray-400 font-medium">Powered by Stripe</p>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label className={`relative cursor-pointer p-4 rounded-xl border transition-all duration-300 ${paymentMethod === 'cod' ? 'border-emerald-500 bg-emerald-50/20' : 'border-gray-200 bg-white hover:border-gray-300'}`}>
+                            <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="cod"
+                                checked={paymentMethod === 'cod'}
+                                onChange={() => setPaymentMethod('cod')}
+                                className="sr-only"
+                            />
+                            <div className="flex items-center gap-3">
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${paymentMethod === 'cod' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                    <Banknote size={18} />
+                                </div>
+                                <div className="text-left">
+                                    <h3 className={`text-sm font-bold ${paymentMethod === 'cod' ? 'text-gray-900' : 'text-gray-500'}`}>Cash on Delivery</h3>
+                                    <p className="text-[10px] text-gray-400 font-medium">Pay upon receipt</p>
+                                </div>
+                            </div>
                         </label>
                     </div>
-                    <div className="flex items-center">
-                        <input
-                            id="cod"
-                            name="paymentMethod"
-                            type="radio"
-                            checked={paymentMethod === 'cod'}
-                            onChange={() => setPaymentMethod('cod')}
-                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                        />
-                        <label htmlFor="cod" className="ml-3 block text-sm font-medium text-gray-700">
-                            Cash on Delivery (COD)
-                        </label>
-                    </div>
-                </div>
 
-                {paymentMethod === 'stripe' && (
-                    <div className="mt-4">
-                        <PaymentElement />
-                    </div>
-                )}
+                    <AnimatePresence mode='wait'>
+                        {paymentMethod === 'stripe' && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="bg-gray-50 p-6 rounded-2xl border border-gray-100"
+                            >
+                                <PaymentElement />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.div>
             </div>
 
-            {errorMessage && (
-                <div className="bg-red-50 p-4 rounded-md">
-                    <p className="text-red-700 text-sm">{errorMessage}</p>
-                </div>
-            )}
+            {/* RIGHT COLUMN: Order Summary */}
+            <div className="lg:col-span-5 relative">
+                <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="bg-white p-6 rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/50 sticky top-8"
+                >
+                    <h2 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-3">
+                        <span className="w-1.5 h-6 bg-emerald-500 rounded-full" />
+                        Order Summary
+                    </h2>
 
-            <button
-                type="submit"
-                disabled={isLoading || (!stripe && paymentMethod === 'stripe')}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
-            >
-                {isLoading ? 'Processing...' : `Pay ${paymentMethod === 'cod' ? 'via COD' : ''}`}
-            </button>
+                    <div className="space-y-4 mb-8 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                        {items.map((item) => (
+                            <div key={item.id} className="flex gap-4 items-center">
+                                <div className="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden border border-gray-100 shrink-0">
+                                    <img
+                                        src={resolveProductImage(item.product?.images || item.product?.image)}
+                                        alt={item.product?.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="text-sm font-bold text-gray-900 truncate">{item.product?.name}</h4>
+                                    <p className="text-xs text-gray-400 mb-1">{item.product?.brand?.name || 'Collection'}</p>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded text-gray-600">Qty: {item.quantity}</span>
+                                        <span className="text-sm font-bold text-gray-900">${(Number(item.price) * item.quantity).toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="border-t border-dashed border-gray-200 py-6 space-y-3">
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-500 font-medium">Subtotal</span>
+                            <span className="font-bold text-gray-900">${total.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-500 font-medium">Shipping</span>
+                            <span className="font-bold text-gray-900">${shippingCost.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-gray-500 font-medium">Tax</span>
+                            <span className="font-bold text-gray-900">${tax.toFixed(2)}</span>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between items-end mb-8 pt-4 border-t border-gray-100">
+                        <span className="text-lg font-bold text-gray-900">Total</span>
+                        <div className="text-right">
+                            <span className="block text-3xl font-black text-gray-900 leading-none">${grandTotal.toFixed(2)}</span>
+                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">USD</span>
+                        </div>
+                    </div>
+
+                    {errorMessage && (
+                        <div className="bg-red-50 p-4 rounded-xl border border-red-100 mb-6 flex gap-3 text-red-600 text-sm font-medium">
+                            <ShieldCheck size={20} className="shrink-0" />
+                            <p>{errorMessage}</p>
+                        </div>
+                    )}
+
+                    <button
+                        type="submit"
+                        disabled={isLoading || (!stripe && paymentMethod === 'stripe')}
+                        className="group w-full py-4 px-6 bg-black text-white rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-emerald-900 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-lg shadow-black/10 disabled:opacity-50 disabled:pointer-events-none"
+                    >
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="animate-spin" size={18} />
+                                <span>Processing...</span>
+                            </>
+                        ) : (
+                            <>
+                                <span>Pay {paymentMethod === 'cod' ? 'Cash on Delivery' : 'Now'}</span>
+                                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                            </>
+                        )}
+                    </button>
+
+                    <div className="mt-6 flex items-center justify-center gap-2 text-gray-400 text-[10px] font-bold uppercase tracking-wider">
+                        <ShieldCheck size={14} />
+                        <span>Secure SSL Encryption</span>
+                    </div>
+                </motion.div>
+            </div>
         </form>
     );
 }

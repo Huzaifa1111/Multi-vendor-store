@@ -22,6 +22,7 @@ import Link from 'next/link';
 
 interface Order {
   id: number;
+  orderNumber: string;
   userId: number;
   total: number;
   status: string;
@@ -83,6 +84,7 @@ export default function AdminOrdersPage() {
   const filteredOrders = orders.filter(order => {
     const matchesStatus = filterStatus === 'all' || order.status === filterStatus;
     const matchesSearch =
+      (order.orderNumber && order.orderNumber.toString().toLowerCase().includes(searchTerm.toLowerCase())) ||
       order.id.toString().includes(searchTerm) ||
       order.userId.toString().includes(searchTerm);
     return matchesStatus && matchesSearch;
@@ -237,7 +239,7 @@ export default function AdminOrdersPage() {
                       transition={{ delay: index * 0.05 }}
                     >
                       <td className="px-8 py-5">
-                        <span className="font-bold text-gray-900">#{order.id}</span>
+                        <span className="font-bold text-gray-900">#{order.orderNumber || order.id}</span>
                       </td>
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-2">

@@ -21,6 +21,7 @@ import { ordersService } from '@/services/orders.service';
 
 interface Order {
   id: number;
+  orderNumber?: string;
   total: number;
   status: string;
   createdAt: string;
@@ -213,7 +214,7 @@ export default function DashboardPage() {
               <Package size={32} />
             </div>
             <div className="flex-1 text-center md:text-left">
-              <h3 className="font-bold text-gray-900 text-lg">Order #{recentOrder.id}</h3>
+              <h3 className="font-bold text-gray-900 text-lg">{recentOrder.orderNumber || recentOrder.id}</h3>
               <p className="text-gray-500 text-sm">
                 Placed on {new Date(recentOrder.createdAt).toLocaleDateString()}
               </p>
@@ -222,7 +223,7 @@ export default function DashboardPage() {
               <span className="block text-lg font-black text-gray-900">${Number(recentOrder.total).toFixed(2)}</span>
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold mt-1 capitalize
                     ${recentOrder.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                  recentOrder.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                  recentOrder.status === 'cancelled' ? 'bg-red-500/10 text-red-700 border border-red-200' :
                     'bg-yellow-100 text-yellow-700'}`}>
                 {recentOrder.status}
               </span>
