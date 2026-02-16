@@ -11,7 +11,7 @@ export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
   const id = parseInt(params.id as string);
-  
+
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState<any>(null);
 
@@ -25,7 +25,7 @@ export default function EditProductPage() {
           description: data.description,
           price: data.price,
           stock: data.stock,
-          category: data.category,
+          categoryId: data.category?.id || '',
         });
       } catch (error) {
         console.error('Error fetching product:', error);

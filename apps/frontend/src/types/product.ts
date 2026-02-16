@@ -26,7 +26,7 @@ export interface Product {
   stock: number;
   image: string | null;
   images?: string[];
-  category?: string;
+  category?: { id: number; name: string };
   brand?: { name: string };
   variations?: Variation[];
   featured?: boolean;
@@ -39,7 +39,7 @@ export interface Product {
 }
 
 export interface ProductFilters {
-  category?: string;
+  category?: string | number;
   featured?: boolean;
   minPrice?: number;
   maxPrice?: number;

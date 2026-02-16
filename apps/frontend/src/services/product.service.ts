@@ -19,7 +19,7 @@ export interface Product {
   stock: number;
   image: string | null;
   images?: string[];
-  category?: string;
+  category?: { id: number; name: string };
   featured?: boolean;
   createdAt: string;
   updatedAt: string;
@@ -37,8 +37,9 @@ export interface CreateProductData {
   description: string;
   price: number;
   stock: number;
-  category?: string;
-  featured?: boolean; // ADD THIS LINE
+  categoryId?: number | string;
+  category?: string; // Legacy field for string input if needed
+  featured?: boolean;
   image?: File;
   longDescription?: string;
   shippingPolicy?: string;
@@ -76,9 +77,9 @@ class ProductService {
     }
   }
 
-  async getCategories(): Promise<string[]> { // ADD THIS METHOD
-    const response = await api.get('/products/categories');
-    return response.data.categories;
+  async getCategories(): Promise<{ id: number, name: string }[]> {
+    const response = await api.get('/categories/public');
+    return response.data;
   }
 
   async getProductById(id: number): Promise<Product> {
@@ -94,11 +95,11 @@ class ProductService {
     formData.append('price', productData.price.toString());
     formData.append('stock', productData.stock.toString());
 
-    if (productData.category) {
-      formData.append('category', productData.category);
+    if (productData.categoryId) {
+      formData.append('categoryId', productData.categoryId.toString());
     }
 
-    if (productData.featured !== undefined) { // ADD THIS BLOCK
+    if (productData.featured !== undefined) {
       formData.append('featured', productData.featured.toString());
     }
 
@@ -116,7 +117,7 @@ class ProductService {
       },
     });
 
-    return response.data.data;
+    return response.data;
   }
 
   async updateProduct(id: number, productData: UpdateProductData): Promise<Product> {
@@ -126,9 +127,12 @@ class ProductService {
     if (productData.description) formData.append('description', productData.description);
     if (productData.price) formData.append('price', productData.price.toString());
     if (productData.stock) formData.append('stock', productData.stock.toString());
-    if (productData.category) formData.append('category', productData.category);
 
-    if (productData.featured !== undefined) { // ADD THIS BLOCK
+    if (productData.categoryId) {
+      formData.append('categoryId', productData.categoryId.toString());
+    }
+
+    if (productData.featured !== undefined) {
       formData.append('featured', productData.featured.toString());
     }
 

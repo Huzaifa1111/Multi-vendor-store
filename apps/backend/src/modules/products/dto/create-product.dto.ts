@@ -41,6 +41,10 @@ export class CreateProductDto {
   category?: string;
 
   @IsOptional()
+  @IsNumber()
+  categoryId?: number;
+
+  @IsOptional()
   @IsBoolean()
   featured?: boolean;
 

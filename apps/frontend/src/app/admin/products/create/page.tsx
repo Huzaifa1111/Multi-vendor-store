@@ -53,14 +53,13 @@ export default function CreateProductPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [brands, setBrands] = useState<{ id: number, name: string }[]>([]);
-
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     longDescription: '',
     price: 0,
     stock: 0,
-    category: '',
+    categoryId: '',
     brandId: '',
     sku: '',
     featured: false,
@@ -74,6 +73,7 @@ export default function CreateProductPage() {
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [descriptionImageUrls, setDescriptionImageUrls] = useState<string[]>([]);
+  const [categories, setCategories] = useState<{ id: number, name: string }[]>([]);
 
   // Attribute Management State
   const [useVariations, setUseVariations] = useState(false);
@@ -87,6 +87,9 @@ export default function CreateProductPage() {
       try {
         const brandsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/brands`);
         if (brandsRes.ok) setBrands(await brandsRes.json());
+
+        const categoriesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/categories/public`);
+        if (categoriesRes.ok) setCategories(await categoriesRes.json());
       } catch (err) {
         console.error('Failed to fetch data', err);
       }
@@ -675,22 +678,18 @@ export default function CreateProductPage() {
 
             <div className="space-y-6">
               <div>
-                <label htmlFor="category" className="block text-sm font-bold text-gray-700 mb-2">Category</label>
+                <label htmlFor="categoryId" className="block text-sm font-bold text-gray-700 mb-2">Category</label>
                 <select
-                  id="category"
-                  name="category"
-                  value={formData.category}
+                  id="categoryId"
+                  name="categoryId"
+                  value={formData.categoryId}
                   onChange={handleInputChange}
                   className="w-full px-4 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-2 focus:ring-orange-100 focus:border-orange-500 transition-all font-medium text-gray-900 appearance-none"
                 >
                   <option value="">Select a category</option>
-                  <option value="electronics">Electronics</option>
-                  <option value="clothing">Clothing</option>
-                  <option value="books">Books</option>
-                  <option value="home">Home & Kitchen</option>
-                  <option value="beauty">Beauty</option>
-                  <option value="sports">Sports</option>
-                  <option value="toys">Toys</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
                 </select>
               </div>
 

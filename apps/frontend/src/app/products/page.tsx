@@ -16,10 +16,10 @@ function ProductsContent() {
   const initialCategory = searchParams.get('category') || undefined;
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<{ id: number, name: string }[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(initialCategory);
   const [filters, setFilters] = useState({
-    category: initialCategory,
+    category: initialCategory as string | number | undefined,
     featured: undefined as boolean | undefined,
     minPrice: undefined as number | undefined,
     maxPrice: undefined as number | undefined,
@@ -117,7 +117,7 @@ function ProductsContent() {
                 <div>
                   <h2 className="text-2xl font-black tracking-tighter text-black uppercase mb-1">
                     {selectedCategory
-                      ? selectedCategory
+                      ? (categories.find(c => c.id.toString() === selectedCategory.toString())?.name || selectedCategory)
                       : 'Entire Collection'}
                   </h2>
                   <div className="flex items-center gap-3">

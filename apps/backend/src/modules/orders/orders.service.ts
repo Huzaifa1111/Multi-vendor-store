@@ -7,6 +7,7 @@ import { Product } from '../products/product.entity';
 import { CartService } from '../cart/cart.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { StripeService } from './stripe.service';
+import { AdminService } from '../admin/admin.service';
 
 @Injectable()
 export class OrdersService {
@@ -19,6 +20,7 @@ export class OrdersService {
     private productRepository: Repository<Product>,
     private cartService: CartService,
     private stripeService: StripeService,
+    private adminService: AdminService,
   ) { }
 
   async createOrder(userId: number, createOrderDto: CreateOrderDto) {
@@ -98,6 +100,9 @@ export class OrdersService {
 
     // Clear cart after order is created
     await this.cartService.clearCart(userId);
+
+    // Trigger real-time analytics update
+    this.adminService.notifyAnalyticsUpdate();
 
     return savedOrder;
   }
@@ -204,7 +209,12 @@ export class OrdersService {
   async updateOrderStatus(id: number, status: OrderStatus) {
     const order = await this.getOrderById(id);
     order.status = status;
-    return await this.orderRepository.save(order);
+    const savedOrder = await this.orderRepository.save(order);
+
+    // Trigger real-time analytics update
+    this.adminService.notifyAnalyticsUpdate();
+
+    return savedOrder;
   }
 
   async deleteOrder(id: number) {

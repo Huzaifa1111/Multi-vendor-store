@@ -8,11 +8,13 @@ import { CartModule } from '../cart/cart.module';
 import { StripeService } from './stripe.service';
 import { OrderItem } from './order-item.entity';
 import { Brand } from '../brands/brand.entity';
+import { AdminModule } from '../admin/admin.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order, Product, OrderItem, Brand]),
     CartModule,
+    AdminModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService, StripeService],

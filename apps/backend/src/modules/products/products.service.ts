@@ -6,7 +6,8 @@ import { Product } from './product.entity';
 import { ProductVariation } from './variation.entity';
 import { Brand } from '../brands/brand.entity';
 import { CreateProductDto } from './dto/create-product.dto';
-import { ProductFilterDto } from './dto/product-filter.dto'; // ADD THIS IMPORT
+import { ProductFilterDto } from './dto/product-filter.dto';
+import { Category } from '../categories/category.entity';
 import { CloudinaryService } from '../uploads/cloudinary.service';
 
 @Injectable()
@@ -49,7 +50,7 @@ export class ProductsService {
       price: createProductDto.price,
       stock: createProductDto.stock,
       sku: createProductDto.sku,
-      category: createProductDto.category || 'Uncategorized',
+      category: createProductDto.categoryId ? { id: createProductDto.categoryId } as any : undefined,
       featured: createProductDto.featured || false,
       images: imageUrls,
       descriptionImages: createProductDto.descriptionImages || [],
@@ -212,6 +213,10 @@ export class ProductsService {
     }
 
     updateData.images = imageUrls;
+
+    if (updateProductDto.categoryId !== undefined) {
+      updateData.category = updateProductDto.categoryId ? { id: updateProductDto.categoryId } : null;
+    }
 
     if (updateProductDto.descriptionImages !== undefined) {
       updateData.descriptionImages = updateProductDto.descriptionImages;

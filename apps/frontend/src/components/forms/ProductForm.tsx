@@ -1,7 +1,7 @@
 // apps/frontend/src/components/forms/ProductForm.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import productService, { CreateProductData } from '@/services/product.service';
 import { Upload, X } from 'lucide-react';
@@ -21,23 +21,30 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [categories, setCategories] = useState<Category[]>([
-    { id: 1, name: 'Electronics' },
-    { id: 2, name: 'Clothing' },
-    { id: 3, name: 'Books' },
-    { id: 4, name: 'Home & Kitchen' },
-    { id: 5, name: 'Beauty' },
-    { id: 6, name: 'Sports' },
-    { id: 7, name: 'Toys' },
-  ]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  const [formData, setFormData] = useState<CreateProductData & { featured?: boolean }>({
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/categories/public`);
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const [formData, setFormData] = useState<CreateProductData & { featured?: boolean; categoryId?: string | number }>({
     name: initialData?.name || '',
     description: initialData?.description || '',
     price: initialData?.price || 0,
     stock: initialData?.stock || 0,
-    category: initialData?.category,
-    featured: initialData?.featured || false, // ADD THIS LINE
+    categoryId: (initialData as any)?.categoryId || '',
+    featured: initialData?.featured || false,
     shippingPolicy: initialData?.shippingPolicy || '',
     returnPolicy: initialData?.returnPolicy || '',
   });
@@ -194,13 +201,13 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
         <RichTextEditor
           label="Shipping Policy"
           placeholder="Custom shipping details..."
-          value={formData.shippingPolicy}
+          value={formData.shippingPolicy || ''}
           onChange={(content) => handleRichTextChange('shippingPolicy', content)}
         />
         <RichTextEditor
           label="Return Policy"
           placeholder="Custom return details..."
-          value={formData.returnPolicy}
+          value={formData.returnPolicy || ''}
           onChange={(content) => handleRichTextChange('returnPolicy', content)}
         />
       </div>
@@ -245,19 +252,19 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
 
       {/* Category */}
       <div>
-        <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700">
           Category
         </label>
         <select
-          id="category"
-          name="category"
-          value={formData.category || ''}
+          id="categoryId"
+          name="categoryId"
+          value={formData.categoryId || ''}
           onChange={handleInputChange}
           className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
           <option value="">Select a category</option>
           {categories.map((category) => (
-            <option key={category.id} value={category.name.toLowerCase()}>
+            <option key={category.id} value={category.id}>
               {category.name}
             </option>
           ))}
