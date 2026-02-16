@@ -10,7 +10,7 @@ export interface Product {
     description: string;
     price: number;
     image: string | null;
-    category?: string;
+    category?: string | { id: number; name: string };
 }
 
 interface WishlistContextType {

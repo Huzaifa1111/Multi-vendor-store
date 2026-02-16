@@ -77,7 +77,7 @@ export default function AdminProductsPage() {
     ? products.filter(product =>
       product.name.toLowerCase().includes(search.toLowerCase()) ||
       product.description.toLowerCase().includes(search.toLowerCase()) ||
-      (product.category && product.category.toLowerCase().includes(search.toLowerCase()))
+      ((typeof product.category === 'object' ? product.category.name : product.category)?.toLowerCase().includes(search.toLowerCase()))
     )
     : products;
 

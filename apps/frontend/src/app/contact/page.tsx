@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import ContactForm from '@/components/forms/ContactForm';
 import { Card, CardContent } from '@/components/ui/Card';
 import {
@@ -12,9 +13,19 @@ import {
   Facebook,
   Twitter,
   CheckCircle2,
-  ArrowRight
+  ArrowRight,
+  ShieldCheck,
+  Zap,
+  MessageSquare
 } from 'lucide-react';
 import api from '@/lib/api';
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 30 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } as any
+};
 
 export default function ContactPage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -32,137 +43,171 @@ export default function ContactPage() {
   const contactInfos = [
     {
       icon: Phone,
-      title: "Direct Support",
-      detail: "+1 (555) 123-4567",
-      subDetail: "Available for urgent tech issues",
-      color: "text-blue-500",
-      bg: "bg-blue-50"
+      title: "Vocal Link",
+      detail: "+1 (555) 888-2024",
+      subDetail: "Priority voice channel",
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10"
     },
     {
       icon: Mail,
-      title: "Digital Inquiries",
-      detail: "support@storeapp.com",
-      subDetail: "Typical response in 4 hours",
-      color: "text-emerald-500",
-      bg: "bg-emerald-50"
+      title: "Digital Cipher",
+      detail: "concierge@estore.com",
+      subDetail: "Secure data transmission",
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10"
     },
     {
       icon: MapPin,
-      title: "Global Headquarters",
-      detail: "123 Commerce Street",
-      subDetail: "San Francisco, CA 94107, USA",
-      color: "text-purple-500",
-      bg: "bg-purple-50"
+      title: "The Atelier",
+      detail: "77 Emerald Plaza",
+      subDetail: "Silicon Valley, CA",
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10"
     }
   ];
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden selection:bg-emerald-100 selection:text-emerald-900">
-      {/* Decorative Elements */}
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-emerald-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-60 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-50 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 opacity-60 pointer-events-none" />
+    <div className="min-h-screen bg-white font-plus-jakarta-sans relative overflow-x-hidden selection:bg-emerald-100 selection:text-emerald-900">
+      {/* Cinematic Background Elements */}
+      <div className="absolute top-0 right-0 w-[1000px] h-[1000px] bg-emerald-500/5 rounded-full blur-[150px] -translate-y-1/2 translate-x-1/2 opacity-60 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-black/[0.02] rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 opacity-60 pointer-events-none" />
 
-      <div className="max-w-[1440px] mx-auto px-6 py-12 md:py-24 relative z-10">
-        <div className="grid lg:grid-cols-12 gap-12 lg:gap-24">
+      <div className="max-w-[1440px] mx-auto px-6 py-16 md:py-24 relative z-10">
+        <div className="grid lg:grid-cols-12 gap-16 items-stretch">
 
-          {/* Left Column: Content & Info */}
+          {/* Left Column: Boutique Content */}
           <div className="lg:col-span-5 flex flex-col justify-center">
-            <div className="max-w-md">
-              <span className="inline-block px-5 py-2 bg-black text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-full mb-8">
-                Get in Touch
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <span className="inline-block px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 font-black uppercase tracking-[0.4em] text-[8px] mb-8">
+                Liaison Office
               </span>
-              <h1 className="text-6xl md:text-7xl font-black text-gray-900 tracking-tighter leading-[0.9] mb-8">
-                Let's <span className="text-emerald-600">Connect</span>.
+              <h1 className="text-5xl md:text-6xl font-black text-black tracking-tighter leading-[0.85] mb-8">
+                SECURE <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-emerald-700">LIAISON.</span>
               </h1>
-              <p className="text-xl text-gray-500 font-medium leading-relaxed mb-12">
-                Have a question about a product or need technical assistance? Our team of specialists is ready to provide the insights you need.
+              <p className="text-base text-gray-500 font-medium leading-relaxed mb-12 max-w-sm tracking-tight">
+                Our specialists are prepared to synthesize your requirements into reality. Initiate the transmission below.
               </p>
 
-              <div className="space-y-8">
+              <div className="grid grid-cols-1 gap-10">
                 {contactInfos.map((item, idx) => (
-                  <div key={idx} className="flex items-start group">
-                    <div className={`w-14 h-14 rounded-2xl ${item.bg} ${item.color} flex items-center justify-center shrink-0 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
-                      <item.icon size={24} strokeWidth={2.5} />
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 + idx * 0.1 }}
+                    className="flex items-center group"
+                  >
+                    <div className={`w-11 h-11 rounded-lg ${item.bg} ${item.color} flex items-center justify-center shrink-0 transition-all duration-500 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white group-hover:shadow-2xl group-hover:shadow-emerald-500/20`}>
+                      <item.icon size={18} strokeWidth={2} />
                     </div>
-                    <div className="ml-6">
-                      <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">{item.title}</h4>
-                      <p className="text-lg font-black text-gray-900 mb-0.5">{item.detail}</p>
-                      <p className="text-sm font-medium text-gray-500">{item.subDetail}</p>
+                    <div className="ml-5 border-l border-gray-100 pl-5">
+                      <h4 className="text-[8px] font-black uppercase tracking-[0.3em] text-emerald-600 mb-0.5">{item.title}</h4>
+                      <p className="text-base font-black text-black tracking-tight">{item.detail}</p>
+                      <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">{item.subDetail}</p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
 
-              <div className="pt-12 mt-12 border-t border-gray-100">
-                <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6">Social Ecosystem</h4>
-                <div className="flex gap-4">
+              {/* Social Guild */}
+              <div className="pt-12 mt-16 border-t border-gray-100">
+                <h4 className="text-[8px] font-black uppercase tracking-[0.3em] text-gray-400 mb-6 font-plus-jakarta-sans">Digital Footprint</h4>
+                <div className="flex gap-3">
                   {[Instagram, Facebook, Twitter].map((Icon, i) => (
-                    <a key={i} href="#" className="w-12 h-12 rounded-full border-2 border-gray-50 flex items-center justify-center text-gray-400 hover:border-black hover:text-black transition-all duration-300">
-                      <Icon size={20} />
+                    <a key={i} href="#" className="w-10 h-10 rounded-lg border border-gray-100 flex items-center justify-center text-black hover:bg-black hover:text-white hover:border-black transition-all duration-500 hover:-translate-y-1">
+                      <Icon size={16} />
                     </a>
                   ))}
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
 
-          {/* Right Column: Form Card */}
+          {/* Right Column: High-Fidelity Form Card */}
           <div className="lg:col-span-7">
-            <Card className="rounded-[3rem] border-none shadow-[0_50px_100px_-20px_rgba(0,0,0,0.06)] bg-white/80 backdrop-blur-xl border border-white p-2">
-              <CardContent className="p-8 md:p-12 lg:p-16">
-                {formSubmitted ? (
-                  <div className="text-center py-24 animate-in fade-in zoom-in duration-500">
-                    <div className="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-emerald-100">
-                      <CheckCircle2 size={48} strokeWidth={1.5} />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+              className="h-full"
+            >
+              <Card className="h-full rounded-[2rem] border-none shadow-2xl bg-white border border-gray-50 overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                <CardContent className="p-6 md:p-10 lg:p-12 relative z-10">
+                  {formSubmitted ? (
+                    <div className="text-center py-20 animate-in fade-in zoom-in duration-700">
+                      <div className="w-20 h-20 bg-emerald-500/10 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-emerald-500/5">
+                        <ShieldCheck size={32} strokeWidth={1.5} />
+                      </div>
+                      <h2 className="text-3xl font-black text-black tracking-tight mb-4">CIPHER SENT.</h2>
+                      <p className="text-sm text-gray-500 font-medium max-w-sm mx-auto mb-10 leading-relaxed tracking-tight">
+                        Your secure inquiry has been successfully transmitted to the guild specialists.
+                      </p>
+                      <button
+                        onClick={() => setFormSubmitted(false)}
+                        className="group relative inline-flex items-center gap-3 px-6 py-3.5 bg-black text-white rounded-lg font-black text-[8px] uppercase tracking-[0.3em] overflow-hidden transition-all duration-500 hover:scale-105"
+                      >
+                        <span className="relative z-10 flex items-center">
+                          Reset Encryption <ArrowRight size={14} className="ml-3 transition-transform group-hover:translate-x-1" />
+                        </span>
+                        <div className="absolute inset-0 bg-emerald-600 -translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
+                      </button>
                     </div>
-                    <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4">Message Relayed</h2>
-                    <p className="text-lg text-gray-500 font-medium max-w-sm mx-auto mb-10 leading-relaxed">
-                      Your inquiry has been successfully transmitted. Our team will review and respond shortly.
-                    </p>
-                    <button
-                      onClick={() => setFormSubmitted(false)}
-                      className="flex items-center gap-3 px-8 py-4 bg-gray-900 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] hover:bg-emerald-900 transition-all mx-auto"
-                    >
-                      New Transmission <ArrowRight size={16} />
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <div className="mb-12">
-                      <h2 className="text-3xl font-black text-gray-900 tracking-tight mb-3">Initialize Inquiry</h2>
-                      <p className="text-gray-500 font-medium">Please fill out the form below to reach our dedicated specialists.</p>
-                    </div>
-                    <ContactForm onSubmit={handleSubmit} />
-                  </>
-                )}
-              </CardContent>
-            </Card>
+                  ) : (
+                    <>
+                      <div className="mb-8">
+                        <h2 className="text-2xl font-black text-black tracking-tighter mb-3 leading-none uppercase">Initialize Inquiry</h2>
+                        <div className="flex items-center gap-2 text-emerald-600">
+                          <Zap size={12} />
+                          <p className="text-[8px] font-black uppercase tracking-[0.2em]">Secure Protocol Enabled</p>
+                        </div>
+                      </div>
+                      <ContactForm onSubmit={handleSubmit} />
+                    </>
+                  )}
+                </CardContent>
+              </Card>
 
-            <div className="mt-8 grid grid-cols-2 gap-4">
-              <div className="p-8 bg-gray-50 rounded-[2rem] border border-gray-100">
-                <div className="flex items-center gap-3 text-emerald-600 mb-4">
-                  <Clock size={20} strokeWidth={2.5} />
-                  <span className="text-[11px] font-black uppercase tracking-[0.2em]">Operating Status</span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="font-bold text-gray-900">Mon - Fri</span>
-                    <span className="text-gray-500">09:00 - 18:00</span>
+              {/* Status Modules */}
+              <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <motion.div
+                  {...fadeInUp}
+                  className="p-6 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col justify-between"
+                >
+                  <div className="flex items-center gap-3 text-emerald-600 mb-5">
+                    <Clock size={16} strokeWidth={2.5} />
+                    <span className="text-[8px] font-black uppercase tracking-[0.3em]">Temporal Status</span>
                   </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="font-bold text-gray-900">Sat</span>
-                    <span className="text-gray-500">10:00 - 16:00</span>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center text-[10px]">
+                      <span className="font-black text-black uppercase tracking-tight">Weekday Ops</span>
+                      <span className="bg-white px-2 py-0.5 rounded-md text-[9px] font-bold border border-gray-100 italic">09:00 - 18:00</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[10px]">
+                      <span className="font-black text-black uppercase tracking-tight">Weekend Ops</span>
+                      <span className="bg-white px-2 py-0.5 rounded-md text-[9px] font-bold border border-gray-100 italic">10:00 - 16:00</span>
+                    </div>
                   </div>
-                </div>
+                </motion.div>
+
+                <motion.div
+                  {...fadeInUp}
+                  className="p-6 bg-black rounded-2xl text-white overflow-hidden relative group"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-1000"></div>
+                  <div className="mb-4 opacity-40">
+                    <MessageSquare size={20} />
+                  </div>
+                  <p className="text-lg font-black leading-none mb-2 uppercase tracking-tighter">Instant <br /> Resonance</p>
+                  <p className="text-[8px] font-bold opacity-50 uppercase tracking-[0.2em]">Avg. sync time {`<`} 120min</p>
+                </motion.div>
               </div>
-              <div className="p-8 bg-black rounded-[2rem] text-white">
-                <div className="mb-6 opacity-60">
-                  <CheckCircle2 size={24} />
-                </div>
-                <p className="text-lg font-black leading-tight mb-2">Priority<br />Escalation</p>
-                <p className="text-xs font-medium opacity-60">Standard response time {`<`} 4 hours</p>
-              </div>
-            </div>
+            </motion.div>
           </div>
 
         </div>

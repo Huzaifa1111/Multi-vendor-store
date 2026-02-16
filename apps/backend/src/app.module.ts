@@ -37,6 +37,7 @@ async function initDb() {
           password: process.env.DB_PASSWORD || '',
           database: process.env.DB_NAME || 'store_db',
           synchronize: true,
+          logging: false,
           migrationsRun: false,
           autoLoadEntities: true,
         }

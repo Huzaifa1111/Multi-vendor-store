@@ -26,7 +26,7 @@ export interface Product {
   stock: number;
   image: string | null;
   images?: string[];
-  category?: string;
+  category?: string | { id: number; name: string };
   brand?: { name: string };
   variations?: Variation[];
   featured?: boolean;

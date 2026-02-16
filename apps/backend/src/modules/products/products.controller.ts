@@ -65,6 +65,16 @@ export class ProductsController {
         : [parseInt(body.crossSellIds)];
     }
 
+    if (body.descriptionImages) {
+      try {
+        createProductDto.descriptionImages = typeof body.descriptionImages === 'string'
+          ? JSON.parse(body.descriptionImages)
+          : body.descriptionImages;
+      } catch (e) {
+        console.error('Failed to parse descriptionImages:', e);
+      }
+    }
+
     if (body.variations) {
       try {
         createProductDto.variations = JSON.parse(body.variations);
@@ -156,6 +166,16 @@ export class ProductsController {
         updateData.crossSellIds = Array.isArray(updateProductDto.crossSellIds)
           ? updateProductDto.crossSellIds.map(id => parseInt(id))
           : [parseInt(updateProductDto.crossSellIds)];
+      }
+
+      if (updateProductDto.descriptionImages !== undefined) {
+        try {
+          updateData.descriptionImages = typeof updateProductDto.descriptionImages === 'string'
+            ? JSON.parse(updateProductDto.descriptionImages)
+            : updateProductDto.descriptionImages;
+        } catch (e) {
+          console.error('Failed to parse descriptionImages:', e);
+        }
       }
 
       if (updateProductDto.variations) {

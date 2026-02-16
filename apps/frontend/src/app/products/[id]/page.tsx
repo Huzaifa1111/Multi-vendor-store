@@ -1,11 +1,11 @@
 // apps/frontend/src/app/products/[id]/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import productService, { Product } from '@/services/product.service';
 import { resolveProductImage } from '@/lib/image';
-import { ArrowLeft, Package, Star, Loader2, Sparkles, TrendingUp, MessageSquare, Info, Truck, RotateCcw, Award } from 'lucide-react';
+import { ArrowLeft, Package, Star, Loader2, Sparkles, TrendingUp, MessageSquare, Info, Truck, RotateCcw, Award, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/lib/auth';
 import ReviewForm from '@/components/products/ReviewForm';
@@ -83,6 +83,7 @@ export default function ProductDetailPage() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'details' | 'reviews' | 'shipping' | 'brand'>('details');
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const { isAuthenticated } = useAuth();
 
@@ -147,6 +148,21 @@ export default function ProductDetailPage() {
     <div className="min-h-screen bg-[#fafafa] relative overflow-hidden font-plus-jakarta-sans text-black pb-16">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-emerald-50 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 opacity-40 pointer-events-none"></div>
+
+      <style jsx global>{`
+        .rich-text-content img {
+          max-width: 85%;
+          height: auto;
+          border-radius: 2rem;
+          margin: 2.5rem auto;
+          display: block;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+          border: 1px solid rgba(0,0,0,0.05);
+        }
+        .prose-emerald img {
+          border-radius: 1.5rem;
+        }
+      `}</style>
 
       <div className="max-w-[1440px] mx-auto px-4 md:px-12 py-6 md:py-10 relative z-10">
         <Breadcrumbs customLabels={{ [id.toString()]: product.name }} />
@@ -220,19 +236,45 @@ export default function ProductDetailPage() {
               {/* Description Images Gallery */}
               {product.descriptionImages && product.descriptionImages.length > 0 && (
                 <div className="mt-12 space-y-6">
-                  <h3 className="text-2xl font-black text-emerald-900 tracking-tight flex items-center gap-3">
-                    <span className="w-2 h-2 bg-emerald-600 rounded-full animate-pulse"></span>
-                    Product Gallery
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="w-2 h-2 bg-emerald-600 rounded-full animate-pulse"></span>
+                      <h3 className="text-xl font-black text-emerald-900 tracking-tight uppercase tracking-[0.2em] text-[10px]">Visual Dossier</h3>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          if (scrollRef.current) scrollRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+                        }}
+                        className="p-2 rounded-full bg-white border border-emerald-100 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (scrollRef.current) scrollRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+                        }}
+                        className="p-2 rounded-full bg-white border border-emerald-100 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div
+                    ref={scrollRef}
+                    className="flex gap-6 overflow-x-auto pb-8 scrollbar-none snap-x snap-mandatory px-2"
+                  >
                     {product.descriptionImages.map((img: string, idx: number) => (
-                      <div key={idx} className="group relative aspect-video rounded-3xl overflow-hidden border-4 border-white shadow-2xl hover:shadow-emerald-200/50 transition-all duration-700">
-                        <img
-                          src={resolveProductImage(img)}
-                          alt={`${product.name} - Image ${idx + 1}`}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      <div key={idx} className="flex-shrink-0 w-72 md:w-80 snap-center">
+                        <div className="group relative aspect-square rounded-[2rem] overflow-hidden border-4 border-white shadow-xl hover:shadow-emerald-200/50 transition-all duration-700">
+                          <img
+                            src={resolveProductImage(img)}
+                            alt={`${product.name} - Image ${idx + 1}`}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        </div>
                       </div>
                     ))}
                   </div>

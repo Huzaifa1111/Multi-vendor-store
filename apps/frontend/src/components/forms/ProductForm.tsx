@@ -34,10 +34,11 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
   const [formData, setFormData] = useState<CreateProductData & { featured?: boolean }>({
     name: initialData?.name || '',
     description: initialData?.description || '',
+    longDescription: initialData?.longDescription || '',
     price: initialData?.price || 0,
     stock: initialData?.stock || 0,
-    category: initialData?.category,
-    featured: initialData?.featured || false, // ADD THIS LINE
+    category: typeof initialData?.category === 'object' ? (initialData.category as any).name : initialData?.category,
+    featured: initialData?.featured || false,
     shippingPolicy: initialData?.shippingPolicy || '',
     returnPolicy: initialData?.returnPolicy || '',
   });
@@ -180,13 +181,23 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
         />
       </div>
 
-      {/* Description */}
+      {/* Short Description */}
       <div>
         <RichTextEditor
-          label="Description *"
-          placeholder="Enter product description..."
+          label="Short Summary (Highlights) *"
+          placeholder="Brief summary for highlights..."
           value={formData.description}
           onChange={(content) => handleRichTextChange('description', content)}
+        />
+      </div>
+
+      {/* Long Description */}
+      <div>
+        <RichTextEditor
+          label="Extended Narrative (Includes Images)"
+          placeholder="Detailed description, specifications, and images..."
+          value={formData.longDescription || ''}
+          onChange={(content) => handleRichTextChange('longDescription', content)}
         />
       </div>
 

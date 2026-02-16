@@ -36,7 +36,7 @@ interface Product {
   stock: number;
   image: string | null;
   images?: string[];
-  category?: string;
+  category?: string | { id: number; name: string };
   brand?: { name: string };
   variations?: Variation[];
   createdAt: string;
@@ -166,7 +166,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-10">
             {/* Image Gallery */}
             <div className="space-y-4 md:space-y-6">
-              <div className="relative aspect-square w-full max-w-md mx-auto rounded-[2.5rem] overflow-hidden bg-gray-50/50 border border-gray-100 shadow-inner group">
+              <div className="relative aspect-square w-full max-w-sm mx-auto rounded-[2.5rem] overflow-hidden bg-gray-50/50 border border-gray-100 shadow-inner group">
                 <img
                   src={resolveProductImage(allImages[selectedImage])}
                   alt={product.name}
@@ -209,7 +209,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="px-5 py-2 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-emerald-100/30">
-                      {product.category || 'Premium Series'}
+                      {typeof product.category === 'object' ? product.category.name : (product.category || 'Premium Series')}
                     </span>
                     {product.brand && (
                       <span className="px-5 py-2 bg-gray-50 text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-gray-100">

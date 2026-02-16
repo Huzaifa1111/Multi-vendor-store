@@ -10,8 +10,10 @@ import { CloudinaryService } from '../uploads/cloudinary.service';
 import { AttributesService } from './attributes.service';
 import { AttributesController } from './attributes.controller';
 
+import { Category } from '../categories/category.entity';
+
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, ProductVariation, Brand, Attribute, AttributeValue])],
+  imports: [TypeOrmModule.forFeature([Product, ProductVariation, Brand, Attribute, AttributeValue, Category])],
   controllers: [ProductsController, AttributesController],
   providers: [ProductsService, AttributesService, CloudinaryService],
   exports: [ProductsService, AttributesService],

@@ -1,178 +1,239 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
-import { Quote, Linkedin, Twitter, Mail } from 'lucide-react';
+import { Quote, Linkedin, Twitter, Mail, ArrowLeft } from 'lucide-react';
+import { useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
 
 const fadeInUp = {
-    initial: { opacity: 0, y: 40 },
+    initial: { opacity: 0, y: 30 },
     whileInView: { opacity: 1, y: 0 },
     viewport: { once: true },
-    transition: { duration: 0.8, ease: "anticipate" } as any
+    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as any }
+};
+
+const staggerContainer = {
+    initial: {},
+    whileInView: {
+        transition: {
+            staggerChildren: 0.15
+        }
+    }
 };
 
 export default function OurStoryPage() {
+    const containerRef = useRef(null);
+    const router = useRouter();
+    const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ["start start", "end end"]
+    });
+
+    const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+
     return (
-        <div className="min-h-screen bg-white font-jost overflow-x-hidden">
-            {/* Hero Section */}
-            <section className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden bg-gray-900 text-white">
-                <div className="absolute inset-0 z-0 opacity-40">
-                    {/* Abstract texture or office background */}
-                    <Image
-                        src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80"
-                        alt="Background"
-                        fill
-                        className="object-cover"
-                    />
-                </div>
+        <div className="min-h-screen bg-[#fafafa] font-plus-jakarta-sans text-gray-900 overflow-x-hidden relative" ref={containerRef}>
+            {/* Background decoration */}
+            <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-emerald-50 rounded-full blur-[120px] -translate-y-1/2 -translate-x-1/2 opacity-40 pointer-events-none"></div>
 
-                <div className="container mx-auto px-6 relative z-10 text-center">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1 }}
-                    >
-                        <span className="inline-block py-1 px-3 rounded-full bg-blue-500/20 backdrop-blur-md border border-blue-400/30 text-blue-300 font-bold uppercase tracking-[0.2em] text-[10px] mb-6">
-                            Est. 2024
-                        </span>
-                        <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 text-white">
-                            The Journey
-                        </h1>
-                        <p className="text-xl md:text-2xl text-white/80 max-w-2xl mx-auto font-medium leading-relaxed">
-                            Two friends, one vision, and a relentless drive to redefine online commerce.
-                        </p>
+            <div className="max-w-[1440px] mx-auto px-4 md:px-12 py-6 md:py-10 relative z-10">
+                <Breadcrumbs />
+
+                <button
+                    onClick={() => router.back()}
+                    className="group flex items-center text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 hover:text-emerald-600 mb-12 transition-all"
+                >
+                    <ArrowLeft size={14} className="mr-3 transition-transform group-hover:-translate-x-1" />
+                    Back to Gallery
+                </button>
+
+                {/* Parallax Hero Section */}
+                <section className="relative h-[45vh] min-h-[400px] rounded-[2.5rem] overflow-hidden mb-20 shadow-2xl bg-emerald-950">
+                    <motion.div style={{ y }} className="absolute inset-0 z-0">
+                        <Image
+                            src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80"
+                            alt="The Journey"
+                            fill
+                            className="object-cover brightness-50 contrast-125"
+                            priority
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-emerald-950/60"></div>
                     </motion.div>
-                </div>
-            </section>
 
-            {/* The Beginning */}
-            <section className="py-24 md:py-32">
-                <div className="container mx-auto px-6">
-                    <div className="max-w-4xl mx-auto text-center">
-                        <span className="text-blue-600 font-black uppercase tracking-[0.4em] text-[11px] mb-6 block">How It Started</span>
-                        <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-black mb-10 leading-tight">
-                            It started with a simple idea: <br />
-                            <span className="text-gray-400">Quality shouldn't be complicated.</span>
+                    <div className="absolute inset-0 z-10 flex items-center justify-center text-center px-6">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                        >
+                            <span className="inline-block py-2 px-5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white font-black uppercase tracking-[0.3em] text-[10px] mb-8">
+                                Established 2024
+                            </span>
+                            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-white tracking-widest leading-tight md:leading-none mb-6 md:mb-8 drop-shadow-2xl translate-y-2">
+                                THE <span className="text-emerald-400">GENESIS</span>
+                            </h1>
+                            <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto font-medium leading-relaxed drop-shadow-md">
+                                Two visionaries, one mission: To synthesize technological precision with artistic craftsmanship.
+                            </p>
+                        </motion.div>
+                    </div>
+                </section>
+
+                {/* The Origin Narrative */}
+                <section className="mb-20">
+                    <div className="max-w-4xl mx-auto text-center space-y-12">
+                        <motion.div {...fadeInUp} className="space-y-4">
+                            <span className="text-[11px] font-black text-emerald-600 uppercase tracking-[0.5em] block">The Inception</span>
+                            <h2 className="text-3xl md:text-4xl font-black tracking-tighter text-gray-900 leading-none">
+                                Curating Clarity <br />
+                                <span className="text-emerald-800 opacity-60">In a world of noise.</span>
+                            </h2>
+                        </motion.div>
+
+                        <motion.p
+                            {...fadeInUp}
+                            transition={{ delay: 0.2 }}
+                            className="text-gray-600 text-base md:text-lg leading-relaxed font-medium"
+                        >
+                            In an era of generic mass-production, we envisioned a sanctuary for intentional acquisition. What began as a series of late-night architectural sessions has blossomed into a global guild of artisans and collectors. We strip away the superfluous to reveal the essential, ensuring that every interaction with our platform is as seamless as it is inspiring.
+                        </motion.p>
+
+                        <motion.div
+                            initial={{ scaleX: 0 }}
+                            whileInView={{ scaleX: 1 }}
+                            transition={{ duration: 1, ease: "circOut" }}
+                            className="w-24 h-1.5 bg-emerald-600 mx-auto rounded-full"
+                        ></motion.div>
+                    </div>
+                </section>
+
+                {/* The Visionaries Section */}
+                <section className="mb-20 relative">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[120%] bg-emerald-50/50 -z-10 blur-3xl rounded-[10rem]"></div>
+
+                    <motion.div
+                        variants={fadeInUp}
+                        initial="initial"
+                        whileInView="whileInView"
+                        className="text-center mb-16 space-y-4"
+                    >
+                        <span className="text-emerald-600 font-black uppercase tracking-[0.5em] text-[11px]">The Curators</span>
+                        <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-gray-900 leading-[1.1] md:leading-none uppercase">ARCHITECTS <br />OF THE FUTURE</h2>
+                    </motion.div>
+
+                    <div className="grid md:grid-cols-2 gap-8 lg:gap-12 max-w-3xl mx-auto">
+                        {/* Wasik */}
+                        <motion.div
+                            initial={{ opacity: 0, x: -30 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] as any }}
+                            className="group relative"
+                        >
+                            <div className="bg-white rounded-[2rem] p-4 shadow-[0_15px_60px_rgba(0,0,0,0.02)] border border-white/50 hover:shadow-[0_40px_80px_rgba(16,185,129,0.06)] transition-all duration-700 hover:-translate-y-2 text-center">
+                                <div className="relative aspect-[4/5] overflow-hidden rounded-[1.5rem] mb-6 shadow-lg">
+                                    <Image
+                                        src="/images/hero/wasik.jpeg"
+                                        alt="Wasik Rehman"
+                                        fill
+                                        className="object-cover transition-transform duration-[2000ms] group-hover:scale-110"
+                                    />
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="space-y-1">
+                                        <h3 className="text-2xl lg:text-3xl font-black text-gray-900 tracking-tighter leading-none">Wasik Rehman</h3>
+                                        <span className="inline-block py-1 px-4 bg-emerald-50 text-emerald-600 rounded-full text-[9px] font-black uppercase tracking-[0.2em]">
+                                            Chief Strategist
+                                        </span>
+                                    </div>
+                                    <p className="text-gray-500 leading-relaxed font-medium italic max-w-[180px] mx-auto text-[10px]">
+                                        "We're not just building a platform; we're crafting a legacy where quality meets innovation."
+                                    </p>
+                                    <div className="flex justify-center space-x-5 pt-4 border-t border-gray-100">
+                                        {[Linkedin, Twitter, Mail].map((Icon, i) => (
+                                            <button key={i} className="text-gray-300 hover:text-emerald-600 transform hover:scale-110 transition-all duration-300">
+                                                <Icon size={16} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        {/* Huzaifa */}
+                        <motion.div
+                            initial={{ opacity: 0, x: 30 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] as any }}
+                            className="group relative"
+                        >
+                            <div className="bg-white rounded-[2rem] p-4 shadow-[0_15px_60px_rgba(0,0,0,0.02)] border border-white/50 hover:shadow-[0_40px_80px_rgba(16,185,129,0.06)] transition-all duration-700 hover:-translate-y-2 text-center">
+                                <div className="relative aspect-[4/5] overflow-hidden rounded-[1.5rem] mb-6 shadow-lg">
+                                    <Image
+                                        src="/images/hero/huzaifa.jpeg"
+                                        alt="Muhammad Huzaifa"
+                                        fill
+                                        className="object-cover transition-transform duration-[2000ms] group-hover:scale-110"
+                                    />
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="space-y-1">
+                                        <h3 className="text-2xl lg:text-3xl font-black text-gray-900 tracking-tighter leading-none">M. Huzaifa</h3>
+                                        <span className="inline-block py-1 px-4 bg-emerald-50 text-emerald-600 rounded-full text-[9px] font-black uppercase tracking-[0.2em]">
+                                            Chief Technologist
+                                        </span>
+                                    </div>
+                                    <p className="text-gray-500 leading-relaxed font-medium italic max-w-[180px] mx-auto text-[10px]">
+                                        "Technology should be invisible—a silent engine powering a magic-infused experience."
+                                    </p>
+                                    <div className="flex justify-center space-x-5 pt-4 border-t border-gray-100">
+                                        {[Linkedin, Twitter, Mail].map((Icon, i) => (
+                                            <button key={i} className="text-gray-300 hover:text-emerald-600 transform hover:scale-110 transition-all duration-300">
+                                                <Icon size={16} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                </section>
+
+                {/* The Philosophical Quote Section */}
+                <motion.section
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="mb-12 relative py-16 md:py-32 rounded-[2.5rem] md:rounded-[4rem] overflow-hidden bg-emerald-950 text-white text-center shadow-3xl"
+                >
+                    <div className="absolute inset-0 z-0 opacity-10">
+                        <Image
+                            src="https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?auto=format&fit=crop&q=80"
+                            alt="Abstract texture"
+                            fill
+                            className="object-cover"
+                        />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-950 via-gray-950 to-emerald-950 z-0 opacity-90"></div>
+
+                    <div className="relative z-10 max-w-4xl mx-auto px-6 space-y-10">
+                        <Quote size={48} className="text-emerald-400 mx-auto opacity-40 animate-pulse" />
+                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black tracking-tight leading-tight mb-8 text-white uppercase px-4">
+                            "KHUWAR  PA LONDON K AAM KHUWAR EE"
                         </h2>
-                        <p className="text-gray-500 text-lg md:text-xl leading-relaxed mb-12">
-                            In a crowded market of endless options and confusing interfaces, we saw an opportunity to strip away the noise. We wanted to build a platform that didn't just sell products, but curated experiences. What began as late-night coding sessions in a university dorm has evolved into a global marketplace connecting thousands of creators and customers.
-                        </p>
-                        <div className="w-24 h-1 bg-black mx-auto rounded-full"></div>
+                        <div className="flex items-center justify-center space-x-6 opacity-30">
+                            <span className="h-[2px] w-16 bg-emerald-400"></span>
+                            <span className="uppercase tracking-[0.6em] text-[10px] font-black">The Founders</span>
+                            <span className="h-[2px] w-16 bg-emerald-400"></span>
+                        </div>
                     </div>
-                </div>
-            </section>
-
-            {/* The Founders */}
-            <section className="py-24 bg-[#fafafa] relative overflow-hidden">
-                {/* Decorative Blobs */}
-                <div className="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-50 rounded-full blur-[100px] pointer-events-none"></div>
-                <div className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] bg-gray-100 rounded-full blur-[100px] pointer-events-none"></div>
-
-                <div className="container mx-auto px-6 relative z-10">
-                    <motion.div
-                        {...fadeInUp}
-                        className="text-center mb-24"
-                    >
-                        <span className="text-blue-600 font-black uppercase tracking-[0.4em] text-[11px] mb-4 block">Leadership</span>
-                        <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-black">The Visionaries</h2>
-                    </motion.div>
-
-                    <div className="grid md:grid-cols-2 gap-10 lg:gap-16 max-w-5xl mx-auto">
-
-                        {/* Founder 1: Wasik */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 50 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.8 }}
-                            className="group bg-white rounded-[2.5rem] p-4 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
-                        >
-                            <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] mb-8">
-                                <Image
-                                    src="/images/hero/wasik.jpeg"
-                                    alt="Wasik"
-                                    fill
-                                    className="object-cover transition-transform duration-1000 group-hover:scale-110 group-hover:rotate-1"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                                </div>
-                            </div>
-
-                            <div className="px-6 pb-6 text-center">
-                                <h3 className="text-4xl font-black text-black mb-2">Wasik Rehman</h3>
-                                <div className="flex justify-center mb-6">
-                                    <span className="py-1 px-4 border border-blue-100 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest">
-                                        Co-Founder & CEO
-                                    </span>
-                                </div>
-                                <p className="text-gray-500 leading-relaxed mb-8 max-w-sm mx-auto font-medium">
-                                    "We're not just building a platform; we're crafting an ecosystem where quality meets innovation."
-                                </p>
-
-                                <div className="flex justify-center space-x-6 border-t border-gray-100 pt-8">
-                                    <button className="text-gray-400 hover:text-black hover:scale-110 transition-all"><Linkedin size={20} /></button>
-                                    <button className="text-gray-400 hover:text-black hover:scale-110 transition-all"><Twitter size={20} /></button>
-                                    <button className="text-gray-400 hover:text-black hover:scale-110 transition-all"><Mail size={20} /></button>
-                                </div>
-                            </div>
-                        </motion.div>
-
-                        {/* Founder 2: Huzaifa */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 50 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.8, delay: 0.2 }}
-                            className="group bg-white rounded-[2.5rem] p-4 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
-                        >
-                            <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] mb-8">
-                                <Image
-                                    src="/images/hero/huzaifa.jpeg"
-                                    alt="Huzaifa"
-                                    fill
-                                    className="object-cover transition-transform duration-1000 group-hover:scale-110 group-hover:-rotate-1"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                                </div>
-                            </div>
-
-                            <div className="px-6 pb-6 text-center">
-                                <h3 className="text-4xl font-black text-black mb-2">Muhammad Huzaifa</h3>
-                                <div className="flex justify-center mb-6">
-                                    <span className="py-1 px-4 border border-purple-100 bg-purple-50 text-purple-600 rounded-full text-[10px] font-black uppercase tracking-widest">
-                                        Co-Founder & CTO
-                                    </span>
-                                </div>
-                                <p className="text-gray-500 leading-relaxed mb-8 max-w-sm mx-auto font-medium">
-                                    "Technology should be invisible. If it works perfectly, you don't notice the code—you just feel the magic."
-                                </p>
-
-                                <div className="flex justify-center space-x-6 border-t border-gray-100 pt-8">
-                                    <button className="text-gray-400 hover:text-black hover:scale-110 transition-all"><Linkedin size={20} /></button>
-                                    <button className="text-gray-400 hover:text-black hover:scale-110 transition-all"><Twitter size={20} /></button>
-                                    <button className="text-gray-400 hover:text-black hover:scale-110 transition-all"><Mail size={20} /></button>
-                                </div>
-                            </div>
-                        </motion.div>
-
-                    </div>
-                </div>
-            </section>
-
-            {/* Quote Section */}
-            <section className="py-32 bg-black text-white text-center">
-                <div className="container mx-auto px-6 max-w-4xl">
-                    <Quote size={48} className="text-blue-600 mx-auto mb-8 opacity-50" />
-                    <h2 className="text-3xl md:text-5xl font-medium leading-tight mb-10">
-                        "We didn't just want to build another store. We wanted to build a destination where technology meets artistry."
-                    </h2>
-                    <div className="flex items-center justify-center space-x-4 opacity-50">
-                        <span className="h-px w-12 bg-white"></span>
-                        <span className="uppercase tracking-[0.2em] text-sm">The Founders</span>
-                        <span className="h-px w-12 bg-white"></span>
-                    </div>
-                </div>
-            </section>
+                </motion.section>
+            </div>
         </div>
     );
 }

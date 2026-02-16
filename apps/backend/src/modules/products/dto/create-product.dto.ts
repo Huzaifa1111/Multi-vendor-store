@@ -25,7 +25,7 @@ export class CreateProductDto {
   name: string;
 
   @IsString()
-  @MaxLength(1000)
+  @MaxLength(5000)
   description: string;
 
   @IsNumber()

@@ -3,74 +3,88 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Leaf, Recycle, Heart, Droplets, Sun, Wind } from 'lucide-react';
+import { ArrowLeft, Leaf, Recycle, Heart, Droplets, Sun, Wind, ArrowRight, ShieldCheck, Sparkles, Globe } from 'lucide-react';
 import { useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import Breadcrumbs from '@/components/ui/Breadcrumbs';
 
 const fadeInUp = {
-    initial: { opacity: 0, y: 60 },
+    initial: { opacity: 0, y: 30 },
     whileInView: { opacity: 1, y: 0 },
     viewport: { once: true },
-    transition: { duration: 0.8, ease: "anticipate" } as any
+    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
 };
 
 const staggerContainer = {
     initial: {},
     whileInView: {
         transition: {
-            staggerChildren: 0.2
+            staggerChildren: 0.1
         }
     }
 };
 
 export default function SustainabilityPage() {
     const containerRef = useRef(null);
+    const router = useRouter();
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end end"]
     });
 
-    const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+    const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
 
     return (
-        <div className="min-h-screen bg-white font-jost overflow-x-hidden" ref={containerRef}>
-            {/* Parallax Hero Section */}
-            <section className="relative h-[80vh] min-h-[600px] flex items-center justify-center overflow-hidden">
-                <motion.div
-                    style={{ y }}
-                    className="absolute inset-0 z-0"
+        <div className="min-h-screen bg-[#fafafa] font-plus-jakarta-sans text-gray-900 overflow-x-hidden relative" ref={containerRef}>
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-emerald-50 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 opacity-40 pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-emerald-100/30 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4 opacity-30 pointer-events-none"></div>
+
+            <div className="max-w-[1440px] mx-auto px-4 md:px-12 py-6 md:py-10 relative z-10">
+                <Breadcrumbs />
+
+                <button
+                    onClick={() => router.back()}
+                    className="group flex items-center text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 hover:text-emerald-600 mb-12 transition-all"
                 >
-                    <Image
-                        src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80"
-                        alt="Nature Background"
-                        fill
-                        className="object-cover brightness-75"
-                        priority
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-white"></div>
-                </motion.div>
+                    <ArrowLeft size={14} className="mr-3 transition-transform group-hover:-translate-x-1" />
+                    Back to Collection
+                </button>
 
-                <div className="container mx-auto px-6 relative z-10 text-center text-white">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1 }}
-                    >
-                        <span className="inline-block py-1 px-3 rounded-full bg-green-500/20 backdrop-blur-md border border-green-400/30 text-green-300 font-bold uppercase tracking-[0.2em] text-[10px] mb-6">
-                            Our Commitment
-                        </span>
-                        <h1 className="text-6xl md:text-9xl font-black tracking-tighter mb-8 leading-tight">
-                            Commerce in <br /> <span className="text-green-400">Harmony</span>
-                        </h1>
-                        <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto font-medium leading-relaxed drop-shadow-md">
-                            We believe in a future where style involves responsibility. Every product tells a story of preservation.
-                        </p>
+                {/* Parallax Hero Section */}
+                <section className="relative h-[70vh] min-h-[500px] rounded-[3rem] overflow-hidden mb-24 shadow-2xl">
+                    <motion.div style={{ y }} className="absolute inset-0 z-0">
+                        <Image
+                            src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80"
+                            alt="Nature Background"
+                            fill
+                            className="object-cover brightness-[0.85]"
+                            priority
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-emerald-900/40"></div>
                     </motion.div>
-                </div>
-            </section>
 
-            {/* Impact Stats */}
-            <section className="py-24 bg-white relative z-20 -mt-20">
-                <div className="container mx-auto px-6">
+                    <div className="absolute inset-0 z-10 flex items-center justify-center text-center px-6">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                        >
+                            <span className="inline-block py-2 px-5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white font-black uppercase tracking-[0.3em] text-[10px] mb-8">
+                                Ethical Curators
+                            </span>
+                            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-white tracking-widest leading-tight md:leading-none mb-6 md:mb-8 drop-shadow-2xl uppercase">
+                                ECO <br /> <span className="text-emerald-400">LUXURY</span>
+                            </h1>
+                            <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto font-medium leading-relaxed drop-shadow-md">
+                                Redefining professional standards through environmental stewardship. Every acquisition is a pledge to the future.
+                            </p>
+                        </motion.div>
+                    </div>
+                </section>
+
+                {/* Impact Stats */}
+                <section className="mb-32">
                     <motion.div
                         variants={staggerContainer}
                         initial="initial"
@@ -79,90 +93,105 @@ export default function SustainabilityPage() {
                         className="grid grid-cols-1 md:grid-cols-3 gap-8"
                     >
                         {[
-                            { label: "Carbon Neutral", value: "100%", desc: "Shipping & Operations" },
-                            { label: "Recycled Materials", value: "85%", desc: "Across all packaging" },
-                            { label: "Trees Planted", value: "50k+", desc: "In partnership with OneTree" },
+                            { label: "Carbon Neutral", value: "100%", desc: "Integrated Operations", icon: <Globe className="text-emerald-600" size={18} /> },
+                            { label: "Circular Materials", value: "85%", desc: "Recycled Packaging", icon: <Recycle className="text-emerald-600" size={18} /> },
+                            { label: "Reforestation", value: "50k+", desc: "Saplings Planted", icon: <Leaf className="text-emerald-600" size={18} /> },
                         ].map((stat, i) => (
                             <motion.div
                                 key={i}
                                 variants={fadeInUp}
-                                className="bg-gray-50 p-10 rounded-[2rem] text-center hover:bg-green-50 transition-colors duration-500 group"
+                                className="bg-white/70 backdrop-blur-xl p-8 rounded-[2rem] border border-white/50 shadow-[0_20px_50px_rgba(0,0,0,0.03)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.06)] hover:-translate-y-2 transition-all duration-500 group text-center"
                             >
-                                <h3 className="text-6xl font-black text-black mb-2 group-hover:text-green-600 transition-colors">{stat.value}</h3>
-                                <p className="text-sm font-black uppercase tracking-widest text-gray-400 mb-4">{stat.label}</p>
-                                <p className="text-gray-500 font-medium">{stat.desc}</p>
+                                <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mx-auto mb-6 transition-colors group-hover:bg-emerald-600 group-hover:text-white">
+                                    {stat.icon}
+                                </div>
+                                <h3 className="text-5xl font-black text-gray-900 mb-2 tracking-tighter">{stat.value}</h3>
+                                <p className="text-[11px] font-black uppercase tracking-[0.3em] text-emerald-600 mb-4">{stat.label}</p>
+                                <p className="text-gray-500 font-medium text-sm">{stat.desc}</p>
                             </motion.div>
                         ))}
                     </motion.div>
-                </div>
-            </section>
+                </section>
 
-            {/* Mission Split Section */}
-            <section className="py-24 md:py-32 overflow-hidden">
-                <div className="container mx-auto px-6">
+                {/* Mission Split Section */}
+                <section className="mb-32 relative">
                     <div className="grid lg:grid-cols-2 gap-20 items-center">
                         <motion.div
-                            initial={{ opacity: 0, x: -50 }}
+                            initial={{ opacity: 0, x: -30 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.8 }}
+                            className="space-y-8"
                         >
-                            <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-black mb-8">
-                                The Green <br /> Standard.
-                            </h2>
-                            <div className="space-y-6 text-lg text-gray-500 font-medium leading-relaxed">
-                                <p>
-                                    Traditional e-commerce leaves a heavy footprint. We're rewriting the rules. From sourcing organic cotton to using biodegradable mailers, every decision is weighed against its environmental impact.
-                                </p>
-                                <p>
-                                    We don't just ask "is it profitable?" We ask "is it sustainable?" If the answer is no, we go back to the drawing board.
-                                </p>
+                            <div className="space-y-4">
+                                <span className="text-[11px] font-black text-emerald-600 uppercase tracking-[0.4em]">Our Philosophy</span>
+                                <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-gray-900 leading-[0.9]">
+                                    The Emerald <br /> Commitment.
+                                </h2>
                             </div>
-                            <div className="mt-10">
-                                <Link href="/products" className="text-green-600 font-black uppercase tracking-widest text-sm border-b-2 border-green-600 pb-1 hover:text-black hover:border-black transition-all">
-                                    Read Our Full Report
-                                </Link>
+                            <div className="space-y-6 text-sm md:text-base text-gray-600 font-medium leading-relaxed max-w-xl">
+                                <p>
+                                    Modern commerce demands a radical shift in perspective. We don't just curate products; we curate legacies. Our "Emerald Commitment" ensures that every item in our collection is vetted for its ecological integrity.
+                                </p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+                                    <div className="flex gap-4">
+                                        <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                                            <ShieldCheck size={16} className="text-emerald-600" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-black text-[10px] uppercase tracking-widest mb-1">Ethical Labor</h4>
+                                            <p className="text-[10px] text-gray-500">Fair wages & safety.</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                                            <Sparkles size={16} className="text-emerald-600" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-black text-[10px] uppercase tracking-widest mb-1">Purity Grade</h4>
+                                            <p className="text-[10px] text-gray-500">Chemical-free fabrics.</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </motion.div>
 
                         <motion.div
-                            initial={{ opacity: 0, x: 50 }}
-                            whileInView={{ opacity: 1, x: 0 }}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.8 }}
+                            transition={{ duration: 1 }}
                             className="relative"
                         >
-                            <div className="aspect-[4/5] rounded-[3rem] overflow-hidden relative z-10">
+                            <div className="aspect-square md:aspect-[4/5] rounded-[2.5rem] md:rounded-[4rem] overflow-hidden shadow-2xl border-[8px] md:border-[12px] border-white relative z-10">
                                 <Image
-                                    src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80" // Reusing distinct nature image or finding another
+                                    src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80"
                                     alt="Sustainable Materials"
                                     fill
                                     className="object-cover"
                                 />
                             </div>
-                            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-green-100 rounded-full blur-3xl z-0"></div>
-                            <div className="absolute -top-10 -right-10 w-60 h-60 bg-blue-100 rounded-full blur-3xl z-0"></div>
+                            <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-emerald-200/40 rounded-full blur-[80px] z-0 animate-pulse"></div>
                         </motion.div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* Pillars Grid */}
-            <section className="py-32 bg-[#fafafa]">
-                <div className="container mx-auto px-6">
-                    <div className="text-center max-w-3xl mx-auto mb-20">
-                        <span className="text-green-600 font-black uppercase tracking-[0.4em] text-[11px] mb-4 block">Our Pillars</span>
-                        <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-black">Designed for the Future</h2>
+                {/* Pillars Grid */}
+                <section className="mb-32">
+                    <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
+                        <span className="text-emerald-600 font-black uppercase tracking-[0.5em] text-[11px]">The Pillars</span>
+                        <h2 className="text-3xl md:text-4xl font-black tracking-tight text-gray-900 leading-none">Designed for <span className="text-emerald-800">Prosperity</span></h2>
+                        <div className="h-1 w-20 bg-emerald-600 mx-auto rounded-full"></div>
                     </div>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {[
-                            { icon: <Leaf size={28} />, title: "Eco-Friendly Materials", desc: "Organic cottons, recycled polyesters, and responsibly sourced woods." },
-                            { icon: <Recycle size={28} />, title: "Circular Economy", desc: "Programs to repair, resell, and recycle used products." },
-                            { icon: <Wind size={28} />, title: "Clean Energy", desc: "Warehouses powered by 100% renewable solar and wind energy." },
-                            { icon: <Droplets size={28} />, title: "Water Conservation", desc: "Closed-loop dyeing processes that save millions of liters." },
-                            { icon: <Heart size={28} />, title: "Ethical Labor", desc: "Fair wages and safe working conditions for all makers." },
-                            { icon: <Sun size={28} />, title: "Transparency", desc: "Full visibility into our supply chain and impact reports." },
+                            { icon: <Leaf size={20} />, title: "Noble Materials", desc: "Organic cottons, recycled polyesters, and responsibly sourced luxury woods." },
+                            { icon: <Globe size={20} />, title: "Circular Ethos", desc: "Refined programs to repair, resell, and recycle every artifact we sell." },
+                            { icon: <Wind size={20} />, title: "Renewable Power", desc: "Global logistics hubs powered by 100% renewable solar and wind energy." },
+                            { icon: <Droplets size={20} />, title: "Aquatic Stewardship", desc: "Advanced closed-loop dyeing processes that conserve premium water sources." },
+                            { icon: <Heart size={20} />, title: "Artisan Welfare", desc: "Direct safety protocols and premium living wages for our master makers." },
+                            { icon: <Sparkles size={20} />, title: "Absolute Clarity", desc: "Full cryptographic visibility into our premium supply chain and impact." },
                         ].map((item, i) => (
                             <motion.div
                                 key={i}
@@ -170,51 +199,54 @@ export default function SustainabilityPage() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.1 }}
                                 viewport={{ once: true }}
-                                className="bg-white p-8 rounded-3xl border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+                                className="bg-white p-8 rounded-[2rem] border border-gray-100/50 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden"
                             >
-                                <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-green-600 group-hover:text-white transition-all">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-full -mr-12 -mt-12 group-hover:bg-emerald-600 transition-colors duration-500 opacity-20"></div>
+                                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-8 group-hover:bg-emerald-600 group-hover:text-white transition-all transform group-hover:rotate-[360deg] duration-700">
                                     {item.icon}
                                 </div>
-                                <h3 className="text-xl font-bold text-black mb-3">{item.title}</h3>
-                                <p className="text-gray-500 leading-relaxed font-medium">{item.desc}</p>
+                                <h3 className="text-lg font-black text-gray-900 mb-3 tracking-tight">{item.title}</h3>
+                                <p className="text-gray-500 leading-relaxed font-medium text-xs">{item.desc}</p>
                             </motion.div>
                         ))}
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* CTA */}
-            <motion.section
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                className="py-32 bg-green-900 text-white relative overflow-hidden"
-            >
-                <div className="container mx-auto px-6 relative z-10 text-center">
-                    <h2 className="text-5xl md:text-8xl font-black tracking-tighter mb-10">
-                        Join the Movement
-                    </h2>
-                    <p className="text-xl md:text-2xl text-green-100 mb-12 max-w-2xl mx-auto font-medium">
-                        Make a choice that matters. Shop our curated collection of sustainable goods.
-                    </p>
-                    <Link
-                        href="/products"
-                        className="inline-flex items-center px-12 py-6 bg-white text-green-900 rounded-full font-black uppercase tracking-[0.2em] text-[12px] hover:scale-105 transition-transform duration-300"
-                    >
-                        Shop Consciously <ArrowRight className="ml-3" size={18} />
-                    </Link>
-                </div>
+                {/* Final CTA Overlay Card */}
+                <motion.section
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="relative rounded-[2.5rem] md:rounded-[4rem] overflow-hidden bg-emerald-900 text-white p-12 md:p-24 text-center shadow-3xl mb-12 group"
+                >
+                    <div className="absolute inset-0 z-0 opacity-40 group-hover:opacity-60 transition-opacity">
+                        <Image
+                            src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80"
+                            alt="Forest texture"
+                            fill
+                            className="object-cover"
+                        />
+                    </div>
+                    <div className="absolute inset-0 bg-emerald-950/60 backdrop-blur-[2px] z-0"></div>
 
-                {/* Decorative Nature Elements */}
-                <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-                    <Image
-                        src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80"
-                        alt="Texture"
-                        fill
-                        className="object-cover"
-                    />
-                </div>
-            </motion.section>
+                    <div className="relative z-10 max-w-2xl mx-auto space-y-8">
+                        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-emerald-400">Collaborate with Us</span>
+                        <h2 className="text-3xl md:text-6xl font-black tracking-tighter leading-tight md:leading-none uppercase px-4">
+                            ACQUIRE <br /> CONSCIOUSLY
+                        </h2>
+                        <p className="text-base md:text-lg text-emerald-100/80 font-medium max-w-lg mx-auto leading-relaxed">
+                            Join our guild of responsible collectors. Every piece you acquire contributes to a restorative global economy.
+                        </p>
+                        <Link
+                            href="/products"
+                            className="inline-flex items-center px-10 py-6 bg-white text-emerald-900 rounded-2xl font-black uppercase tracking-[0.3em] text-[11px] hover:bg-emerald-400 hover:text-emerald-950 transition-all duration-300 shadow-xl active:scale-95"
+                        >
+                            Explore Collection <ArrowRight size={16} className="ml-4" />
+                        </Link>
+                    </div>
+                </motion.section>
+
+            </div>
         </div>
     );
 }

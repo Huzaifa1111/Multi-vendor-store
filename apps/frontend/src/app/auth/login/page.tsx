@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Mail, Lock, LogIn, Chrome } from 'lucide-react';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -19,14 +21,13 @@ export default function LoginPage() {
     useEffect(() => {
         const verified = searchParams.get('verified');
         if (verified === 'true') {
-            setSuccess('Email verified successfully! You can now log in.');
+            setSuccess('Identity verified. Welcome to the collective.');
         }
 
         const emailParam = searchParams.get('email');
         if (emailParam) {
             setEmail(emailParam);
         } else {
-            // Initialize email from localStorage if available and no URL param
             const rememberedEmail = localStorage.getItem('rememberedEmail');
             if (rememberedEmail) {
                 setEmail(rememberedEmail);
@@ -42,24 +43,21 @@ export default function LoginPage() {
 
         try {
             if (!email || !password) {
-                throw new Error('Please enter both email and password');
+                throw new Error('Required credentials missing.');
             }
 
             if (!/\S+@\S+\.\S+/.test(email)) {
-                throw new Error('Please enter a valid email address');
+                throw new Error('Invalid email structure.');
             }
 
             await login(email, password);
-
-            // Save email for pre-fill on next visit
             localStorage.setItem('rememberedEmail', email);
         } catch (err: any) {
             if (err.message.includes('verify your email')) {
-                setError(err.message + ' Please check your email for verification OTP.');
+                setError('Verification required. Check your secure vault (email).');
             } else {
-                setError(err.message || 'Login failed. Please check your credentials.');
+                setError(err.message || 'Authentication failed. Review credentials.');
             }
-            console.error('Login error:', err);
         } finally {
             setIsLoading(false);
         }
@@ -76,186 +74,143 @@ export default function LoginPage() {
     }, [user, router]);
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#0a0a0b] font-jost relative overflow-hidden">
-            {/* Premium Animated Background */}
-            <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-glow pointer-events-none"></div>
-            <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse-glow pointer-events-none" style={{ animationDelay: '2s' }}></div>
-            <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-indigo-600/10 rounded-full blur-[100px] animate-float pointer-events-none"></div>
+        <div className="min-h-screen flex items-center justify-center bg-[#050505] font-plus-jakarta-sans relative overflow-hidden">
+            {/* Emerald Aurora Background */}
+            <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-emerald-600/10 rounded-full blur-[140px] animate-pulse pointer-events-none opacity-40"></div>
+            <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-emerald-950/20 rounded-full blur-[120px] animate-pulse pointer-events-none opacity-30" style={{ animationDelay: '3s' }}></div>
 
             {/* Grid Pattern */}
-            <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:32px_32px] pointer-events-none"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(rgba(16,185,129,0.03)_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none"></div>
 
-            <div className="w-full flex items-center justify-center p-6 md:p-12 relative z-10">
-                <div className="max-w-md w-full opacity-0-initial animate-slide-up">
-
-                    {/* Logo Section */}
-                    <div className="text-center mb-10 opacity-0-initial animate-zoom-in delay-300">
-                        <Link href="/" className="text-5xl font-black tracking-tighter text-white inline-block mb-4 hover:scale-105 transition-transform duration-300">
-                            <span className="bg-white text-black px-3 py-1 rounded-2xl mr-2">E</span>
-                            <span>Store</span>
-                            <span className="text-blue-500 animate-pulse">.</span>
+            <div className="w-full flex items-center justify-center p-6 relative z-10">
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    className="max-w-md w-full"
+                >
+                    {/* Brand Header */}
+                    <div className="text-center mb-12">
+                        <Link href="/" className="group inline-flex items-center space-x-2 mb-8">
+                            <span className="w-10 h-10 bg-white text-black rounded-xl flex items-center justify-center font-black text-xl shadow-2xl group-hover:scale-110 transition-transform duration-500">E</span>
+                            <span className="text-2xl font-black text-white tracking-widest uppercase shadow-sm">ESTORE</span>
                         </Link>
                     </div>
 
-                    {/* Form Card */}
-                    <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 md:p-10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] opacity-0-initial animate-slide-up delay-500">
-                        <div className="text-center mb-10">
-                            <h2 className="text-4xl font-bold text-white mb-2 tracking-tight">Welcome back</h2>
-                            <p className="text-gray-400 font-medium tracking-wide">Please enter your details to sign in.</p>
-                        </div>
+                    {/* Auth Card */}
+                    <div className="bg-white/5 backdrop-blur-3xl border border-white/5 p-8 md:p-12 rounded-[2.5rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-[40px] -mr-16 -mt-16 group-hover:opacity-100 opacity-50 transition-opacity duration-700"></div>
 
-                        <form className="space-y-6" onSubmit={handleSubmit}>
-                            {/* Error/Success Messages */}
-                            <div>
+                        <div className="relative z-10">
+                            <div className="mb-10 text-center">
+                                <h2 className="text-3xl font-black text-white tracking-tighter mb-2 uppercase italic">SYNTHESIZE ACCESS</h2>
+                                <p className="text-gray-500 font-medium text-xs tracking-[0.2em] uppercase">Enter the curation collective</p>
+                            </div>
+
+                            <form className="space-y-6" onSubmit={handleSubmit}>
                                 {error && (
-                                    <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-2xl text-sm font-medium animate-fade-in">
-                                        <div className="flex items-center space-x-2">
-                                            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                                            <span>{error}</span>
-                                        </div>
-                                    </div>
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center space-x-3"
+                                    >
+                                        <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
+                                        <span>{error}</span>
+                                    </motion.div>
                                 )}
 
                                 {success && (
-                                    <div className="bg-green-500/10 border border-green-500/20 text-green-500 px-4 py-3 rounded-2xl text-sm font-medium animate-fade-in">
-                                        <div className="flex items-center space-x-2">
-                                            <span className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></span>
-                                            <span>{success}</span>
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center space-x-3"
+                                    >
+                                        <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                                        <span>{success}</span>
+                                    </motion.div>
+                                )}
+
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] ml-2">Secure Link (Email)</label>
+                                        <div className="relative group">
+                                            <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-emerald-500 transition-colors" size={16} />
+                                            <input
+                                                type="email"
+                                                required
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                className="w-full pl-12 pr-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl outline-none focus:bg-white/[0.07] focus:border-emerald-500/30 transition-all duration-500 text-white font-medium text-sm placeholder-gray-600"
+                                                placeholder="curator@collective.com"
+                                                disabled={isLoading}
+                                            />
                                         </div>
                                     </div>
-                                )}
-                            </div>
 
-                            {/* Form Fields */}
-                            <div className="space-y-5">
-                                <div className="group opacity-0-initial animate-slide-left delay-700">
-                                    <label htmlFor="email" className="block text-sm font-bold text-gray-400 mb-2 transition-colors group-focus-within:text-white">
-                                        Email Address
-                                    </label>
-                                    <input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        autoComplete="email username"
-                                        required
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:bg-white/10 focus:border-white/30 focus:ring-4 focus:ring-white/5 transition-all duration-300 text-white font-medium placeholder-gray-500"
-                                        placeholder="name@company.com"
-                                        disabled={isLoading}
-                                    />
-                                </div>
-
-                                <div className="group relative opacity-0-initial animate-slide-left delay-800">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <label htmlFor="password" className="text-sm font-bold text-gray-400 group-focus-within:text-white transition-colors">
-                                            Password
-                                        </label>
-                                        <Link href="/auth/verify-email" className="text-xs font-bold text-blue-400 hover:text-blue-300 underline decoration-1 underline-offset-4">
-                                            Forgot Password?
-                                        </Link>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center ml-2">
+                                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Coded Key (Password)</label>
+                                            <Link href="/auth/verify-email" className="text-[9px] font-black text-emerald-500 uppercase tracking-widest hover:text-emerald-400 transition-colors">Recover</Link>
+                                        </div>
+                                        <div className="relative group">
+                                            <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-emerald-500 transition-colors" size={16} />
+                                            <input
+                                                type="password"
+                                                required
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                className="w-full pl-12 pr-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl outline-none focus:bg-white/[0.07] focus:border-emerald-500/30 transition-all duration-500 text-white font-medium text-sm placeholder-gray-600"
+                                                placeholder="••••••••"
+                                                disabled={isLoading}
+                                            />
+                                        </div>
                                     </div>
-                                    <input
-                                        id="password"
-                                        name="password"
-                                        type="password"
-                                        autoComplete="current-password"
-                                        required
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:bg-white/10 focus:border-white/30 focus:ring-4 focus:ring-white/5 transition-all duration-300 text-white font-medium placeholder-gray-500"
-                                        placeholder="••••••••"
-                                        disabled={isLoading}
-                                    />
                                 </div>
-                            </div>
 
-                            {/* Submit Button */}
-                            <div className="opacity-0-initial animate-slide-up delay-1000 pt-2">
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full bg-white text-black py-5 rounded-2xl font-bold text-lg hover:bg-gray-100 active:scale-[0.98] transition-all duration-300 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_20px_40px_rgba(255,255,255,0.05)] group"
+                                    className="w-full bg-white text-black py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.5em] hover:bg-emerald-50 active:scale-[0.98] transition-all duration-500 flex items-center justify-center space-x-4 disabled:opacity-50 group/btn shadow-[0_20px_40px_-10px_rgba(255,255,255,0.1)]"
                                 >
                                     {isLoading ? (
-                                        <>
-                                            <svg className="animate-spin h-6 w-6 text-black" fill="none" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            <span>Processing...</span>
-                                        </>
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin"></div>
+                                            <span>SYNTHESIZING...</span>
+                                        </div>
                                     ) : (
                                         <>
-                                            <span>Sign In</span>
-                                            <span className="group-hover:translate-x-1 transition-transform">→</span>
+                                            <span>INITIALIZE ACCESS</span>
+                                            <LogIn size={14} className="group-hover:translate-x-1 transition-transform" />
                                         </>
                                     )}
                                 </button>
-                            </div>
+                            </form>
 
-                            <div className="relative opacity-0-initial animate-fade-in delay-1000 py-2">
-                                <div className="absolute inset-0 flex items-center">
-                                    <div className="w-full border-t border-white/10"></div>
-                                </div>
-                                <div className="relative flex justify-center text-xs uppercase font-black tracking-widest">
-                                    <span className="bg-[#141416]/50 backdrop-blur-md px-4 text-gray-500">Or continue with</span>
-                                </div>
-                            </div>
+                            <div className="mt-10 pt-10 border-t border-white/5 space-y-6">
+                                <p className="text-[9px] font-black text-gray-600 text-center uppercase tracking-[0.4em]">Alternative Gateways</p>
 
-                            <div className="opacity-0-initial animate-slide-up delay-1000">
                                 <button
                                     type="button"
                                     onClick={() => window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/auth/google`}
-                                    className="w-full bg-white/5 border border-white/10 text-white py-5 rounded-2xl font-bold text-lg hover:bg-white/10 hover:border-white/20 active:scale-[0.98] transition-all duration-300 flex items-center justify-center space-x-3 group"
+                                    className="w-full bg-white/[0.03] border border-white/5 text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-white/[0.07] hover:border-white/10 transition-all duration-500 flex items-center justify-center space-x-4 group"
                                 >
-                                    <svg className="w-6 h-6 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
-                                        <path
-                                            fill="currentColor"
-                                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                                        />
-                                        <path
-                                            fill="currentColor"
-                                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                                        />
-                                        <path
-                                            fill="currentColor"
-                                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                                        />
-                                        <path
-                                            fill="currentColor"
-                                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z"
-                                        />
-                                    </svg>
-                                    <span>Google Account</span>
+                                    <Chrome size={16} className="text-gray-400 group-hover:text-white transition-colors" />
+                                    <span>Google Protocol</span>
                                 </button>
-                            </div>
 
-                            {/* Footer Links */}
-                            <div className="text-center text-sm font-medium opacity-0-initial animate-fade-in delay-1000 pt-4">
-                                <span className="text-gray-500">Don't have an account? </span>
-                                <Link href="/auth/register" className="text-white font-bold border-b-2 border-white hover:bg-white hover:text-black px-1 transition-all duration-300">
-                                    Create one for free
-                                </Link>
-                            </div>
-
-                            {/* Demo Access */}
-                            <div className="mt-8 p-5 bg-white/5 rounded-[2rem] border border-white/10 opacity-0-initial animate-zoom-in delay-1000">
-                                <p className="text-[10px] uppercase font-black text-gray-500 tracking-widest mb-3 text-center">Demo Access</p>
-                                <div className="flex items-center justify-between text-xs">
-                                    <div className="flex flex-col">
-                                        <span className="text-gray-500 font-bold mb-0.5">Admin Email</span>
-                                        <span className="text-white font-mono font-bold">admin@store.com</span>
-                                    </div>
-                                    <div className="flex flex-col text-right">
-                                        <span className="text-gray-500 font-bold mb-0.5">Password</span>
-                                        <span className="text-white font-mono font-bold">Admin@123</span>
-                                    </div>
+                                <div className="text-center">
+                                    <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">New visionary? </span>
+                                    <Link href="/auth/register" className="text-[10px] font-black text-white hover:text-emerald-500 uppercase tracking-widest underline underline-offset-8 decoration-emerald-500/30 transition-all">Join the Guild</Link>
                                 </div>
                             </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
+
+                    {/* Meta Info */}
+                    <div className="mt-12 text-center opacity-40">
+                        <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.5em]">Secure Terminal Protocol v2.4.0</p>
+                    </div>
+                </motion.div>
             </div>
         </div>
     );

@@ -6,8 +6,9 @@ import { Product } from './product.entity';
 import { ProductVariation } from './variation.entity';
 import { Brand } from '../brands/brand.entity';
 import { CreateProductDto } from './dto/create-product.dto';
-import { ProductFilterDto } from './dto/product-filter.dto'; // ADD THIS IMPORT
+import { ProductFilterDto } from './dto/product-filter.dto';
 import { CloudinaryService } from '../uploads/cloudinary.service';
+import { Category } from '../categories/category.entity';
 
 @Injectable()
 export class ProductsService {
@@ -18,8 +19,19 @@ export class ProductsService {
     private variationRepository: Repository<ProductVariation>,
     @InjectRepository(Brand)
     private brandRepository: Repository<Brand>,
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
     private cloudinaryService: CloudinaryService,
   ) { }
+
+  private async getOrCreateCategory(name: string): Promise<Category> {
+    let category = await this.categoryRepository.findOne({ where: { name } });
+    if (!category) {
+      category = this.categoryRepository.create({ name });
+      category = await this.categoryRepository.save(category);
+    }
+    return category;
+  }
 
   async create(createProductDto: CreateProductDto, images?: Express.Multer.File[]): Promise<any> {
     console.log('Creating product:', createProductDto);
@@ -49,7 +61,7 @@ export class ProductsService {
       price: createProductDto.price,
       stock: createProductDto.stock,
       sku: createProductDto.sku,
-      category: createProductDto.category || 'Uncategorized',
+      category: await this.getOrCreateCategory(createProductDto.category || 'Uncategorized'),
       featured: createProductDto.featured || false,
       images: imageUrls,
       descriptionImages: createProductDto.descriptionImages || [],
@@ -91,7 +103,8 @@ export class ProductsService {
     const query = this.productRepository.createQueryBuilder('product');
 
     if (filters?.category) {
-      query.andWhere('product.category = :category', { category: filters.category });
+      query.leftJoin('product.category', 'category')
+        .andWhere('category.name = :category', { category: filters.category });
     }
 
     if (filters?.featured !== undefined) {
@@ -138,20 +151,15 @@ export class ProductsService {
     return query.getMany();
   }
 
-  async getCategories(): Promise<string[]> { // ADD THIS METHOD
-    const categories = await this.productRepository
-      .createQueryBuilder('product')
-      .select('DISTINCT product.category', 'category')
-      .where('product.category IS NOT NULL')
-      .getRawMany();
-
-    return categories.map(c => c.category);
+  async getCategories(): Promise<string[]> {
+    const categories = await this.categoryRepository.find();
+    return categories.map(c => c.name);
   }
 
   async findOne(id: number): Promise<Product> {
     const product = await this.productRepository.findOne({
       where: { id },
-      relations: ['brand', 'variations', 'variations.attributeValues', 'variations.attributeValues.attribute', 'upsells', 'crossSells']
+      relations: ['brand', 'category', 'variations', 'variations.attributeValues', 'variations.attributeValues.attribute', 'upsells', 'crossSells']
     });
 
     if (!product) {
@@ -180,6 +188,10 @@ export class ProductsService {
     }
 
     const updateData: any = { ...updateProductDto };
+
+    if (updateProductDto.category) {
+      updateData.category = await this.getOrCreateCategory(updateProductDto.category);
+    }
 
     // Handle types
     if (updateProductDto.price !== undefined) {

@@ -11,7 +11,7 @@ export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
   const id = parseInt(params.id as string);
-  
+
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState<any>(null);
 
@@ -23,9 +23,13 @@ export default function EditProductPage() {
           id: data.id,
           name: data.name,
           description: data.description,
+          longDescription: data.longDescription,
           price: data.price,
           stock: data.stock,
-          category: data.category,
+          category: data.category?.name || data.category,
+          featured: data.featured,
+          shippingPolicy: data.shippingPolicy,
+          returnPolicy: data.returnPolicy,
         });
       } catch (error) {
         console.error('Error fetching product:', error);

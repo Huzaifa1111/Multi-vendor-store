@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { Review } from '../reviews/review.entity';
 import { Brand } from '../brands/brand.entity';
 import { ProductVariation } from './variation.entity';
+import { Category } from '../categories/category.entity';
 
 @Entity('products')
 export class Product {
@@ -23,8 +24,8 @@ export class Product {
   @Column('simple-array', { nullable: true })
   images: string[];
 
-  @Column({ nullable: true })
-  category: string;
+  @ManyToOne(() => Category, (category) => category.products, { nullable: true })
+  category: Category;
 
   @Column({ default: false })
   featured: boolean;

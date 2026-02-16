@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Button from '@/components/ui/Button';
+import { Send, User, Mail, MessageSquare, ChevronDown } from 'lucide-react';
 
 interface ContactFormProps {
   onSubmit: (data: ContactFormData) => void;
@@ -42,102 +43,121 @@ export default function ContactForm({ onSubmit }: ContactFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label htmlFor="name" className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 ml-1">
-            Full Name
+    <form onSubmit={handleSubmit} className="space-y-5 font-plus-jakarta-sans">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="space-y-1.5">
+          <label htmlFor="name" className="text-[8px] font-black uppercase tracking-[0.3em] text-emerald-600 ml-0.5">
+            Full Identity
           </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            required
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-emerald-50 focus:border-emerald-500 transition-all duration-300 text-gray-900 font-bold placeholder:text-gray-300 placeholder:font-medium"
-            placeholder="John Doe"
-          />
+          <div className="relative group">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-emerald-500 transition-colors pointer-events-none">
+              <User size={14} />
+            </div>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full pl-10 pr-4 py-3 bg-gray-50/50 border border-gray-100 rounded-lg focus:bg-white focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all duration-500 text-[13px] text-black font-bold placeholder:text-gray-300 placeholder:font-medium outline-none"
+              placeholder="E.g. Alexander Sterling"
+            />
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <label htmlFor="email" className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 ml-1">
-            Email Address
+        <div className="space-y-1.5">
+          <label htmlFor="email" className="text-[8px] font-black uppercase tracking-[0.3em] text-emerald-600 ml-0.5">
+            Digital Address
           </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            required
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-emerald-50 focus:border-emerald-500 transition-all duration-300 text-gray-900 font-bold placeholder:text-gray-300 placeholder:font-medium"
-            placeholder="john@example.com"
-          />
+          <div className="relative group">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-emerald-500 transition-colors pointer-events-none">
+              <Mail size={14} />
+            </div>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full pl-10 pr-4 py-3 bg-gray-50/50 border border-gray-100 rounded-lg focus:bg-white focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all duration-500 text-[13px] text-black font-bold placeholder:text-gray-300 placeholder:font-medium outline-none"
+              placeholder="liaison@domain.com"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="subject" className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 ml-1">
-          Subject
+      <div className="space-y-1.5">
+        <label htmlFor="subject" className="text-[8px] font-black uppercase tracking-[0.3em] text-emerald-600 ml-0.5">
+          Inquiry Vector
         </label>
-        <select
-          id="subject"
-          name="subject"
-          required
-          value={formData.subject}
-          onChange={handleChange}
-          className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-emerald-50 focus:border-emerald-500 transition-all duration-300 text-gray-900 font-bold appearance-none cursor-pointer"
-        >
-          <option value="">Select a subject</option>
-          <option value="General Inquiry">General Inquiry</option>
-          <option value="Technical Support">Technical Support</option>
-          <option value="Billing Question">Billing Question</option>
-          <option value="Product Feedback">Product Feedback</option>
-          <option value="Other">Other</option>
-        </select>
+        <div className="relative group">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-emerald-500 transition-colors pointer-events-none">
+            <Send size={14} />
+          </div>
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none">
+            <ChevronDown size={14} />
+          </div>
+          <select
+            id="subject"
+            name="subject"
+            required
+            value={formData.subject}
+            onChange={handleChange}
+            className="w-full pl-10 pr-8 py-3 bg-gray-50/50 border border-gray-100 rounded-lg focus:bg-white focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all duration-500 text-[13px] text-black font-bold appearance-none cursor-pointer outline-none"
+          >
+            <option value="">Select Vector</option>
+            <option value="General Inquiry">General Liaison</option>
+            <option value="Technical Support">Technical Synthesis</option>
+            <option value="Billing Question">Financial Protocol</option>
+            <option value="Product Feedback">Quality Intelligence</option>
+            <option value="Other">Custom Transmission</option>
+          </select>
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="message" className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 ml-1">
-          Message
+      <div className="space-y-1.5">
+        <label htmlFor="message" className="text-[8px] font-black uppercase tracking-[0.3em] text-emerald-600 ml-0.5">
+          Transmission Payload
         </label>
-        <textarea
-          id="message"
-          name="message"
-          required
-          rows={5}
-          value={formData.message}
-          onChange={handleChange}
-          minLength={10}
-          className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-emerald-50 focus:border-emerald-500 transition-all duration-300 text-gray-900 font-bold placeholder:text-gray-300 placeholder:font-medium resize-none"
-          placeholder="Tell us what's on your mind... (Min. 10 characters)"
-        />
+        <div className="relative group">
+          <div className="absolute left-4 top-5 text-gray-300 group-focus-within:text-emerald-500 transition-colors pointer-events-none">
+            <MessageSquare size={14} />
+          </div>
+          <textarea
+            id="message"
+            name="message"
+            required
+            rows={4}
+            value={formData.message}
+            onChange={handleChange}
+            minLength={10}
+            className="w-full pl-10 pr-4 py-4 bg-gray-50/50 border border-gray-100 rounded-lg focus:bg-white focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all duration-500 text-[13px] text-black font-bold placeholder:text-gray-300 placeholder:font-medium resize-none outline-none"
+            placeholder="Articulate inquiry... (Encrypted)"
+          />
+        </div>
       </div>
 
       <Button
         type="submit"
         disabled={isSubmitting}
-        className="w-full h-16 bg-black hover:bg-emerald-900 text-white rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] transition-all duration-500 shadow-xl shadow-gray-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden relative"
+        className="w-full h-14 bg-black hover:bg-emerald-600 text-white rounded-lg font-black text-[9px] uppercase tracking-[0.4em] transition-all duration-700 shadow-2xl shadow-emerald-900/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden relative"
       >
         <div className="relative z-10 flex items-center justify-center">
           {isSubmitting ? (
             <div className="flex items-center gap-3">
-              <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span>Relaying Message...</span>
+              <div className="animate-spin h-3.5 w-3.5 border-2 border-white/20 border-t-white rounded-full"></div>
+              <span>Transmitting...</span>
             </div>
           ) : (
             <>
-              <span>Dispatch Message</span>
-              <svg className="w-5 h-5 ml-3 transition-transform duration-500 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-              </svg>
+              <span>Dispatch Transmission</span>
+              <Send className="w-3.5 h-3.5 ml-2.5 transition-transform duration-700 group-hover:translate-x-2 group-hover:-translate-y-1" />
             </>
           )}
         </div>
+        <div className="absolute inset-0 bg-emerald-600 -translate-x-full group-hover:translate-x-0 transition-transform duration-700 ease-[0.16, 1, 0.3, 1]"></div>
       </Button>
     </form>
   );

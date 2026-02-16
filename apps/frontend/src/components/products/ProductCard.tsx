@@ -18,7 +18,7 @@ interface Product {
   stock: number;
   image: string | null;
   images?: string[];
-  category?: string;
+  category?: string | { id: number; name: string };
   featured?: boolean;
 }
 
@@ -95,7 +95,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="absolute top-2 left-2 flex flex-col gap-1.5">
           {product.category && (
             <span className="inline-block bg-black/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded shadow-sm border border-white/10">
-              {product.category}
+              {typeof product.category === 'object' ? product.category.name : product.category}
             </span>
           )}
           {product.featured && (

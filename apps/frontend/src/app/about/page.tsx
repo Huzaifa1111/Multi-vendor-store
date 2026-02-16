@@ -3,13 +3,13 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, CheckCircle2, Globe, Users, Zap } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Globe, Users, Zap, Award, Sparkles, Target } from 'lucide-react';
 
 const fadeInUp = {
-  initial: { opacity: 0, y: 60 },
+  initial: { opacity: 0, y: 30 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true },
-  transition: { duration: 0.8, ease: "anticipate" } as any
+  transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } as any
 };
 
 const staggerContainer = {
@@ -23,83 +23,109 @@ const staggerContainer = {
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-white font-jost overflow-x-hidden">
-      {/* Hero Section */}
-      <section className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden">
+    <div className="min-h-screen bg-white font-plus-jakarta-sans overflow-x-hidden selection:bg-emerald-100 selection:text-emerald-900">
+      {/* Hero Section - Cinematic Aurora */}
+      <section className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden bg-black">
+        {/* Animated Aurora Background */}
         <div className="absolute inset-0 z-0">
-          <Image
-            src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80"
-            alt="Office Background"
-            fill
-            className="object-cover opacity-20"
-            priority
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] bg-emerald-500/20 rounded-full blur-[120px]"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/50 to-white"></div>
+          <motion.div
+            animate={{
+              scale: [1.2, 1, 1.2],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] bg-emerald-600/10 rounded-full blur-[100px]"
+          />
+          <div className="absolute inset-0 bg-[url('https://transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 mix-blend-overlay"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-white"></div>
         </div>
 
         <div className="container mx-auto px-6 relative z-10 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="text-blue-600 font-black uppercase tracking-[0.4em] text-[11px] mb-6 block">Our Story</span>
-            <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-black mb-8">
-              Redefining <br className="hidden md:block" /> Digital Commerce
+            <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-black uppercase tracking-[0.4em] text-[10px] mb-8">
+              Legacy of Excellence
+            </span>
+            <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-white mb-6 leading-[0.9]">
+              ARCHITECTS <br className="hidden md:block" /> <span className="text-transparent bg-clip-text bg-gradient-to-b from-emerald-400 to-emerald-600">OF DIGITAL</span> <br /> MASTERY.
             </h1>
-            <p className="text-xl md:text-2xl text-gray-500 max-w-2xl mx-auto font-medium leading-relaxed">
-              We're building the future of shopping, one seamless experience at a time.
+            <p className="text-sm md:text-base text-gray-400 max-w-xl mx-auto font-medium leading-relaxed tracking-wide">
+              Engineering the future of boutique commerce through high-fidelity experiences and uncompromising quality.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Mission Section */}
-      <section className="py-24 md:py-32">
+      {/* Mission Section - Elevated Grid */}
+      <section className="py-24 md:py-40 bg-white">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="relative aspect-square md:aspect-[4/3] rounded-[3rem] overflow-hidden"
+              {...fadeInUp}
+              className="relative group"
             >
-              <Image
-                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80"
-                alt="Our Team"
-                fill
-                className="object-cover"
-              />
+              <div className="absolute -inset-4 bg-emerald-50 rounded-[4rem] scale-95 group-hover:scale-100 transition-transform duration-700 -z-10 opacity-50"></div>
+              <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden shadow-2xl">
+                <Image
+                  src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80"
+                  alt="Atelier"
+                  fill
+                  className="object-cover contrast-110 saturate-[0.8] transition-transform duration-1000 group-hover:scale-110"
+                />
+              </div>
+              {/* Floating Stat Card */}
+              <div className="absolute -bottom-10 -right-10 bg-black text-white p-8 rounded-[2rem] shadow-2xl hidden md:block border border-white/10 backdrop-blur-3xl bg-black/80">
+                <p className="text-[9px] font-black uppercase tracking-[0.3em] mb-3 text-emerald-400">Founded</p>
+                <div className="text-4xl font-black tracking-tighter">MMXXIV</div>
+              </div>
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
+              initial={{ opacity: 0, x: 40 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
-              <span className="text-blue-600 font-black uppercase tracking-[0.4em] text-[11px] mb-6 block">Our Mission</span>
-              <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-black mb-8 leading-tight">
-                Driven by Innovation, <br /> Guided by Quality.
+              <span className="text-emerald-600 font-black uppercase tracking-[0.4em] text-[10px] mb-8 block">The Philosophy</span>
+              <h2 className="text-4xl md:text-6xl font-black tracking-tight text-black mb-10 leading-[0.95]">
+                DRIVEN BY <span className="text-gray-300">PRECISION.</span> <br /> GUIDED BY VISION.
               </h2>
-              <div className="space-y-6 text-gray-500 text-lg font-medium leading-relaxed">
-                <p>
-                  Founded in 2024, our journey began with a simple yet ambitious vision: to bridge the gap between premium technology and everyday accessibility. We believe that shopping online should be more than just a transaction; it should be an experience.
+              <div className="space-y-8 text-gray-500 text-lg font-medium leading-relaxed">
+                <p className="border-l-4 border-emerald-500 pl-8">
+                  Our journey is a synthesis of art and algorithm. We believe that digital commerce should transcend the transactional, becoming a curated ritual of discovery.
                 </p>
                 <p>
-                  Today, we connect thousands of users with top-tier vendors, fostering a marketplace built on trust, efficiency, and cutting-edge design. Our team is dedicated to pushing the boundaries of what's possible in e-commerce.
+                  Today, we bridge the gap between artisanal quality and digital speed. We connect a global community of masters with those who seek nothing less than the exceptional.
                 </p>
               </div>
 
-              <div className="mt-12 grid grid-cols-2 gap-8">
-                <div>
-                  <h3 className="text-4xl font-black text-black mb-2">10k+</h3>
-                  <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Active Users</p>
+              <div className="mt-16 grid grid-cols-2 gap-12">
+                <div className="border-t border-gray-100 pt-8">
+                  <h3 className="text-4xl font-black text-black mb-3">24/7</h3>
+                  <p className="text-gray-400 text-[9px] font-black uppercase tracking-[0.25em]">Global Operations</p>
                 </div>
-                <div>
-                  <h3 className="text-4xl font-black text-black mb-2">50+</h3>
-                  <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Brand Partners</p>
+                <div className="border-t border-gray-100 pt-8">
+                  <h3 className="text-4xl font-black text-black mb-3">99.9%</h3>
+                  <p className="text-gray-400 text-[9px] font-black uppercase tracking-[0.25em]">Precision Rating</p>
                 </div>
               </div>
             </motion.div>
@@ -107,15 +133,16 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Core Values */}
-      <section className="py-32 bg-[#fafafa]">
-        <div className="container mx-auto px-6">
+      {/* Core Values - Luxury Cards */}
+      <section className="py-24 bg-[#050505] relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-emerald-500/5 blur-[150px] rounded-full"></div>
+        <div className="container mx-auto px-6 relative z-10">
           <motion.div
             {...fadeInUp}
             className="text-center mb-24"
           >
-            <span className="text-blue-600 font-black uppercase tracking-[0.4em] text-[11px] mb-4 block">Why Choose Us</span>
-            <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-black">Our Core Values</h2>
+            <span className="text-emerald-500 font-black uppercase tracking-[0.4em] text-[9px] mb-5 block">Our DNA</span>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tight text-white">THE PRINCIPLES</h2>
           </motion.div>
 
           <motion.div
@@ -123,67 +150,65 @@ export default function AboutPage() {
             initial="initial"
             whileInView="whileInView"
             viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
           >
             {[
-              { icon: <Zap size={32} />, title: "Innovation", desc: "Always getting better." },
-              { icon: <CheckCircle2 size={32} />, title: "Quality", desc: "Only the best for you." },
-              { icon: <Users size={32} />, title: "Community", desc: "Growing together." },
-              { icon: <Globe size={32} />, title: "Sustainability", desc: "For a better future." },
+              { icon: <Zap size={16} />, title: "Velocity", desc: "Instantaneous execution at the speed of thought." },
+              { icon: <Award size={16} />, title: "Nobility", desc: "Upholding the highest standards of integrity and quality." },
+              { icon: <Sparkles size={16} />, title: "Aesthetics", desc: "Every pixel curated for emotional resonance." },
+              { icon: <Target size={16} />, title: "Focus", desc: "Unwavering commitment to our user ecosystem." },
             ].map((item, index) => (
               <motion.div
                 key={index}
                 variants={fadeInUp}
-                className="bg-white p-10 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-500 group"
+                className="bg-white/[0.03] backdrop-blur-3xl border border-white/10 p-8 rounded-2xl hover:bg-emerald-600/10 hover:border-emerald-500/50 transition-all duration-700 group"
               >
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 mb-8 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 mb-6 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-black transition-all duration-500 shadow-xl shadow-emerald-500/5">
                   {item.icon}
                 </div>
-                <h3 className="text-2xl font-black text-black mb-4">{item.title}</h3>
-                <p className="text-gray-500 font-medium">{item.desc}</p>
+                <h3 className="text-base font-black text-white mb-3 uppercase tracking-tight">{item.title}</h3>
+                <p className="text-gray-400 font-medium leading-relaxed text-[11px]">{item.desc}</p>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section - Cinematic Footer */}
       <motion.section
         {...fadeInUp}
-        className="py-32 bg-white relative overflow-hidden"
+        className="py-24 bg-white relative"
       >
-        <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
-          <span className="text-blue-600 font-black uppercase tracking-[0.4em] text-[11px] mb-6 block">Join The Revolution</span>
-          <h2 className="text-5xl md:text-8xl font-black tracking-tighter mb-10 text-black">Ready to Start?</h2>
-          <p className="text-gray-500 text-xl mb-14 font-medium leading-relaxed">
-            Experience the next generation of e-commerce. Browse our collections or get in touch with our diverse team.
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <span className="text-emerald-600 font-black uppercase tracking-[0.4em] text-[9px] mb-6 block">Initiate Engagement</span>
+          <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-10 text-black leading-[0.85]">
+            SHAPE THE <br /> <span className="text-gray-200">TOMORROW.</span>
+          </h2>
+          <p className="text-gray-400 text-sm md:text-base mb-12 font-medium leading-relaxed max-w-2xl mx-auto tracking-tight">
+            Collaborate with the guild of specialists redefining the vanguard of digital commerce.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/products"
-              className="group relative inline-flex items-center px-12 py-6 bg-black text-white rounded-full font-black uppercase tracking-[0.3em] text-[12px] overflow-hidden transition-all duration-500 hover:scale-105 shadow-2xl"
+              className="group relative inline-flex items-center px-8 py-4 bg-black text-white rounded-xl font-black uppercase tracking-[0.3em] text-[9px] overflow-hidden transition-all duration-500 hover:scale-105 shadow-2xl shadow-emerald-900/10"
             >
               <span className="relative z-10 flex items-center">
-                Shop Now <ArrowRight className="ml-4 group-hover:translate-x-2 transition-transform" size={18} />
+                Access Gallery <ArrowRight className="ml-3 group-hover:translate-x-2 transition-transform" size={12} />
               </span>
-              <div className="absolute inset-0 bg-blue-600 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-in-out"></div>
+              <div className="absolute inset-0 bg-emerald-600 -translate-x-full group-hover:translate-x-0 transition-transform duration-700 ease-[0.16, 1, 0.3, 1]"></div>
             </Link>
 
             <Link
               href="/contact"
-              className="group relative inline-flex items-center px-12 py-6 bg-white border-2 border-black text-black rounded-full font-black uppercase tracking-[0.3em] text-[12px] overflow-hidden transition-all duration-500 hover:scale-105"
+              className="group relative inline-flex items-center px-8 py-4 bg-white border-2 border-black text-black rounded-xl font-black uppercase tracking-[0.3em] text-[9px] overflow-hidden transition-all duration-500 hover:scale-105"
             >
-              <span className="relative z-10 flex items-center">
-                Contact Us
+              <span className="relative z-10">
+                Secure Inquiry
               </span>
             </Link>
           </div>
         </div>
-
-        {/* Decorative elements */}
-        <div className="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-blue-50/50 rounded-full blur-[100px]"></div>
-        <div className="absolute bottom-0 right-0 translate-y-1/2 translate-x-1/2 w-[500px] h-[500px] bg-purple-50/50 rounded-full blur-[100px]"></div>
       </motion.section>
     </div>
   );

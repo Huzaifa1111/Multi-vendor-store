@@ -3,8 +3,7 @@ import { Inter, Jost, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
 import { WishlistProvider } from '@/lib/WishlistContext';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import MainLayout from '@/components/layout/MainLayout';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const jost = Jost({ subsets: ['latin'], variable: '--font-jost' });
@@ -29,11 +28,9 @@ export default function RootLayout({
       <body className={`${plusJakartaSans.className} ${plusJakartaSans.variable} ${jost.variable} ${inter.variable}`}>
         <AuthProvider>
           <WishlistProvider>
-            <Header />
-            <main className="min-h-screen pt-20">
+            <MainLayout>
               {children}
-            </main>
-            <Footer />
+            </MainLayout>
           </WishlistProvider>
         </AuthProvider>
       </body>

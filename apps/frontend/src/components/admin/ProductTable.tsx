@@ -117,7 +117,7 @@ export default function ProductTable({ products, loading = false, onDelete }: Pr
                   </td>
                   <td className="px-6 py-5">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
-                      {product.category || 'N/A'}
+                      {typeof product.category === 'object' ? product.category.name : (product.category || 'N/A')}
                     </span>
                   </td>
                   <td className="px-6 py-5 text-sm font-black text-gray-900">
@@ -212,7 +212,7 @@ export default function ProductTable({ products, loading = false, onDelete }: Pr
                   <p className="text-xs text-gray-500 line-clamp-1 mb-2">{product.description}</p>
                   <div className="flex flex-wrap gap-2">
                     <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold uppercase tracking-wide">
-                      {product.category || 'N/A'}
+                      {typeof product.category === 'object' ? product.category.name : (product.category || 'N/A')}
                     </span>
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${getStockColor(formatStock(product.stock))}`}>
                       {formatStock(product.stock)} Left

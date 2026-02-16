@@ -8,6 +8,7 @@ export interface Variation {
   sku: string;
   price: number;
   stock: number;
+  attributeValues: any[];
 }
 
 export interface Product {
@@ -19,7 +20,7 @@ export interface Product {
   stock: number;
   image: string | null;
   images?: string[];
-  category?: string;
+  category?: string | { id: number; name: string };
   featured?: boolean;
   createdAt: string;
   updatedAt: string;
