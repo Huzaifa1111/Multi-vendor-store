@@ -5,12 +5,14 @@ import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AdminService } from '../admin/admin.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private adminService: AdminService,
   ) { }
 
   async findAll(): Promise<User[]> {
@@ -38,7 +40,12 @@ export class UsersService {
       createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
     }
     const user = this.usersRepository.create(createUserDto);
-    return this.usersRepository.save(user);
+    const savedUser = await this.usersRepository.save(user);
+
+    // Trigger real-time analytics update
+    this.adminService.notifyAnalyticsUpdate();
+
+    return savedUser;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {

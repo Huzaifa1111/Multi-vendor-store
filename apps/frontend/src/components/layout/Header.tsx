@@ -10,6 +10,8 @@ import { authService } from '@/services/auth.service';
 import { useCart } from '@/hooks/useCart';
 import { useWishlist } from '@/lib/WishlistContext';
 
+import { categoryService } from '@/services/category.service';
+
 import {
   Search,
   User,
@@ -24,6 +26,11 @@ import {
   ArrowRight
 } from 'lucide-react';
 
+interface Category {
+  id: number;
+  name: string;
+}
+
 export default function Header() {
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuth();
@@ -32,6 +39,19 @@ export default function Header() {
   const dropdownRef = useClickOutside<HTMLDivElement>(() => setIsAccountOpen(false));
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await categoryService.getCategories();
+        setCategories(data);
+      } catch (err) {
+        console.error('Failed to fetch categories', err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Handle intersection/scroll logic
   const handleScroll = useCallback(() => {
@@ -79,24 +99,6 @@ export default function Header() {
 
   const { count } = useCart();
   const { items: wishlistItems } = useWishlist();
-
-
-  const categories = [
-    "Electronic Devices",
-    "Electronic Accessories",
-    "TV & Home Appliances",
-    "Health & Beauty",
-    "Babies & Toys",
-    "Groceries & Pets",
-    "Home & Lifestyle",
-    "Women's Fashion",
-    "Men's Fashion",
-    "Watches, Bags & Jewellery",
-    "Sports & Outdoor",
-    "Automotive & Motorbike",
-    "Stationery & Craft",
-    "Books & Magazines"
-  ];
 
   const navLinks = [
     { href: '/', label: 'Home' },
@@ -153,12 +155,12 @@ export default function Header() {
               <div className="absolute top-[100%] left-0 w-[800px] bg-white border border-gray-100 shadow-2xl rounded-2xl p-8 opacity-0 invisible group-hover/mega:opacity-100 group-hover/mega:visible transition-all duration-300 transform origin-top-left -translate-y-2 group-hover/mega:translate-y-0 grid grid-cols-3 gap-x-8 gap-y-2 z-[100]">
                 {categories.map((cat) => (
                   <Link
-                    key={cat}
-                    href={`/products?category=${cat.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`}
+                    key={cat.id}
+                    href={`/products?category=${cat.id}`}
                     className="flex items-center space-x-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
                   >
                     <div className="w-1.5 h-1.5 rounded-full bg-gray-200 group-hover:bg-emerald-600 transition-colors" />
-                    <span className="text-[14px] font-medium text-gray-600 group-hover:text-black transition-colors">{cat}</span>
+                    <span className="text-[14px] font-medium text-gray-600 group-hover:text-black transition-colors">{cat.name}</span>
                   </Link>
                 ))}
                 <div className="col-span-3 mt-4 pt-4 border-t border-gray-100">

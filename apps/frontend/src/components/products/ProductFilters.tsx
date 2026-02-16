@@ -4,12 +4,17 @@
 import { useState } from 'react';
 import { Filter, X } from 'lucide-react';
 
+interface Category {
+  id: number;
+  name: string;
+}
+
 interface ProductFiltersProps {
-  categories: string[];
-  selectedCategory?: string;
+  categories: Category[];
+  selectedCategory?: string | number;
   showFeaturedFilter?: boolean;
   onFilterChange: (filters: {
-    category?: string;
+    category?: string | number;
     featured?: boolean;
     minPrice?: number;
     maxPrice?: number;
@@ -33,8 +38,8 @@ export default function ProductFilters({
     onFilterChange({ search: value });
   };
 
-  const handleCategoryChange = (category: string) => {
-    onFilterChange({ category: category === 'all' ? undefined : category });
+  const handleCategoryChange = (categoryId: string | number) => {
+    onFilterChange({ category: categoryId === 'all' ? undefined : categoryId });
   };
 
   const handlePriceChange = () => {
@@ -103,12 +108,12 @@ export default function ProductFilters({
               </button>
               {categories.map((category) => (
                 <button
-                  key={category}
-                  onClick={() => handleCategoryChange(category)}
-                  className={`block w-full text-left px-5 py-3.5 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all ${selectedCategory === category ? 'bg-emerald-600 text-white shadow-[0_10px_20px_-5px_rgba(5,150,105,0.3)]' : 'text-gray-500 hover:text-emerald-600 hover:bg-emerald-50'}`}
+                  key={category.id}
+                  onClick={() => handleCategoryChange(category.id)}
+                  className={`block w-full text-left px-5 py-3.5 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all ${selectedCategory?.toString() === category.id.toString() ? 'bg-emerald-600 text-white shadow-[0_10px_20px_-5px_rgba(5,150,105,0.3)]' : 'text-gray-500 hover:text-emerald-600 hover:bg-emerald-50'}`}
                 >
                   <span className="flex items-center">
-                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                    {category.name}
                   </span>
                 </button>
               ))}

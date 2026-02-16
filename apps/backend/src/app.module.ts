@@ -14,6 +14,7 @@ import { EmailModule } from './modules/email/email.module';
 import { CartModule } from './modules/cart/cart.module';
 import { ContactModule } from './modules/contact/contact.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
+import { CategoriesModule } from './modules/categories/categories.module';
 import { createDatabaseIfNotExists } from 'dbsetup';
 
 
@@ -54,6 +55,7 @@ async function initDb() {
     CartModule,
     ContactModule,
     ReviewsModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

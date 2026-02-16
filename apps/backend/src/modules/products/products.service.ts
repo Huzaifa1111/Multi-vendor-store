@@ -7,6 +7,10 @@ import { ProductVariation } from './variation.entity';
 import { Brand } from '../brands/brand.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductFilterDto } from './dto/product-filter.dto';
+<<<<<<< HEAD
+=======
+import { Category } from '../categories/category.entity';
+>>>>>>> 221541e6fdbf0d393ceb818dab6c65a5d3209dce
 import { CloudinaryService } from '../uploads/cloudinary.service';
 import { Category } from '../categories/category.entity';
 
@@ -61,7 +65,11 @@ export class ProductsService {
       price: createProductDto.price,
       stock: createProductDto.stock,
       sku: createProductDto.sku,
+<<<<<<< HEAD
       category: await this.getOrCreateCategory(createProductDto.category || 'Uncategorized'),
+=======
+      category: createProductDto.categoryId ? { id: createProductDto.categoryId } as any : undefined,
+>>>>>>> 221541e6fdbf0d393ceb818dab6c65a5d3209dce
       featured: createProductDto.featured || false,
       images: imageUrls,
       descriptionImages: createProductDto.descriptionImages || [],
@@ -224,6 +232,10 @@ export class ProductsService {
     }
 
     updateData.images = imageUrls;
+
+    if (updateProductDto.categoryId !== undefined) {
+      updateData.category = updateProductDto.categoryId ? { id: updateProductDto.categoryId } : null;
+    }
 
     if (updateProductDto.descriptionImages !== undefined) {
       updateData.descriptionImages = updateProductDto.descriptionImages;
