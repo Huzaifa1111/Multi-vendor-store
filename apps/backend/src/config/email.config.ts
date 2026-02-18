@@ -1,12 +1,16 @@
 // apps/backend/src/config/email.config.ts
 export interface EmailConfig {
-  resendApiKey: string;
-  fromEmail: string;
-  fromName: string;
+  smtpHost: string;
+  smtpPort: number;
+  smtpUser: string;
+  smtpPass: string;
+  smtpFrom: string;
 }
 
 export const emailConfig = (): EmailConfig => ({
-  resendApiKey: process.env.RESEND_API_KEY || '',
-  fromEmail: process.env.EMAIL_FROM || 'noreply@yourdomain.com',
-  fromName: process.env.EMAIL_FROM_NAME || 'Store App',
+  smtpHost: process.env.SMTP_HOST || 'smtp.gmail.com',
+  smtpPort: parseInt(process.env.SMTP_PORT || '587', 10),
+  smtpUser: process.env.SMTP_USER || '',
+  smtpPass: process.env.SMTP_PASS || '',
+  smtpFrom: process.env.SMTP_FROM || '"Store App" <noreply@example.com>',
 });

@@ -20,11 +20,7 @@ export interface Product {
   stock: number;
   image: string | null;
   images?: string[];
-<<<<<<< HEAD
-  category?: string | { id: number; name: string };
-=======
   category?: { id: number; name: string };
->>>>>>> 221541e6fdbf0d393ceb818dab6c65a5d3209dce
   featured?: boolean;
   createdAt: string;
   updatedAt: string;

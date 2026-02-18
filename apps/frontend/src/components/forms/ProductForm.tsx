@@ -44,11 +44,7 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     longDescription: initialData?.longDescription || '',
     price: initialData?.price || 0,
     stock: initialData?.stock || 0,
-<<<<<<< HEAD
-    category: typeof initialData?.category === 'object' ? (initialData.category as any).name : initialData?.category,
-=======
     categoryId: (initialData as any)?.categoryId || '',
->>>>>>> 221541e6fdbf0d393ceb818dab6c65a5d3209dce
     featured: initialData?.featured || false,
     shippingPolicy: initialData?.shippingPolicy || '',
     returnPolicy: initialData?.returnPolicy || '',

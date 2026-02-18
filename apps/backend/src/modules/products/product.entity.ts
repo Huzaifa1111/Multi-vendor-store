@@ -24,11 +24,7 @@ export class Product {
   @Column('simple-array', { nullable: true })
   images: string[];
 
-<<<<<<< HEAD
-  @ManyToOne(() => Category, (category) => category.products, { nullable: true })
-=======
   @ManyToOne(() => Category, (category) => category.products, { nullable: true, onDelete: 'SET NULL' })
->>>>>>> 221541e6fdbf0d393ceb818dab6c65a5d3209dce
   category: Category;
 
   @Column({ default: false })

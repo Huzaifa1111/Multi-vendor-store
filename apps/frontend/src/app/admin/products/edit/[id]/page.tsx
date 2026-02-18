@@ -26,14 +26,10 @@ export default function EditProductPage() {
           longDescription: data.longDescription,
           price: data.price,
           stock: data.stock,
-<<<<<<< HEAD
-          category: data.category?.name || data.category,
+          categoryId: data.category?.id || '',
           featured: data.featured,
           shippingPolicy: data.shippingPolicy,
           returnPolicy: data.returnPolicy,
-=======
-          categoryId: data.category?.id || '',
->>>>>>> 221541e6fdbf0d393ceb818dab6c65a5d3209dce
         });
       } catch (error) {
         console.error('Error fetching product:', error);
