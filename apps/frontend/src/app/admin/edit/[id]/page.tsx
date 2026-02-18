@@ -60,7 +60,7 @@ export default function EditProductPage() {
           longDescription: data.longDescription || '',
           price: data.price,
           stock: data.stock,
-          category: data.category || '',
+          category: typeof data.category === 'object' ? data.category.name : (data.category || ''),
           featured: data.featured || false,
         });
 

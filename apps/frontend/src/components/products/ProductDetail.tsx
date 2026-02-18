@@ -209,7 +209,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="px-5 py-2 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-emerald-100/30">
-                      {typeof product.category === 'object' ? product.category.name : (product.category || 'Premium Series')}
+                      {(product.category && typeof product.category === 'object') ? product.category.name : (product.category || 'Premium Series')}
                     </span>
                     {product.brand && (
                       <span className="px-5 py-2 bg-gray-50 text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-gray-100">
