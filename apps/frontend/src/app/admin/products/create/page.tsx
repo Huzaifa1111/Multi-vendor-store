@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, UploadCloud, Image as ImageIcon, Check, Loader2, DollarSign, Package, Tag, Layers, Star, Plus, Trash2, Search, Link as LinkIcon, Sparkles, Scissors, Info } from 'lucide-react';
+import { ArrowLeft, UploadCloud, Image as ImageIcon, Check, Loader2, DollarSign, Package, Tag, Layers, Star, Plus, Trash2, Search, Link as LinkIcon, Sparkles, Scissors, Info, X } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import RichTextEditor from '@/components/admin/RichTextEditor';
@@ -77,10 +77,11 @@ export default function CreateProductPage() {
 
   // Attribute Management State
   const [useVariations, setUseVariations] = useState(false);
-  const [selectedAttributeValues, setSelectedAttributeValues] = useState<{ [key: string]: AttributeValue[] }>({
-    'Color': [],
-    'Size': []
-  });
+  const [attributes, setAttributes] = useState<{ name: string; values: AttributeValue[] }[]>([
+    { name: 'Color', values: [] },
+    { name: 'Size', values: [] },
+  ]);
+  const [newAttributeName, setNewAttributeName] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -187,14 +188,31 @@ export default function CreateProductPage() {
     setDescriptionImageUrls(prev => prev.filter((_, i) => i !== index));
   };
 
+  // Attribute Management
+  const addAttribute = () => {
+    const name = newAttributeName.trim();
+    if (!name) return;
+    if (attributes.find(a => a.name.toLowerCase() === name.toLowerCase())) return;
+    setAttributes(prev => [...prev, { name, values: [] }]);
+    setNewAttributeName('');
+  };
+
+  const removeAttribute = (index: number) => {
+    setAttributes(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateAttributeValues = (index: number, values: AttributeValue[]) => {
+    setAttributes(prev => prev.map((a, i) => i === index ? { ...a, values } : a));
+  };
+
   // Variation Logic
   const generateVariations = () => {
-    const attributes = Object.keys(selectedAttributeValues).filter(k => selectedAttributeValues[k].length > 0);
-    if (attributes.length === 0) return;
+    const activeAttrs = attributes.filter(a => a.values.length > 0);
+    if (activeAttrs.length === 0) return;
 
     const combinations: AttributeValue[][] = [[]];
-    for (const attr of attributes) {
-      const values = selectedAttributeValues[attr];
+    for (const attr of activeAttrs) {
+      const values = attr.values;
       const newCombinations: AttributeValue[][] = [];
       for (const combo of combinations) {
         for (const val of values) {
@@ -540,25 +558,65 @@ export default function CreateProductPage() {
               <div className="space-y-8 animate-in fade-in slide-in-from-top-4 duration-500">
                 {/* Attribute Selection */}
                 <div className="p-6 bg-gray-50/50 rounded-2xl border border-gray-100 space-y-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Scissors className="text-indigo-500" size={18} />
-                    <h3 className="font-bold text-gray-900">Define Attributes</h3>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Scissors className="text-indigo-500" size={18} />
+                      <h3 className="font-bold text-gray-900">Define Attributes</h3>
+                    </div>
+                    <span className="text-xs text-gray-400 font-medium">{attributes.length} attribute{attributes.length !== 1 ? 's' : ''}</span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <AttributeSelector
-                      attributeName="Color"
-                      selectedValues={selectedAttributeValues['Color']}
-                      onChange={(vals) => setSelectedAttributeValues({ ...selectedAttributeValues, 'Color': vals })}
-                    />
-                    <AttributeSelector
-                      attributeName="Size"
-                      selectedValues={selectedAttributeValues['Size']}
-                      onChange={(vals) => setSelectedAttributeValues({ ...selectedAttributeValues, 'Size': vals })}
-                    />
+                  {/* Attribute rows */}
+                  <div className="space-y-4">
+                    {attributes.map((attr, idx) => (
+                      <div key={idx} className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-indigo-400" />
+                            {attr.name}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeAttribute(idx)}
+                            className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                            title={`Remove ${attr.name}`}
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                        <AttributeSelector
+                          attributeName={attr.name}
+                          selectedValues={attr.values}
+                          onChange={(vals) => updateAttributeValues(idx, vals)}
+                        />
+                      </div>
+                    ))}
                   </div>
 
-                  <div className="flex justify-end pt-4">
+                  {/* Add new attribute */}
+                  <div className="flex gap-3 pt-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                      <input
+                        type="text"
+                        value={newAttributeName}
+                        onChange={(e) => setNewAttributeName(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addAttribute(); } }}
+                        placeholder="Add new attribute (e.g. Material, Storage...)"
+                        className="w-full pl-10 pr-4 py-3 bg-white border border-dashed border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all text-sm font-medium placeholder:text-gray-400"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={addAttribute}
+                      disabled={!newAttributeName.trim()}
+                      className="px-5 py-3 bg-indigo-50 text-indigo-600 rounded-xl font-bold hover:bg-indigo-100 transition-colors flex items-center gap-2 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <Plus size={16} /> Add
+                    </button>
+                  </div>
+
+                  <div className="flex justify-end pt-2">
                     <button
                       type="button"
                       onClick={generateVariations}

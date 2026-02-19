@@ -26,6 +26,15 @@ export class Order {
   user: User;
 
   @Column('decimal', { precision: 10, scale: 2 })
+  subtotal: number;
+
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  shippingFee: number;
+
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  tax: number;
+
+  @Column('decimal', { precision: 10, scale: 2 })
   total: number;
 
   @Column({

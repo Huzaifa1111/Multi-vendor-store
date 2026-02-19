@@ -235,4 +235,13 @@ export class AdminService {
 
     return updated;
   }
+
+  async getPublicSettings() {
+    const settings = await this.getSettings();
+    return {
+      taxRate: Number(settings.taxRate) || 0,
+      shippingFee: Number(settings.shippingFee) || 0,
+      currency: settings.currency || 'USD',
+    };
+  }
 }

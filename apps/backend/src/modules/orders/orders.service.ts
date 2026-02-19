@@ -8,6 +8,8 @@ import { CartService } from '../cart/cart.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { StripeService } from './stripe.service';
 import { AdminService } from '../admin/admin.service';
+import { Settings } from '../admin/settings.entity';
+
 
 @Injectable()
 export class OrdersService {
@@ -18,10 +20,24 @@ export class OrdersService {
     private orderRepository: Repository<Order>,
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
+    @InjectRepository(Settings)
+    private settingsRepository: Repository<Settings>,
     private cartService: CartService,
     private stripeService: StripeService,
     private adminService: AdminService,
   ) { }
+
+  private async getSettings(): Promise<{ taxRate: number; shippingFee: number }> {
+    let settings = await this.settingsRepository.findOne({ where: { id: 1 } });
+    if (!settings) {
+      settings = this.settingsRepository.create({ id: 1 });
+      await this.settingsRepository.save(settings);
+    }
+    return {
+      taxRate: Number(settings.taxRate) || 0,
+      shippingFee: Number(settings.shippingFee) || 0,
+    };
+  }
 
   async createOrder(userId: number, createOrderDto: CreateOrderDto) {
     // Get cart items
@@ -31,10 +47,15 @@ export class OrdersService {
       throw new BadRequestException('Cart is empty. Please add items before checkout.');
     }
 
-    // Calculate total
-    const total = cartItems.reduce((sum, item) => {
+    // Calculate subtotal from cart items
+    const subtotal = cartItems.reduce((sum, item) => {
       return sum + (item.price * item.quantity);
     }, 0);
+
+    // Fetch live settings for tax and shipping
+    const { taxRate, shippingFee } = await this.getSettings();
+    const tax = parseFloat((subtotal * (taxRate / 100)).toFixed(2));
+    const total = parseFloat((subtotal + shippingFee + tax).toFixed(2));
 
     // Generate professional order number (e.g., ORD-20240210-ABCD)
     const date = new Date();
@@ -46,6 +67,9 @@ export class OrdersService {
     const order = this.orderRepository.create({
       userId,
       orderNumber,
+      subtotal,
+      shippingFee,
+      tax,
       total,
       shippingAddress: createOrderDto.shippingAddress,
       paymentMethod: createOrderDto.paymentMethod,
@@ -138,21 +162,23 @@ export class OrdersService {
       throw new BadRequestException('Cart is empty. Please add items before checkout.');
     }
 
-    const total = cartItems.reduce((sum, item) => {
+    const subtotal = cartItems.reduce((sum, item) => {
       return sum + (item.price * item.quantity);
     }, 0);
 
-    // console.log('=== CREATE PAYMENT INTENT ===');
-    // console.log('User ID:', userId);
-    // console.log('Cart Items Count:', cartItems.length);
-    // console.log('Calculated Total:', total);
+    // Fetch live settings for tax and shipping
+    const { taxRate, shippingFee } = await this.getSettings();
+    const tax = parseFloat((subtotal * (taxRate / 100)).toFixed(2));
+    const total = parseFloat((subtotal + shippingFee + tax).toFixed(2));
 
     try {
       const paymentIntent = await this.stripeService.createPaymentIntent(total);
-      // console.log('Payment Intent Created:', paymentIntent.id);
 
       return {
         clientSecret: paymentIntent.client_secret,
+        subtotal,
+        shippingFee,
+        tax,
         total,
       };
     } catch (error) {

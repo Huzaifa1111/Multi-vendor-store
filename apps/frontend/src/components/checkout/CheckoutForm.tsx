@@ -31,11 +31,31 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
     const [selectedAddressId, setSelectedAddressId] = useState<number | 'new'>('new');
     const [isFetchingAddresses, setIsFetchingAddresses] = useState(false);
 
-    const shippingCost = 5.99;
-    const tax = total * 0.1;
-    const grandTotal = total + shippingCost + tax;
+    // Dynamic settings from backend
+    const [shippingFee, setShippingFee] = useState(0);
+    const [taxRate, setTaxRate] = useState(0);
+    const [settingsLoaded, setSettingsLoaded] = useState(false);
+
+    const tax = parseFloat((total * (taxRate / 100)).toFixed(2));
+    const grandTotal = parseFloat((total + shippingFee + tax).toFixed(2));
 
     useEffect(() => {
+        // Fetch public settings (tax rate + shipping fee)
+        const fetchSettings = async () => {
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/admin/settings/public`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setShippingFee(Number(data.shippingFee) || 0);
+                    setTaxRate(Number(data.taxRate) || 0);
+                }
+            } catch (err) {
+                console.error('Failed to fetch settings:', err);
+            } finally {
+                setSettingsLoaded(true);
+            }
+        };
+
         const fetchAddresses = async () => {
             setIsFetchingAddresses(true);
             try {
@@ -53,6 +73,8 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
                 setIsFetchingAddresses(false);
             }
         };
+
+        fetchSettings();
         fetchAddresses();
     }, []);
 
@@ -336,11 +358,19 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500 font-medium">Shipping</span>
-                            <span className="font-bold text-gray-900">${shippingCost.toFixed(2)}</span>
+                            {settingsLoaded ? (
+                                <span className="font-bold text-gray-900">${shippingFee.toFixed(2)}</span>
+                            ) : (
+                                <span className="font-bold text-gray-400 animate-pulse">Loading...</span>
+                            )}
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-gray-500 font-medium">Tax</span>
-                            <span className="font-bold text-gray-900">${tax.toFixed(2)}</span>
+                            <span className="text-gray-500 font-medium">Tax ({taxRate}%)</span>
+                            {settingsLoaded ? (
+                                <span className="font-bold text-gray-900">${tax.toFixed(2)}</span>
+                            ) : (
+                                <span className="font-bold text-gray-400 animate-pulse">Loading...</span>
+                            )}
                         </div>
                     </div>
 

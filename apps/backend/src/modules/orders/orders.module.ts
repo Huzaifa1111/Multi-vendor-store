@@ -9,10 +9,11 @@ import { StripeService } from './stripe.service';
 import { OrderItem } from './order-item.entity';
 import { Brand } from '../brands/brand.entity';
 import { AdminModule } from '../admin/admin.module';
+import { Settings } from '../admin/settings.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Order, Product, OrderItem, Brand]),
+    TypeOrmModule.forFeature([Order, Product, OrderItem, Brand, Settings]),
     CartModule,
     AdminModule,
   ],

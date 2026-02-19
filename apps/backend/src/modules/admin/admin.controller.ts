@@ -3,6 +3,7 @@ import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -43,5 +44,11 @@ export class AdminController {
   @Patch('settings')
   async updateSettings(@Body() updateData: any) {
     return this.adminService.updateSettings(updateData);
+  }
+
+  @Public()
+  @Get('settings/public')
+  async getPublicSettings() {
+    return this.adminService.getPublicSettings();
   }
 }
