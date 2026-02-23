@@ -15,18 +15,38 @@ import {
     Truck,
     XCircle,
     ShoppingBag,
-    Loader2
+    Loader2,
+    FileText,
+    Download
 } from 'lucide-react';
 import Link from 'next/link';
 import { ordersService } from '@/services/orders.service';
+import { generateInvoice } from '@/utils/InvoiceGenerator';
+
+interface OrderItem {
+    id: number;
+    quantity: number;
+    price: number;
+    product: {
+        id: number;
+        name: string;
+        images: string[];
+        price: number;
+    };
+}
 
 interface Order {
     id: number;
     orderNumber: string;
+    subtotal: number;
+    shippingFee: number;
+    tax: number;
     total: number;
     status: string;
     createdAt: string;
-    items?: any[];
+    items: OrderItem[];
+    paymentMethod?: string;
+    shippingAddress?: string;
 }
 
 const containerVariants = {
@@ -191,9 +211,22 @@ export default function MyOrdersPage() {
                                                         </p>
                                                     </div>
 
-                                                    <div className="hidden sm:block pl-4 border-l border-gray-100">
-                                                        <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-black group-hover:text-white transition-all">
-                                                            <ChevronRight size={20} />
+                                                    <div className="flex items-center gap-3">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                generateInvoice(order);
+                                                            }}
+                                                            className="p-3 bg-gray-50 text-gray-400 rounded-xl hover:bg-gray-100 hover:text-blue-600 transition-all active:scale-90"
+                                                            title="Download Invoice"
+                                                        >
+                                                            <FileText size={20} />
+                                                        </button>
+                                                        <div className="hidden sm:block pl-4 border-l border-gray-100">
+                                                            <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-black group-hover:text-white transition-all">
+                                                                <ChevronRight size={20} />
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>

@@ -16,11 +16,14 @@ import {
     MapPin,
     CreditCard,
     ShoppingBag,
-    Loader2
+    Loader2,
+    FileText,
+    Download
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ordersService } from '@/services/orders.service';
+import { generateInvoice } from '@/utils/InvoiceGenerator';
 
 interface OrderItem {
     id: number;
@@ -37,6 +40,9 @@ interface OrderItem {
 interface Order {
     id: number;
     orderNumber: string;
+    subtotal: number;
+    shippingFee: number;
+    tax: number;
     total: number;
     status: string;
     createdAt: string;
@@ -162,6 +168,17 @@ export default function OrderDetailPage() {
                         })}
                     </p>
                 </div>
+
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => order && generateInvoice(order)}
+                        className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-100 rounded-2xl font-bold text-sm text-gray-900 hover:bg-gray-50 active:scale-95 transition-all shadow-sm group"
+                    >
+                        <FileText size={18} className="text-gray-400 group-hover:text-blue-600 transition-colors" />
+                        Download Invoice
+                        <Download size={14} className="text-gray-300 ml-1" />
+                    </button>
+                </div>
             </motion.div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -246,6 +263,6 @@ export default function OrderDetailPage() {
                     </motion.div>
                 </div>
             </div>
-        </motion.div>
+        </motion.div >
     );
 }
