@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { addressesService, Address as SavedAddress } from '@/services/addresses.service';
 import { Home, Briefcase, MapPin, Loader2, Check, CreditCard, Banknote, ShieldCheck, ArrowRight, Package } from 'lucide-react';
+import { useAuth } from '@/lib/auth';
 import { useCart } from '@/hooks/useCart';
 import { resolveProductImage } from '@/lib/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,17 +25,27 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
     const [email, setEmail] = useState('');
     const [address, setAddress] = useState('');
     const [city, setCity] = useState('');
+    const [state, setState] = useState('');
+    const [zipCode, setZipCode] = useState('');
+    const [country, setCountry] = useState('Pakistan');
     const [paymentMethod, setPaymentMethod] = useState('stripe');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
     const [selectedAddressId, setSelectedAddressId] = useState<number | 'new'>('new');
     const [isFetchingAddresses, setIsFetchingAddresses] = useState(false);
+    const { user } = useAuth();
 
     // Dynamic settings from backend
     const [shippingFee, setShippingFee] = useState(0);
     const [taxRate, setTaxRate] = useState(0);
     const [settingsLoaded, setSettingsLoaded] = useState(false);
+
+    useEffect(() => {
+        if (user?.email) {
+            setEmail(user.email);
+        }
+    }, [user]);
 
     const tax = parseFloat((total * (taxRate / 100)).toFixed(2));
     const grandTotal = parseFloat((total + shippingFee + tax).toFixed(2));
@@ -83,11 +94,17 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
         if (id === 'new') {
             setAddress('');
             setCity('');
+            setState('');
+            setZipCode('');
+            setCountry('Pakistan');
         } else {
             const addr = savedAddresses.find(a => a.id === id);
             if (addr) {
                 setAddress(addr.street);
                 setCity(addr.city);
+                setState(addr.state || '');
+                setZipCode(addr.zipCode);
+                setCountry(addr.country);
             }
         }
     };
@@ -102,7 +119,7 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
         setIsLoading(true);
         setErrorMessage(null);
 
-        const shippingAddress = `${address}, ${city}`;
+        const shippingAddress = `${address}, ${city}, ${state}, ${zipCode}, ${country}`;
         localStorage.setItem('shippingAddress', shippingAddress);
 
         if (paymentMethod === 'stripe') {
@@ -215,18 +232,19 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
                                 placeholder="your@email.com"
                             />
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="md:col-span-2">
-                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Street Address</label>
-                                <input
-                                    type="text"
-                                    required
-                                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 font-medium focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder:text-gray-400"
-                                    value={address}
-                                    onChange={(e) => setAddress(e.target.value)}
-                                    placeholder="123 Luxury Blvd"
-                                />
-                            </div>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Street Address</label>
+                            <input
+                                type="text"
+                                required
+                                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 font-medium focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder:text-gray-400"
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
+                                placeholder="123 Luxury Blvd"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">City</label>
                                 <input
@@ -236,6 +254,42 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
                                     value={city}
                                     onChange={(e) => setCity(e.target.value)}
                                     placeholder="New York"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Zip / Postal Code</label>
+                                <input
+                                    type="text"
+                                    required
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 font-medium focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder:text-gray-400"
+                                    value={zipCode}
+                                    onChange={(e) => setZipCode(e.target.value)}
+                                    placeholder="10001"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">State / Province</label>
+                                <input
+                                    type="text"
+                                    required
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 font-medium focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder:text-gray-400"
+                                    value={state}
+                                    onChange={(e) => setState(e.target.value)}
+                                    placeholder="NY"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Country</label>
+                                <input
+                                    type="text"
+                                    required
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 font-medium focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all placeholder:text-gray-400"
+                                    value={country}
+                                    onChange={(e) => setCountry(e.target.value)}
+                                    placeholder="Pakistan"
                                 />
                             </div>
                         </div>
@@ -334,14 +388,14 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
                             <div key={item.id} className="flex gap-4 items-center">
                                 <div className="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden border border-gray-100 shrink-0">
                                     <img
-                                        src={resolveProductImage(item.product?.images || item.product?.image)}
+                                        src={resolveProductImage(item.product?.images || item.product?.image || null)}
                                         alt={item.product?.name}
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <h4 className="text-sm font-bold text-gray-900 truncate">{item.product?.name}</h4>
-                                    <p className="text-xs text-gray-400 mb-1">{item.product?.brand?.name || 'Collection'}</p>
+                                    <p className="text-xs text-gray-400 mb-1">{(item.product as any)?.brand?.name || 'Collection'}</p>
                                     <div className="flex justify-between items-center">
                                         <span className="text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded text-gray-600">Qty: {item.quantity}</span>
                                         <span className="text-sm font-bold text-gray-900">${(Number(item.price) * item.quantity).toFixed(2)}</span>

@@ -41,6 +41,14 @@ async function initDb() {
           logging: false,
           migrationsRun: false,
           autoLoadEntities: true,
+          retryAttempts: 10,
+          retryDelay: 3000,
+          extra: {
+            // Added to handle remote ECONNRESET
+            connectTimeout: 20000,
+            enableKeepAlive: true,
+            keepAliveDelay: 10000,
+          }
         }
       },
     }),

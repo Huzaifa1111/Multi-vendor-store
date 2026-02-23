@@ -1,30 +1,38 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
-import { emailConfig } from '../../config/email.config';
 
 @Injectable()
 export class EmailService {
   private transporter: nodemailer.Transporter;
   private readonly logger = new Logger(EmailService.name);
 
-  constructor() {
-    const config = emailConfig();
+  constructor(private configService: ConfigService) {
     this.transporter = nodemailer.createTransport({
-      host: config.smtpHost,
-      port: config.smtpPort,
-      secure: false, // true for 465, false for other ports
+      host: this.configService.get<string>('SMTP_HOST'),
+      port: this.configService.get<number>('SMTP_PORT'),
+      secure: this.configService.get<number>('SMTP_PORT') === 465, // true for 465, false for other ports
       auth: {
-        user: config.smtpUser,
-        pass: config.smtpPass,
+        user: this.configService.get<string>('SMTP_USER'),
+        pass: this.configService.get<string>('SMTP_PASS'),
       },
+    });
+
+    // Verify connection on startup
+    this.transporter.verify((error) => {
+      if (error) {
+        this.logger.error('SMTP Connection Error:', error);
+      } else {
+        this.logger.log('SMTP Server is ready to take messages');
+      }
     });
   }
 
   async sendOtpEmail(to: string, name: string, otp: string) {
-    const config = emailConfig();
+    const from = this.configService.get<string>('SMTP_FROM');
     try {
       const info = await this.transporter.sendMail({
-        from: config.smtpFrom,
+        from,
         to,
         subject: 'Your OTP Code',
         html: `<p>Hi ${name},</p><p>Your OTP code is: <strong>${otp}</strong></p>`,
@@ -38,10 +46,10 @@ export class EmailService {
   }
 
   async sendOrderConfirmation(to: string, name: string, orderId: string, orderDetails: any) {
-    const config = emailConfig();
+    const from = this.configService.get<string>('SMTP_FROM');
     try {
       const info = await this.transporter.sendMail({
-        from: config.smtpFrom,
+        from,
         to,
         subject: `Order Confirmation #${orderId}`,
         html: `<p>Hi ${name},</p><p>Thank you for your order #${orderId}.</p><p>We will notify you when it ships.</p>`,

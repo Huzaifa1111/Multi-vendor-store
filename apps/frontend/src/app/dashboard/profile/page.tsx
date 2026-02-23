@@ -68,7 +68,8 @@ export default function ProfilePage() {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:3001/uploads/image', {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+            const response = await fetch(`${API_URL}/uploads/image`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`
