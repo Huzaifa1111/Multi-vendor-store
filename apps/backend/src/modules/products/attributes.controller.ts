@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Delete, Param } from '@nestjs/common';
 import { AttributesService } from './attributes.service';
 
 @Controller('attributes')
@@ -8,6 +8,16 @@ export class AttributesController {
     @Get()
     async findAll() {
         return this.attributesService.findAll();
+    }
+
+    @Post()
+    async create(@Body() body: { name: string }) {
+        return this.attributesService.create(body.name);
+    }
+
+    @Delete(':id')
+    async remove(@Param('id') id: string) {
+        return this.attributesService.remove(parseInt(id));
     }
 
     @Get('values')

@@ -46,6 +46,7 @@ export interface CreateProductData {
   shippingPolicy?: string;
   returnPolicy?: string;
   descriptionImages?: string[];
+  variations?: any[];
 }
 
 export interface UpdateProductData extends Partial<CreateProductData> { }
@@ -111,6 +112,9 @@ class ProductService {
     if (productData.longDescription) formData.append('longDescription', productData.longDescription);
     if (productData.shippingPolicy) formData.append('shippingPolicy', productData.shippingPolicy);
     if (productData.returnPolicy) formData.append('returnPolicy', productData.returnPolicy);
+    if (productData.variations) {
+      formData.append('variations', JSON.stringify(productData.variations));
+    }
 
     const response = await api.post('/products', formData, {
       headers: {
@@ -144,6 +148,9 @@ class ProductService {
     if (productData.longDescription) formData.append('longDescription', productData.longDescription);
     if (productData.shippingPolicy) formData.append('shippingPolicy', productData.shippingPolicy);
     if (productData.returnPolicy) formData.append('returnPolicy', productData.returnPolicy);
+    if (productData.variations) {
+      formData.append('variations', JSON.stringify(productData.variations));
+    }
 
     const response = await api.patch(`/products/${id}`, formData, {
       headers: {

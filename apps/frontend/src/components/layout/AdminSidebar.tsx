@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Home,
   Package,
@@ -13,13 +15,21 @@ import {
   Shield,
   PlusCircle,
   ArrowLeft,
-  Mail
+  Mail,
+  ChevronDown
 } from 'lucide-react';
 
 const navItems = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: Home },
-  { href: '/admin/products', label: 'Products', icon: Package },
-  { href: '/admin/products/create', label: 'Add Product', icon: PlusCircle },
+  {
+    label: 'Products',
+    icon: Package,
+    children: [
+      { href: '/admin/products', label: 'All Products' },
+      { href: '/admin/products/create', label: 'Add Product' },
+      { href: '/admin/products/variations', label: 'Variations' },
+    ]
+  },
   { href: '/admin/categories', label: 'Categories', icon: Folder },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { href: '/admin/messages', label: 'Messages', icon: Mail },
@@ -30,6 +40,15 @@ const navItems = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const [openMenus, setOpenMenus] = useState<string[]>(['Products']);
+
+  const toggleMenu = (label: string) => {
+    setOpenMenus(prev =>
+      prev.includes(label)
+        ? prev.filter(m => m !== label)
+        : [...prev, label]
+    );
+  };
 
   return (
     <aside className="w-full lg:w-72 flex-shrink-0">
@@ -50,7 +69,58 @@ export default function AdminSidebar() {
         <nav className="p-4 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+            const hasChildren = 'children' in item;
+            const isOpen = openMenus.includes(item.label);
+            const isActive = !hasChildren && (pathname === item.href || pathname?.startsWith(item.href + '/'));
+            const isChildActive = hasChildren && item.children?.some(child => pathname === child.href || pathname?.startsWith(child.href + '/'));
+
+            if (hasChildren) {
+              return (
+                <div key={item.label} className="space-y-1">
+                  <button
+                    onClick={() => toggleMenu(item.label)}
+                    className={`w-full flex items-center justify-between px-4 py-3.5 text-sm font-bold rounded-xl transition-all duration-200 group ${isChildActive || isOpen
+                      ? 'bg-gray-50 text-black'
+                      : 'text-gray-500 hover:bg-gray-50 hover:text-black'
+                      }`}
+                  >
+                    <div className="flex items-center">
+                      <Icon className={`w-5 h-5 mr-3 transition-colors ${isChildActive || isOpen ? 'text-black' : 'text-gray-400 group-hover:text-black'}`} />
+                      {item.label}
+                    </div>
+                    <ChevronDown size={14} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  <AnimatePresence>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden bg-gray-50/50 rounded-xl mt-1"
+                      >
+                        {item.children?.map((child) => {
+                          const isSubActive = pathname === child.href || pathname?.startsWith(child.href + '/');
+                          return (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              className={`flex items-center pl-12 pr-4 py-3 text-xs font-bold transition-all duration-200 ${isSubActive
+                                ? 'text-indigo-600'
+                                : 'text-gray-500 hover:text-black'
+                                }`}
+                            >
+                              <div className={`w-1.5 h-1.5 rounded-full mr-3 transition-all ${isSubActive ? 'bg-indigo-600 scale-125' : 'bg-gray-300'}`} />
+                              {child.label}
+                            </Link>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            }
 
             return (
               <Link

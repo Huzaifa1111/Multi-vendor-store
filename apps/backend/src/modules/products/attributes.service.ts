@@ -16,6 +16,17 @@ export class AttributesService {
         return this.attributeRepository.find({ relations: ['values'] });
     }
 
+    async create(name: string) {
+        const attribute = this.attributeRepository.create({ name });
+        return this.attributeRepository.save(attribute);
+    }
+
+    async remove(id: number) {
+        const attribute = await this.attributeRepository.findOne({ where: { id } });
+        if (!attribute) throw new NotFoundException('Attribute not found');
+        return this.attributeRepository.remove(attribute);
+    }
+
     async findValuesByAttribute(attributeName: string, query?: string) {
         const attribute = await this.attributeRepository.findOne({
             where: { name: attributeName },

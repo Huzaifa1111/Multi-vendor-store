@@ -85,8 +85,6 @@ export default function AttributeSelector({ attributeName, selectedValues, onCha
 
     return (
         <div className="space-y-3">
-            <label className="block text-sm font-bold text-gray-700">{attributeName}</label>
-
             <div className="relative">
                 <div className="flex gap-2">
                     <div className="relative flex-1">
@@ -134,9 +132,9 @@ export default function AttributeSelector({ attributeName, selectedValues, onCha
 
             <div className="flex flex-wrap gap-2">
                 {selectedValues.map(val => (
-                    <span key={val.id} className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-100">
+                    <span key={val.id} className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold border border-indigo-100">
                         {val.value}
-                        <button type="button" onClick={() => toggleValue(val)} className="hover:text-blue-900">
+                        <button type="button" onClick={() => toggleValue(val)} className="hover:text-indigo-900 transition-colors">
                             <X size={14} />
                         </button>
                     </span>

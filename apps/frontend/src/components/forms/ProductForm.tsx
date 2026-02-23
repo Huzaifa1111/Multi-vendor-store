@@ -4,8 +4,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import productService, { CreateProductData } from '@/services/product.service';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Layers, Plus, Sparkles, Search } from 'lucide-react';
 import RichTextEditor from '../admin/RichTextEditor';
+import AttributeSelector from '../admin/AttributeSelector';
+import VariationEditor from '../admin/VariationEditor';
+import { motion, AnimatePresence } from 'framer-motion';
+import api from '@/lib/api';
 
 interface ProductFormProps {
   initialData?: CreateProductData & { id?: number; featured?: boolean };
@@ -48,7 +52,38 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     featured: initialData?.featured || false,
     shippingPolicy: initialData?.shippingPolicy || '',
     returnPolicy: initialData?.returnPolicy || '',
+    variations: initialData?.variations || [],
   });
+
+  const [isVariable, setIsVariable] = useState(initialData?.variations && initialData.variations.length > 0);
+  const [attributes, setAttributes] = useState<{ name: string; values: { id: number; value: string }[] }[]>([
+    { name: 'Size', values: [] },
+    { name: 'Color', values: [] }
+  ]);
+  const [newAttributeInput, setNewAttributeInput] = useState('');
+  const [newAttributeValues, setNewAttributeValues] = useState('');
+  const [globalAttributes, setGlobalAttributes] = useState<{ id: number; name: string }[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [focusedSuggestionIndex, setFocusedSuggestionIndex] = useState(-1);
+
+  const filteredSuggestions = globalAttributes.filter(attr =>
+    newAttributeInput &&
+    attr.name.toLowerCase().includes(newAttributeInput.toLowerCase()) &&
+    !attributes.find(a => a.name.toLowerCase() === attr.name.toLowerCase()) &&
+    attr.name.toLowerCase() !== newAttributeInput.toLowerCase()
+  );
+
+  useEffect(() => {
+    const fetchGlobalAttributes = async () => {
+      try {
+        const res = await api.get('/attributes');
+        setGlobalAttributes(res.data);
+      } catch (err) {
+        console.error('Failed to fetch global attributes', err);
+      }
+    };
+    fetchGlobalAttributes();
+  }, []);
 
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -124,6 +159,69 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleUpdateAttribute = (index: number, values: { id: number; value: string }[]) => {
+    const newAttrs = [...attributes];
+    newAttrs[index].values = values;
+    setAttributes(newAttrs);
+  };
+
+  const handleAddAttribute = () => {
+    if (!newAttributeInput.trim()) return;
+    const trimmedName = newAttributeInput.trim();
+    if (attributes.find(a => a.name.toLowerCase() === trimmedName.toLowerCase())) {
+      alert('Attribute already exists');
+      return;
+    }
+
+    // Process initial values if any
+    const initialValues = newAttributeValues.split(',')
+      .map(v => v.trim())
+      .filter(Boolean)
+      .map((v, i) => ({ id: -(Date.now() + i), value: v }));
+
+    setAttributes([...attributes, { name: trimmedName, values: initialValues }]);
+    setNewAttributeInput('');
+    setNewAttributeValues('');
+  };
+
+  const handleRemoveAttribute = (index: number) => {
+    if (confirm('Are you sure you want to remove this attribute?')) {
+      setAttributes(attributes.filter((_, i) => i !== index));
+    }
+  };
+
+  const generateCombinations = () => {
+    const activeAttributes = attributes.filter(a => a.values.length > 0);
+    if (activeAttributes.length === 0) return;
+
+    let combos: any[][] = [[]];
+    activeAttributes.forEach(attr => {
+      const nextCombos: any[][] = [];
+      combos.forEach(combo => {
+        attr.values.forEach(val => {
+          nextCombos.push([...combo, { id: val.id, value: val.value, attribute: { name: attr.name } }]);
+        });
+      });
+      combos = nextCombos;
+    });
+
+    const newVariations = combos.map(combo => ({
+      sku: `${formData.name.substring(0, 3).toUpperCase()}-${combo.map(c => c.value.substring(0, 3).toUpperCase()).join('-')}`,
+      price: formData.price,
+      stock: formData.stock,
+      inStock: true,
+      images: [],
+      isDefault: false,
+      attributeValues: combo,
+      attributeValueIds: combo.map(c => c.id)
+    }));
+
+    setFormData(prev => ({
+      ...prev,
+      variations: [...(prev.variations || []), ...newVariations]
+    }));
   };
 
   return (
@@ -301,6 +399,213 @@ export default function ProductForm({ initialData, isEditing = false }: ProductF
             Check this box to make this product appear in the featured section.
           </p>
         </div>
+      </div>
+
+      {/* Variable Product Toggle */}
+      <div className="bg-white border border-gray-100 rounded-[2rem] p-8 shadow-sm space-y-8 mt-8">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+              <Layers size={24} />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 leading-tight">Variable Product</h3>
+              <p className="text-sm text-gray-500 font-medium mt-1">Enable variations like size, color, etc.</p>
+            </div>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer group">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={isVariable}
+              onChange={(e) => setIsVariable(e.target.checked)}
+            />
+            <div className="w-14 h-8 bg-gray-100 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all after:shadow-sm peer-checked:bg-indigo-600 transition-colors"></div>
+          </label>
+        </div>
+
+        <AnimatePresence>
+          {isVariable && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="space-y-8 pt-6 border-t border-gray-50 overflow-hidden"
+            >
+              {/* Define Attributes */}
+              <div className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm relative group/card">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-indigo-50 rounded-xl text-indigo-500">
+                      <Search size={24} />
+                    </div>
+                    <h3 className="text-2xl font-extrabold text-gray-900 tracking-tight">Define Attributes</h3>
+                  </div>
+                  <span className="text-sm font-bold text-gray-400 bg-gray-50 px-3 py-1 rounded-full">{attributes.length} attributes</span>
+                </div>
+
+                {/* Main Search/Add Section from Screenshot */}
+                <div className="space-y-6">
+                  <div className="flex flex-col md:flex-row items-center gap-3">
+                    <div className="flex-1 relative group/search w-full">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within/search:text-indigo-400 transition-colors pointer-events-none">
+                        <Search size={22} />
+                      </div>
+                      <input
+                        type="text"
+                        value={newAttributeInput}
+                        onChange={(e) => {
+                          setNewAttributeInput(e.target.value);
+                          setShowSuggestions(true);
+                          setFocusedSuggestionIndex(-1);
+                        }}
+                        onFocus={() => setShowSuggestions(true)}
+                        placeholder="Add new attribute (e.g. Material, Storage...)"
+                        className="w-full pl-12 pr-4 py-4 bg-white border-2 border-dashed border-gray-100 rounded-[1.5rem] focus:border-indigo-100 focus:ring-4 focus:ring-indigo-50/20 shadow-sm transition-all text-sm font-medium text-gray-900 placeholder:text-gray-300"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            if (focusedSuggestionIndex >= 0) {
+                              setNewAttributeInput(filteredSuggestions[focusedSuggestionIndex].name);
+                              setShowSuggestions(false);
+                            } else {
+                              handleAddAttribute();
+                            }
+                          } else if (e.key === 'ArrowDown') {
+                            setFocusedSuggestionIndex(prev => Math.min(prev + 1, filteredSuggestions.length - 1));
+                          } else if (e.key === 'ArrowUp') {
+                            setFocusedSuggestionIndex(prev => Math.max(prev - 1, -1));
+                          } else if (e.key === 'Escape') {
+                            setShowSuggestions(false);
+                          }
+                        }}
+                      />
+
+                      {showSuggestions && filteredSuggestions.length > 0 && (
+                        <div className="absolute top-full left-0 w-full mt-3 bg-white border border-gray-100 shadow-2xl rounded-2xl overflow-hidden z-[100] py-2 ring-1 ring-black/5 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <div className="px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-50 mb-1">
+                            Existing Attributes
+                          </div>
+                          {filteredSuggestions.map((suggestion, idx) => (
+                            <button
+                              key={suggestion.id}
+                              type="button"
+                              onClick={() => {
+                                setNewAttributeInput(suggestion.name);
+                                setShowSuggestions(false);
+                              }}
+                              className={`w-full text-left px-4 py-3 text-sm font-bold transition-colors flex items-center justify-between ${focusedSuggestionIndex === idx ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                            >
+                              {suggestion.name}
+                              <span className="text-[10px] text-gray-400 font-medium">From database</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddAttribute}
+                      disabled={!newAttributeInput.trim()}
+                      className="w-full md:w-auto flex items-center justify-center gap-2 px-10 py-4 bg-[#F8FAFF] text-indigo-300 rounded-[1.5rem] font-bold text-sm hover:bg-indigo-50 hover:text-indigo-600 active:scale-95 transition-all disabled:opacity-30 whitespace-nowrap"
+                    >
+                      <Plus size={24} />
+                      Add
+                    </button>
+                  </div>
+
+                  <div className="flex justify-center">
+                    <button
+                      type="button"
+                      onClick={generateCombinations}
+                      className="group flex items-center gap-3 px-10 py-4 bg-white border border-indigo-100 text-indigo-600 rounded-[1.5rem] font-bold text-sm hover:bg-indigo-50/50 active:scale-95 transition-all shadow-sm shadow-indigo-100/10"
+                    >
+                      <Sparkles size={22} className="text-indigo-400 group-hover:rotate-12 transition-transform" />
+                      Generate Combinations
+                    </button>
+                  </div>
+                </div>
+
+                {/* List of Added Attributes displayed below the main add bar */}
+                <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                  {attributes.map((attr, idx) => (
+                    <div key={idx} className="bg-white border border-gray-100 rounded-[2rem] p-6 group/attr hover:border-indigo-100 hover:shadow-xl hover:shadow-indigo-50/10 transition-all duration-300 shadow-sm">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-sm" />
+                          <span className="font-bold text-gray-900 text-lg tracking-tight">{attr.name}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveAttribute(idx)}
+                          className="text-gray-300 hover:text-red-500 p-2 opacity-0 group-hover/attr:opacity-100 hover:bg-red-50 rounded-full transition-all"
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
+                      <AttributeSelector
+                        attributeName={attr.name}
+                        selectedValues={attr.values}
+                        onChange={(vals) => handleUpdateAttribute(idx, vals)}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {showSuggestions && (
+                  <div className="fixed inset-0 z-[90]" onClick={() => setShowSuggestions(false)} />
+                )}
+              </div>
+
+              {/* Variations List */}
+              <div className="space-y-4 mt-12">
+                <div className="flex items-center justify-between px-2">
+                  <h4 className="font-bold text-gray-900">Variations ({formData.variations?.length || 0})</h4>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({
+                      ...prev,
+                      variations: [...(prev.variations || []), { sku: '', price: prev.price, stock: 0, inStock: true, images: [], isDefault: false, attributeValues: [] }]
+                    }))}
+                    className="text-indigo-600 font-bold text-sm flex items-center gap-1 hover:text-indigo-700 transition-colors"
+                  >
+                    <Plus size={16} /> Add Manually
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {formData.variations?.map((v, idx) => (
+                    <VariationEditor
+                      key={idx}
+                      variation={v}
+                      isSingle={formData.variations?.length === 1}
+                      onUpdate={(updated) => {
+                        const newVars = [...(formData.variations || [])];
+                        newVars[idx] = updated;
+                        setFormData(prev => ({ ...prev, variations: newVars }));
+                      }}
+                      onRemove={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          variations: prev.variations?.filter((_, i) => i !== idx)
+                        }));
+                      }}
+                    />
+                  ))}
+
+                  {(!formData.variations || formData.variations.length === 0) && (
+                    <div className="py-12 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 rounded-[2rem] bg-gray-50/30">
+                      <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-sm mb-4">
+                        <Layers className="text-gray-200" size={32} />
+                      </div>
+                      <p className="text-gray-400 font-medium">No variations defined yet</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Submit Button */}
