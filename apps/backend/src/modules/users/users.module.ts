@@ -11,7 +11,7 @@ import { AdminModule } from '../admin/admin.module';
 @Module({
   imports: [TypeOrmModule.forFeature([User, Address]), AdminModule],
   providers: [UsersService, AddressesService],
-  controllers: [UsersController, AddressesController],
+  controllers: [AddressesController, UsersController],
   exports: [UsersService, AddressesService, TypeOrmModule],
 })
 export class UsersModule { }

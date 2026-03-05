@@ -12,6 +12,7 @@ import {
   ShoppingBag,
   User as UserIcon,
   Settings,
+  MapPin,
   Shield,
   LogOut,
   ChevronRight,
@@ -57,6 +58,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const menuItems = [
     { name: 'Overview', href: '/dashboard', icon: Home },
     { name: 'My Orders', href: '/dashboard/orders', icon: ShoppingBag },
+    { name: 'My Addresses', href: '/dashboard/addresses', icon: MapPin },
     { name: 'Profile', href: '/dashboard/profile', icon: UserIcon },
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ];

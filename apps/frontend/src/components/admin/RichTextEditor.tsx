@@ -5,10 +5,16 @@ import dynamic from 'next/dynamic';
 import 'react-quill-new/dist/quill.snow.css';
 import api from '@/lib/api';
 
-const ReactQuill = dynamic(() => import('react-quill-new'), {
-    ssr: false,
-    loading: () => <div className="h-64 bg-gray-50 animate-pulse rounded-2xl border border-gray-100" />
-});
+const ReactQuill = dynamic(
+    async () => {
+        const { default: RQ } = await import('react-quill-new');
+        return ({ forwardedRef, ...props }: any) => <RQ ref={forwardedRef} {...props} />;
+    },
+    {
+        ssr: false,
+        loading: () => <div className="h-64 bg-gray-50 animate-pulse rounded-2xl border border-gray-100" />
+    }
+);
 
 interface RichTextEditorProps {
     value: string;
@@ -107,7 +113,7 @@ export default function RichTextEditor({ value, onChange, placeholder, label }: 
             {label && <label className="block text-sm font-bold text-gray-700 mb-2">{label}</label>}
             <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
                 <ReactQuill
-                    ref={quillRef}
+                    forwardedRef={quillRef}
                     theme="snow"
                     value={value}
                     onChange={onChange}

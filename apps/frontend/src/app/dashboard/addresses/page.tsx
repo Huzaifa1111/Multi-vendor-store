@@ -45,6 +45,7 @@ export default function AddressesPage() {
         isDefault: false
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
@@ -55,13 +56,14 @@ export default function AddressesPage() {
     }, [user, isAuthenticated, authLoading, router]);
 
     const fetchAddresses = async () => {
-        console.log('Fetching addresses...');
+        setIsLoading(true);
+        setError(null);
         try {
             const data = await addressesService.getAll();
-            console.log('Addresses fetched:', data);
             setAddresses(data);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to fetch addresses:', error);
+            setError('Could not load addresses. Please try again.');
         } finally {
             setIsLoading(false);
         }
