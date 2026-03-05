@@ -12,6 +12,7 @@ import { useWishlist } from '@/lib/WishlistContext';
 
 import { categoryService } from '@/services/category.service';
 import SearchBar from './SearchBar';
+import CurrencySelector from './CurrencySelector';
 
 import {
   Search,
@@ -112,7 +113,8 @@ export default function Header() {
     <>
       {/* 1. Top Bar - Static (Scrolls Away) */}
       <div className="bg-white border-b border-gray-100 py-2 hidden md:block relative z-[60]">
-        <div className="max-w-[1440px] mx-auto px-6 flex justify-between items-center text-[13px] font-medium text-gray-600">
+        <div className="max-w-[1440px] mx-auto px-6 grid grid-cols-3 items-center text-[13px] font-medium text-gray-600">
+          {/* Left: Socials */}
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-2">
               <Instagram size={14} />
@@ -124,9 +126,15 @@ export default function Header() {
             </div>
           </div>
 
-          <div className="flex-1 text-center font-black uppercase tracking-[0.2em] text-[11px]">
+          {/* Center: Promo */}
+          <div className="text-center font-black uppercase tracking-[0.2em] text-[11px]">
             <span>Next-Gen Tech Marketplace | </span>
             <Link href="/products" className="underline underline-offset-4 hover:text-black transition-colors">Shop Now</Link>
+          </div>
+
+          {/* Right: Currency & Utils */}
+          <div className="flex items-center justify-end">
+            <CurrencySelector />
           </div>
         </div>
       </div>

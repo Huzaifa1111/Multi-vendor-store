@@ -9,6 +9,7 @@ import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useWishlist } from '@/lib/WishlistContext';
+import { usePriceFormatter } from '@/store/useCurrencyStore';
 
 interface Product {
   id: number;
@@ -33,6 +34,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart, isLoading } = useCart();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const { formatPrice } = usePriceFormatter();
   const productImage = resolveProductImage(product.images || product.image);
   const isWishlisted = isInWishlist(product.id);
 
@@ -114,7 +116,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="space-y-1.5">
           <div className="flex items-center justify-center space-x-2">
             <span className="text-base font-black text-black tracking-tight">
-              ${Number(product.price).toFixed(2)}
+              {formatPrice(Number(product.price))}
             </span>
           </div>
           <div className="flex items-center justify-center">

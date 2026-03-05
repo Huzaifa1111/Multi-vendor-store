@@ -114,15 +114,23 @@ export class AdminService {
   }
 
   async getAnalyticsData() {
+    const now = new Date();
     const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    thirtyDaysAgo.setDate(now.getDate() - 30);
+    const sixtyDaysAgo = new Date();
+    sixtyDaysAgo.setDate(now.getDate() - 60);
 
-    const [orders, users, reviews, products] = await Promise.all([
+    const [currentOrders, previousOrders, users, reviews, products] = await Promise.all([
       this.ordersRepository.find({
-        where: { createdAt: MoreThan(thirtyDaysAgo) },
+        where: { createdAt: Between(thirtyDaysAgo, now) },
         relations: ['items', 'items.product', 'items.product.category']
       }),
-      this.usersRepository.count(),
+      this.ordersRepository.find({
+        where: { createdAt: Between(sixtyDaysAgo, thirtyDaysAgo) },
+      }),
+      this.usersRepository.find({
+        order: { createdAt: 'DESC' }
+      }),
       this.reviewsRepository.count(),
       this.productsRepository.find()
     ]);
@@ -134,15 +142,15 @@ export class AdminService {
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split('T')[0];
 
-      const dayOrders = orders.filter(o => o.createdAt.toISOString().split('T')[0] === dateStr);
+      const dayOrders = currentOrders.filter(o => o.createdAt.toISOString().split('T')[0] === dateStr);
       const revenue = dayOrders.reduce((sum, o) => sum + Number(o.total), 0);
 
       salesTrend.push({ date: dateStr, revenue, count: dayOrders.length });
     }
 
-    // 2. Top Selling Products
+    // 2. Top Selling Products (Current Period)
     const productSales: Record<string, { name: string, sales: number, revenue: number }> = {};
-    orders.forEach(order => {
+    currentOrders.forEach(order => {
       order.items.forEach(item => {
         if (!item.product) return;
         if (!productSales[item.product.id]) {
@@ -158,7 +166,7 @@ export class AdminService {
 
     // 3. Category Distribution
     const categorySales: Record<string, number> = {};
-    orders.forEach(order => {
+    currentOrders.forEach(order => {
       order.items.forEach(item => {
         const catName = item.product?.category?.name || 'Uncategorized';
         categorySales[catName] = (categorySales[catName] || 0) + (Number(item.price) * item.quantity);
@@ -168,10 +176,24 @@ export class AdminService {
 
     // 4. Order Status distribution
     const statusCounts: Record<string, number> = {};
-    orders.forEach(o => {
+    currentOrders.forEach(o => {
       statusCounts[o.status] = (statusCounts[o.status] || 0) + 1;
     });
     const statusData = Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
+
+    // Calculations for comparison
+    const currentRevenue = currentOrders.reduce((sum, o) => sum + Number(o.total), 0);
+    const previousRevenue = previousOrders.reduce((sum, o) => sum + Number(o.total), 0);
+    const currentAOV = currentOrders.length > 0 ? currentRevenue / currentOrders.length : 0;
+    const previousAOV = previousOrders.length > 0 ? previousRevenue / previousOrders.length : 0;
+
+    const calculateGrowth = (current: number, previous: number) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return ((current - previous) / previous) * 100;
+    };
+
+    const newCustomers = users.filter(u => u.createdAt > thirtyDaysAgo).length;
+    const lowStockProducts = products.filter(p => p.stock < 10);
 
     return {
       salesTrend,
@@ -179,12 +201,23 @@ export class AdminService {
       categoryData,
       statusData,
       summary: {
-        totalOrders: orders.length,
-        totalRevenue: orders.reduce((sum, o) => sum + Number(o.total), 0),
-        totalUsers: users,
+        totalOrders: currentOrders.length,
+        totalRevenue: currentRevenue,
+        totalUsers: users.length,
         totalReviews: reviews,
-        totalProducts: products.length
-      }
+        totalProducts: products.length,
+        newCustomers,
+        currentAOV,
+        lowStockCount: lowStockProducts.length,
+        revenueGrowth: calculateGrowth(currentRevenue, previousRevenue),
+        orderGrowth: calculateGrowth(currentOrders.length, previousOrders.length),
+        aovGrowth: calculateGrowth(currentAOV, previousAOV),
+      },
+      lowStockAlerts: lowStockProducts.slice(0, 5).map(p => ({
+        id: p.id,
+        name: p.name,
+        stock: p.stock
+      }))
     };
   }
 
