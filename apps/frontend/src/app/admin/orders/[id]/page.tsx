@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { resolveProductImage } from '@/lib/image';
+import { usePriceFormatter } from '@/store/useCurrencyStore';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -42,6 +43,7 @@ export default function OrderDetailPage() {
     const router = useRouter();
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const { formatPrice } = usePriceFormatter();
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -162,7 +164,7 @@ export default function OrderDetailPage() {
                                             <Link href={`/admin/products/edit/${item.productId}`} className="font-black text-black hover:text-emerald-600 transition-colors text-[13px] uppercase tracking-tight line-clamp-1 flex items-center gap-2">
                                                 {item.product?.name} <ExternalLink size={12} className="opacity-30" />
                                             </Link>
-                                            <span className="font-black text-sm text-black tracking-tight">${item.price}</span>
+                                            <span className="font-black text-sm text-black tracking-tight">{formatPrice(Number(item.price))}</span>
                                         </div>
 
                                         <div className="flex flex-wrap gap-2 mb-2">
@@ -193,7 +195,7 @@ export default function OrderDetailPage() {
 
                         <div className="mt-8 pt-8 border-t border-gray-100 flex flex-col items-end gap-1 text-right">
                             <div className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">Total Settlement</div>
-                            <div className="text-3xl font-black text-black tracking-tighter">${order.total}</div>
+                            <div className="text-3xl font-black text-black tracking-tighter">{formatPrice(Number(order.total))}</div>
                         </div>
                     </motion.div>
                 </div>

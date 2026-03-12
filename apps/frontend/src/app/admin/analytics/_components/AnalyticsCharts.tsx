@@ -18,15 +18,16 @@ import {
 } from 'recharts';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+import { usePriceFormatter } from '@/store/useCurrencyStore';
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label, formatPrice }: any) => {
     if (active && payload && payload.length) {
         return (
             <div className="bg-white p-3 border border-gray-100 shadow-lg rounded-lg">
                 <p className="text-xs font-bold text-gray-500 mb-1">{label}</p>
                 {payload.map((entry: any, index: number) => (
                     <p key={index} className="text-sm font-semibold" style={{ color: entry.color }}>
-                        {entry.name}: {entry.name.includes('Revenue') ? `$${entry.value.toLocaleString()}` : entry.value}
+                        {entry.name}: {entry.name.includes('Revenue') ? formatPrice(entry.value) : entry.value}
                     </p>
                 ))}
             </div>
@@ -35,69 +36,72 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return null;
 };
 
-export const SalesTrendChart = ({ data }: { data: any[] }) => (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-gray-900">Sales Performance</h3>
-            <div className="flex items-center space-x-4 text-xs font-medium text-gray-500">
-                <div className="flex items-center">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full mr-2" />
-                    Revenue
-                </div>
-                <div className="flex items-center">
-                    <div className="w-3 h-3 bg-green-500 rounded-full mr-2" />
-                    Orders
+export const SalesTrendChart = ({ data }: { data: any[] }) => {
+    const { formatPrice } = usePriceFormatter();
+    return (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-bold text-gray-900">Sales Performance</h3>
+                <div className="flex items-center space-x-4 text-xs font-medium text-gray-500">
+                    <div className="flex items-center">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full mr-2" />
+                        Revenue
+                    </div>
+                    <div className="flex items-center">
+                        <div className="w-3 h-3 bg-green-500 rounded-full mr-2" />
+                        Orders
+                    </div>
                 </div>
             </div>
+            <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={data}>
+                        <defs>
+                            <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                            </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis
+                            dataKey="date"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#94a3b8', fontSize: 12 }}
+                            tickFormatter={(val) => new Date(val).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                            dy={10}
+                        />
+                        <YAxis
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#94a3b8', fontSize: 12 }}
+                            tickFormatter={(val) => val >= 1000 ? formatPrice(val / 1000) + 'k' : formatPrice(val)}
+                        />
+                        <Tooltip content={<CustomTooltip formatPrice={formatPrice} />} />
+                        <Line
+                            type="monotone"
+                            dataKey="revenue"
+                            name="Revenue"
+                            stroke="#3b82f6"
+                            strokeWidth={3}
+                            dot={{ r: 4, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }}
+                            activeDot={{ r: 6, strokeWidth: 0 }}
+                        />
+                        <Line
+                            type="monotone"
+                            dataKey="count"
+                            name="Orders"
+                            stroke="#10b981"
+                            strokeWidth={2}
+                            strokeDasharray="5 5"
+                            dot={false}
+                        />
+                    </LineChart>
+                </ResponsiveContainer>
+            </div>
         </div>
-        <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data}>
-                    <defs>
-                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
-                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                        </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis
-                        dataKey="date"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: '#94a3b8', fontSize: 12 }}
-                        tickFormatter={(val) => new Date(val).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
-                        dy={10}
-                    />
-                    <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: '#94a3b8', fontSize: 12 }}
-                        tickFormatter={(val) => `$${val >= 1000 ? (val / 1000).toFixed(1) + 'k' : val}`}
-                    />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Line
-                        type="monotone"
-                        dataKey="revenue"
-                        name="Revenue"
-                        stroke="#3b82f6"
-                        strokeWidth={3}
-                        dot={{ r: 4, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }}
-                        activeDot={{ r: 6, strokeWidth: 0 }}
-                    />
-                    <Line
-                        type="monotone"
-                        dataKey="count"
-                        name="Orders"
-                        stroke="#10b981"
-                        strokeWidth={2}
-                        strokeDasharray="5 5"
-                        dot={false}
-                    />
-                </LineChart>
-            </ResponsiveContainer>
-        </div>
-    </div>
-);
+    );
+};
 
 export const TopProductsChart = ({ data }: { data: any[] }) => (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">

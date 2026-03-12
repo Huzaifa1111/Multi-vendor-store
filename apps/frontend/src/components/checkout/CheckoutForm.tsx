@@ -15,12 +15,14 @@ import { useAuth } from '@/lib/auth';
 import { useCart } from '@/hooks/useCart';
 import { resolveProductImage } from '@/lib/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePriceFormatter } from '@/store/useCurrencyStore';
 
 export default function CheckoutForm({ clientSecret }: { clientSecret: string }) {
     const stripe = useStripe();
     const elements = useElements();
     const router = useRouter();
     const { items, total } = useCart();
+    const { formatPrice } = usePriceFormatter();
 
     const [email, setEmail] = useState('');
     const [address, setAddress] = useState('');
@@ -398,7 +400,7 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
                                     <p className="text-xs text-gray-400 mb-1">{(item.product as any)?.brand?.name || 'Collection'}</p>
                                     <div className="flex justify-between items-center">
                                         <span className="text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded text-gray-600">Qty: {item.quantity}</span>
-                                        <span className="text-sm font-bold text-gray-900">${(Number(item.price) * item.quantity).toFixed(2)}</span>
+                                        <span className="text-sm font-bold text-gray-900">{formatPrice(Number(item.price) * item.quantity)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -408,12 +410,12 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
                     <div className="border-t border-dashed border-gray-200 py-6 space-y-3">
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500 font-medium">Subtotal</span>
-                            <span className="font-bold text-gray-900">${total.toFixed(2)}</span>
+                            <span className="font-bold text-gray-900">{formatPrice(total)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500 font-medium">Shipping</span>
                             {settingsLoaded ? (
-                                <span className="font-bold text-gray-900">${shippingFee.toFixed(2)}</span>
+                                <span className="font-bold text-gray-900">{formatPrice(shippingFee)}</span>
                             ) : (
                                 <span className="font-bold text-gray-400 animate-pulse">Loading...</span>
                             )}
@@ -421,7 +423,7 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500 font-medium">Tax ({taxRate}%)</span>
                             {settingsLoaded ? (
-                                <span className="font-bold text-gray-900">${tax.toFixed(2)}</span>
+                                <span className="font-bold text-gray-900">{formatPrice(tax)}</span>
                             ) : (
                                 <span className="font-bold text-gray-400 animate-pulse">Loading...</span>
                             )}
@@ -431,8 +433,7 @@ export default function CheckoutForm({ clientSecret }: { clientSecret: string })
                     <div className="flex justify-between items-end mb-8 pt-4 border-t border-gray-100">
                         <span className="text-lg font-bold text-gray-900">Total</span>
                         <div className="text-right">
-                            <span className="block text-3xl font-black text-gray-900 leading-none">${grandTotal.toFixed(2)}</span>
-                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">USD</span>
+                            <span className="block text-3xl font-black text-gray-900 leading-none">{formatPrice(grandTotal)}</span>
                         </div>
                     </div>
 

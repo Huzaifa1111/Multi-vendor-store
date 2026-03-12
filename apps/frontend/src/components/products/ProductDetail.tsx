@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { resolveProductImage } from '@/lib/image';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/lib/auth';
+import { usePriceFormatter } from '@/store/useCurrencyStore';
 
 interface AttributeValue {
   id: number;
@@ -56,6 +57,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isShortDescOpen, setIsShortDescOpen] = useState(true);
+
+  const { formatPrice } = usePriceFormatter();
 
   // Group attributes from all variations
   const attributes = useMemo(() => {
@@ -220,13 +223,11 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   <div className="flex flex-col items-end">
                     {hasSale && (
                       <span className="text-sm text-gray-400 line-through font-bold opacity-70">
-                        ${Number(currentPrice).toFixed(2)}
+                        {formatPrice(currentPrice)}
                       </span>
                     )}
                     <div className="text-3xl font-black text-emerald-600 tracking-tighter flex items-start gap-1">
-                      <span className="text-lg mt-1 opacity-70 font-bold">$</span>
-                      {Number(displayPrice).toFixed(2).split('.')[0]}
-                      <span className="text-lg mt-1 opacity-70 font-bold">.{Number(displayPrice).toFixed(2).split('.')[1]}</span>
+                      {formatPrice(displayPrice)}
                     </div>
                   </div>
                 </div>

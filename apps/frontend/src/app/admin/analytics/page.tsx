@@ -18,6 +18,7 @@ import {
     Loader2,
     RefreshCw
 } from 'lucide-react';
+import { usePriceFormatter } from '@/store/useCurrencyStore';
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:4000/admin';
 
@@ -26,6 +27,7 @@ export default function AnalyticsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isLive, setIsLive] = useState(false);
+    const { formatPrice } = usePriceFormatter();
 
     useEffect(() => {
         fetchInitialData();
@@ -119,7 +121,7 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatsCard
                     title="Total Revenue"
-                    value={`$${data.summary.totalRevenue.toLocaleString()}`}
+                    value={formatPrice(data.summary.totalRevenue)}
                     trend={data.summary.revenueGrowth}
                     icon={<DollarSign className="text-blue-600" />}
                     color="bg-blue-50"
@@ -133,7 +135,7 @@ export default function AnalyticsPage() {
                 />
                 <StatsCard
                     title="Avg Order Value"
-                    value={`$${data.summary.currentAOV.toFixed(2)}`}
+                    value={formatPrice(data.summary.currentAOV)}
                     trend={data.summary.aovGrowth}
                     icon={<TrendingUp className="text-purple-600" />}
                     color="bg-purple-50"

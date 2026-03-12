@@ -19,6 +19,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import Link from 'next/link';
+import { usePriceFormatter } from '@/store/useCurrencyStore';
 
 interface Order {
   id: number;
@@ -51,6 +52,7 @@ export default function AdminOrdersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const { formatPrice } = usePriceFormatter();
 
   useEffect(() => {
     fetchOrders();
@@ -138,7 +140,7 @@ export default function AdminOrdersPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { title: 'Logistics Volume', value: orders.length, icon: ShoppingBag, desc: 'Total acquisitions' },
-          { title: 'Gross Settlement', value: `$${totalRevenue.toLocaleString()}`, icon: DollarSign, desc: 'Financial valuation' },
+          { title: 'Gross Settlement', value: formatPrice(totalRevenue), icon: DollarSign, desc: 'Financial valuation' },
           { title: 'Pending Dispatch', value: pendingOrders, icon: Clock, desc: 'Awaiting fulfillment' },
           { title: 'Fulfillment Success', value: completedOrders, icon: CheckCircle, desc: 'Orders archived' },
         ].map((stat, index) => (
@@ -239,7 +241,7 @@ export default function AdminOrdersPage() {
                             </span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-xs font-black text-black tracking-tight">${Number(order.total).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span className="text-xs font-black text-black tracking-tight">{formatPrice(Number(order.total))}</span>
                           </td>
                           <td className="px-6 py-4">
                             <span className={`inline-flex items-center px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border ${statusConfig.border} ${statusConfig.bg} ${statusConfig.color}`}>

@@ -134,7 +134,7 @@ export default function Header() {
 
           {/* Right: Currency & Utils */}
           <div className="flex items-center justify-end">
-            <CurrencySelector />
+
           </div>
         </div>
       </div>
@@ -241,6 +241,10 @@ export default function Header() {
                         <Link href="/admin" className="block px-4 py-2.5 text-sm font-medium text-purple-700 hover:bg-purple-50 transition-colors">Admin Panel</Link>
                       )}
                       <Link href="/dashboard" className="block px-4 py-2.5 text-sm font-medium hover:bg-gray-50 hover:text-emerald-600 transition-colors border-b border-gray-50">Profile Settings</Link>
+                      <div className="px-4 py-2 flex items-center justify-between border-b border-gray-50">
+                        <span className="text-sm font-medium text-gray-700">Currency</span>
+                        <CurrencySelector />
+                      </div>
                       <button
                         onClick={handleLogout}
                         className="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors"
@@ -315,6 +319,10 @@ export default function Header() {
                     <div className="p-4 bg-gray-50 rounded-xl">
                       <p className="font-bold">{user?.name}</p>
                       <p className="text-sm text-gray-500">{user?.email}</p>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                      <span className="font-bold text-gray-700">Currency</span>
+                      <CurrencySelector />
                     </div>
                     <Button variant="secondary" onClick={handleLogout} className="w-full py-4 rounded-xl">
                       Logout

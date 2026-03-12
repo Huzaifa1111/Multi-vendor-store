@@ -5,6 +5,7 @@ import { ordersService } from '@/services/orders.service';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Package, MapPin, CreditCard, Clock, CheckCircle2, Truck, Box, ArrowRight, HelpCircle, AlertCircle, XCircle } from 'lucide-react';
+import { usePriceFormatter } from '@/store/useCurrencyStore';
 
 const ORDER_STATUS_STEPS = [
     { key: 'pending', label: 'Ordered', icon: Clock, color: 'text-orange-500', bg: 'bg-orange-50' },
@@ -18,6 +19,7 @@ export default function TrackOrderPage() {
     const [order, setOrder] = useState<any>(null);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const { formatPrice } = usePriceFormatter();
 
     const handleTrack = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -257,7 +259,7 @@ export default function TrackOrderPage() {
                                                         <span className="text-[10px] font-bold bg-white px-2 py-1 rounded-lg border border-gray-100 text-gray-500">×{item.quantity}</span>
                                                     </div>
                                                     <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-widest mb-3">{item.product?.brand?.name || 'Exclusive Line'}</p>
-                                                    <p className="text-sm font-black text-gray-900">${(item.price * item.quantity).toFixed(2)}</p>
+                                                    <p className="text-sm font-black text-gray-900">{formatPrice(Number(item.price) * item.quantity)}</p>
                                                 </div>
                                             </div>
                                         ))}
@@ -266,9 +268,9 @@ export default function TrackOrderPage() {
                                     <div className="mt-8 pt-6 border-t border-gray-50 flex justify-between items-end px-2">
                                         <div>
                                             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Settlement Total</p>
-                                            <p className="text-[10px] text-gray-400 font-medium italic">USD inclusive of taxes</p>
+                                            <p className="text-[10px] text-gray-400 font-medium italic">inclusive of taxes</p>
                                         </div>
-                                        <span className="text-3xl font-black text-gray-900 leading-none">${order.total}</span>
+                                        <span className="text-3xl font-black text-gray-900 leading-none">{formatPrice(Number(order.total))}</span>
                                     </div>
                                 </div>
 

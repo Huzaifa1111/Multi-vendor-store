@@ -6,11 +6,13 @@ import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { CreditCard, ShoppingBag, ArrowRight, ShieldCheck, Truck } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { usePriceFormatter } from '@/store/useCurrencyStore';
 
 export default function CartSummary() {
   const { items, total, clearCart, isLoading } = useCart();
   const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const { formatPrice } = usePriceFormatter();
 
   const shipping = 5.99; // Flat rate shipping
   const tax = total * 0.1; // 10% tax
@@ -43,15 +45,15 @@ export default function CartSummary() {
       <div className="space-y-4 mb-8 relative z-10">
         <div className="flex justify-between items-center text-sm">
           <span className="text-gray-500 font-medium">Subtotal</span>
-          <span className="font-bold text-gray-900">${Number(total).toFixed(2)}</span>
+          <span className="font-bold text-gray-900">{formatPrice(Number(total))}</span>
         </div>
         <div className="flex justify-between items-center text-sm">
           <span className="text-gray-500 font-medium">Shipping</span>
-          <span className="font-bold text-gray-900">${shipping.toFixed(2)}</span>
+          <span className="font-bold text-gray-900">{formatPrice(shipping)}</span>
         </div>
         <div className="flex justify-between items-center text-sm">
           <span className="text-gray-500 font-medium">Tax (10%)</span>
-          <span className="font-bold text-gray-900">${Number(tax).toFixed(2)}</span>
+          <span className="font-bold text-gray-900">{formatPrice(Number(tax))}</span>
         </div>
 
         <div className="border-t border-dashed border-gray-200 my-4" />
@@ -60,9 +62,8 @@ export default function CartSummary() {
           <span className="text-base font-bold text-gray-900">Total</span>
           <div className="text-right">
             <span className="text-3xl font-black text-gray-900 block leading-none">
-              ${Number(grandTotal).toFixed(2)}
+              {formatPrice(Number(grandTotal))}
             </span>
-            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">USD</span>
           </div>
         </div>
       </div>

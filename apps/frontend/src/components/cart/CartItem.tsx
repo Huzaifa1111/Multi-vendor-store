@@ -3,6 +3,7 @@ import { Minus, Plus, Trash2, X } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { resolveProductImage } from '@/lib/image';
 import { motion } from 'framer-motion';
+import { usePriceFormatter } from '@/store/useCurrencyStore';
 
 interface CartItemProps {
   item: any;
@@ -11,6 +12,7 @@ interface CartItemProps {
 export default function CartItem({ item }: CartItemProps) {
   const [quantity, setQuantity] = useState(item.quantity);
   const { updateQuantity, removeItem, isLoading } = useCart();
+  const { formatPrice } = usePriceFormatter();
 
   const handleQuantityChange = async (newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -69,10 +71,10 @@ export default function CartItem({ item }: CartItemProps) {
         <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 justify-between mt-auto">
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-black text-gray-900">
-              ${(Number(item.price) * quantity).toFixed(2)}
+              {formatPrice(Number(item.price) * quantity)}
             </span>
             <span className="text-xs font-bold text-gray-400">
-              (${Number(item.price).toFixed(2)} ea)
+              ({formatPrice(Number(item.price))} ea)
             </span>
           </div>
 
